@@ -1,133 +1,135 @@
 @extends('layouts.canteen')
 
-@section('title', 'Home - LTO Canteen Central')
+@section('title', 'Home - CuisiCourt')
 
 @section('content')
 <!-- Hero Section -->
-<section style="padding: 60px 0; background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); text-align: center;">
-    <div class="container">
-        <h1 style="font-size: 3rem; margin-bottom: 20px; color: var(--primary);">Welcome to LTO Canteen Central</h1>
-        <p style="font-size: 1.2rem; max-width: 700px; margin: 0 auto 40px; color: var(--gray);">Discover delicious food from our trusted stalls. Fresh meals, quick service, and delicious options for everyone - visitors and LTO employees alike.</p>
-        
-        <!-- Search Bar -->
-        <div class="search-bar" style="margin-bottom: 50px;">
-            <form action="/search" method="GET">
-                <input type="text" name="q" placeholder="Search for food items..." class="search-input" value="{{ request('q') }}">
-                <button type="submit" class="search-btn">🔍</button>
-            </form>
-        </div>
-        
-        <div style="display: flex; justify-content: center; gap: 20px; margin-bottom: 50px; flex-wrap: wrap;">
-            <a href="/menu" class="btn btn-primary" style="font-size: 1.1rem;">🛒 Browse Menu</a>
-            <a href="/stalls" class="btn btn-secondary" style="font-size: 1.1rem;">🏪 View Stalls</a>
-        </div>
-    </div>
-</section>
-
-<!-- Top Foods Today -->
-<section style="padding: 60px 0;">
-    <div class="container">
-        <div style="text-align: center; margin-bottom: 50px;">
-            <h2 style="font-size: 2.2rem; color: var(--primary); margin-bottom: 15px;">Top Foods Today</h2>
-            <p style="color: var(--gray); max-width: 700px; margin: 0 auto;">Most popular items ordered by our customers</p>
-        </div>
-        
-        <div class="grid grid-4">
-            @forelse($topFoods as $food)
-            <div class="card">
-                <img src="{{ $food->image ? asset('storage/' . $food->image) : 'https://via.placeholder.com/300x200?text=No+Image' }}" alt="{{ $food->name }}" class="card-img">
-                <div class="card-content">
-                    <h3 class="card-title">{{ $food->name }}</h3>
-                    <p class="card-text">{{ Str::limit($food->description, 60) }}</p>
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                        <span class="price">₱{{ number_format($food->price, 2) }}</span>
-                        <div class="rating">
-                            <span class="stars">⭐⭐⭐⭐⭐</span>
-                            <span style="font-size: 0.9rem; color: var(--gray);">(4.8)</span>
+<section style="padding: 80px 0; background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600"><defs><linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:%23f3f4f6;stop-opacity:0.8"/><stop offset="100%" style="stop-color:%23e5e7eb;stop-opacity:0.9"/></linearGradient></defs><rect width="1200" height="600" fill="url(%23bg)"/></svg>') center/cover; position: relative; overflow: hidden;">
+    <!-- Background overlay with food images -->
+    <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; opacity: 0.1; background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text x="10" y="20" font-size="12">🍕</text><text x="70" y="30" font-size="10">🍜</text><text x="30" y="50" font-size="8">🥗</text><text x="80" y="70" font-size="11">🍔</text><text x="20" y="80" font-size="9">🍰</text></svg>'); background-repeat: repeat;"></div>
+    
+    <div class="container" style="position: relative; z-index: 2;">
+        <div style="display: grid; grid-template-columns: 1fr 400px; gap: 40px; align-items: center;">
+            <!-- Left Content -->
+            <div>
+                <div style="display: inline-flex; align-items: center; background: var(--primary); color: white; padding: 8px 16px; border-radius: 20px; font-size: 0.9rem; margin-bottom: 20px;">
+                    ⭐ Premium Dining Experience
+                </div>
+                
+                <h1 style="font-size: 3.5rem; line-height: 1.1; margin-bottom: 20px; color: var(--dark);">
+                    Discover <span style="color: var(--primary);">Flavors</span><br>
+                    from Around the<br>
+                    World
+                </h1>
+                
+                <p style="font-size: 1.1rem; color: var(--gray); margin-bottom: 40px; max-width: 500px; line-height: 1.6;">
+                    Experience culinary excellence with our diverse collection of authentic stalls, featuring fresh ingredients and traditional recipes from master chefs.
+                </p>
+                
+                <div style="display: flex; gap: 20px; margin-bottom: 40px;">
+                    <a href="/menu" class="btn btn-primary" style="font-size: 1.1rem; padding: 15px 30px;">
+                        Explore Menu →
+                    </a>
+                    <a href="/stalls" class="btn" style="background: transparent; color: var(--dark); border: 2px solid var(--dark); font-size: 1.1rem; padding: 15px 30px;">
+                        View Stalls
+                    </a>
+                </div>
+                
+                <!-- Statistics -->
+                <div style="display: flex; gap: 40px; margin-top: 40px;">
+                    <div style="text-align: center;">
+                        <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 5px;">
+                            <span style="font-size: 1.5rem;">🕐</span>
                         </div>
+                        <div style="font-size: 1.8rem; font-weight: 700; color: var(--primary); margin-bottom: 5px;">15+</div>
+                        <div style="font-size: 0.9rem; color: var(--gray);">Food Stalls</div>
                     </div>
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                        <small style="color: var(--gray);">{{ $food->stall->name }}</small>
-                        <small style="color: var(--primary); font-weight: 600;">{{ rand(15, 45) }} orders today</small>
+                    
+                    <div style="text-align: center;">
+                        <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 5px;">
+                            <span style="font-size: 1.5rem;">📍</span>
+                        </div>
+                        <div style="font-size: 1.8rem; font-weight: 700; color: var(--primary); margin-bottom: 5px;">500+</div>
+                        <div style="font-size: 0.9rem; color: var(--gray);">Daily Meals</div>
                     </div>
-                    <button onclick="addToCart({{ $food->id }}, '{{ $food->name }}', {{ $food->price }}, '{{ $food->image }}')" class="btn btn-primary" style="width: 100%;">Add to Cart</button>
+                    
+                    <div style="text-align: center;">
+                        <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 5px;">
+                            <span style="font-size: 1.5rem;">⭐</span>
+                        </div>
+                        <div style="font-size: 1.8rem; font-weight: 700; color: var(--primary); margin-bottom: 5px;">4.8</div>
+                        <div style="font-size: 0.9rem; color: var(--gray);">Rating</div>
+                    </div>
                 </div>
             </div>
-            @empty
-            <div style="grid-column: 1 / -1; text-align: center; padding: 40px;">
-                <p style="color: var(--gray);">No featured foods available at the moment.</p>
+            
+            <!-- Right Sidebar - Today's Special -->
+            <div style="background: white; border-radius: 20px; padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                    <h3 style="font-size: 1.4rem; color: var(--dark); margin: 0;">Today's Special</h3>
+                    <span style="background: #dcfce7; color: #166534; padding: 4px 12px; border-radius: 12px; font-size: 0.8rem; font-weight: 600;">Available Now</span>
+                </div>
+                
+                @forelse($topFoods->take(3) as $food)
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid #f1f5f9;">
+                    <div>
+                        <h4 style="color: var(--dark); margin: 0 0 5px 0; font-size: 1rem;">{{ $food->name }}</h4>
+                        <p style="color: var(--gray); margin: 0; font-size: 0.9rem;">{{ $food->stall->name }}</p>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="font-size: 1.1rem; font-weight: 700; color: var(--primary);">₱{{ number_format($food->price, 2) }}</div>
+                    </div>
+                </div>
+                @empty
+                <div style="text-align: center; padding: 20px; color: var(--gray);">
+                    <p>No specials available today</p>
+                </div>
+                @endforelse
+                
+                @if($topFoods->count() > 0)
+                <div style="margin-top: 20px;">
+                    <a href="/menu" class="btn btn-primary" style="width: 100%; text-align: center;">View All Menu</a>
+                </div>
+                @endif
             </div>
-            @endforelse
         </div>
     </div>
 </section>
 
-<!-- Popular Stalls -->
-<section style="padding: 60px 0; background-color: #eff6ff;">
+<!-- Popular Food Items -->
+<section style="padding: 80px 0; background: white;">
     <div class="container">
-        <div style="text-align: center; margin-bottom: 50px;">
-            <h2 style="font-size: 2.2rem; color: var(--primary); margin-bottom: 15px;">Popular Stalls</h2>
-            <p style="color: var(--gray); max-width: 700px; margin: 0 auto;">Our most loved food stalls</p>
-        </div>
-        
-        <div class="grid grid-3">
-            @forelse($popularStalls as $stall)
-            <div class="card">
-                <div class="card-content">
-                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 15px;">
-                        <h3 class="card-title">{{ $stall->name }}</h3>
-                        <span class="status {{ $stall->is_active ? 'status-open' : 'status-closed' }}">
-                            {{ $stall->is_active ? 'Open' : 'Closed' }}
-                        </span>
-                    </div>
-                    
-                    <p class="card-text">{{ Str::limit($stall->description, 80) }}</p>
-                    
-                    <div class="rating" style="margin: 15px 0;">
-                        <span class="stars">⭐⭐⭐⭐⭐</span>
-                        <span style="font-size: 0.9rem; color: var(--gray);">(4.{{ rand(6, 9) }})</span>
-                    </div>
-                    
-                    <div style="margin: 15px 0;">
-                        <small style="color: var(--gray);">📍 {{ $stall->location }}</small>
-                    </div>
-                    
-                    <div style="margin: 15px 0;">
-                        <small style="color: var(--primary); font-weight: 600;">{{ $stall->products_count }} items available</small>
-                    </div>
-                    
-                    <a href="/stalls/{{ $stall->id }}" class="btn btn-primary" style="width: 100%;">View Menu</a>
-                </div>
-            </div>
-            @empty
-            <div style="grid-column: 1 / -1; text-align: center; padding: 40px;">
-                <p style="color: var(--gray);">No stalls available at the moment.</p>
-            </div>
-            @endforelse
-        </div>
-    </div>
-</section>
-
-<!-- Featured Items -->
-<section style="padding: 60px 0;">
-    <div class="container">
-        <div style="text-align: center; margin-bottom: 50px;">
-            <h2 style="font-size: 2.2rem; color: var(--primary); margin-bottom: 15px;">Featured Items</h2>
-            <p style="color: var(--gray); max-width: 700px; margin: 0 auto;">Hand-picked specialties from our vendors</p>
+        <div style="text-align: center; margin-bottom: 60px;">
+            <h2 style="font-size: 2.5rem; color: var(--dark); margin-bottom: 15px;">Popular Dishes</h2>
+            <p style="color: var(--gray); max-width: 600px; margin: 0 auto; font-size: 1.1rem;">Discover our most loved dishes from various cuisines</p>
         </div>
         
         <div class="grid grid-3">
             @forelse($featuredItems as $item)
-            <div class="card">
-                <img src="{{ $item->image ? asset('storage/' . $item->image) : 'https://via.placeholder.com/300x200?text=No+Image' }}" alt="{{ $item->name }}" class="card-img">
-                <div class="card-content">
-                    <h3 class="card-title">{{ $item->name }}</h3>
-                    <p class="card-text">{{ Str::limit($item->description, 60) }}</p>
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                        <span class="price">₱{{ number_format($item->price, 2) }}</span>
-                        <small style="color: var(--gray);">{{ $item->stall->name }}</small>
+            <div class="card" style="overflow: hidden; border-radius: 16px;">
+                <div style="position: relative;">
+                    <img src="{{ $item->image ? asset('storage/' . $item->image) : 'https://via.placeholder.com/300x200?text=No+Image' }}" alt="{{ $item->name }}" style="width: 100%; height: 200px; object-fit: cover;">
+                    <button onclick="toggleFavorite({{ $item->id }})" style="position: absolute; top: 15px; right: 15px; background: white; border: none; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                        ♡
+                    </button>
+                </div>
+                <div class="card-content" style="padding: 25px;">
+                    <h3 style="font-size: 1.2rem; margin: 0 0 10px 0; color: var(--dark);">{{ $item->name }}</h3>
+                    <p style="color: var(--gray); margin: 0 0 15px 0; font-size: 0.9rem; line-height: 1.4;">{{ Str::limit($item->description, 60) }}</p>
+                    
+                    <div style="display: flex; align-items: center; margin-bottom: 15px;">
+                        @for($i = 1; $i <= 5; $i++)
+                            <span style="color: #fbbf24; font-size: 0.9rem;">{{ $i <= 4 ? '★' : '☆' }}</span>
+                        @endfor
+                        <span style="margin-left: 8px; font-size: 0.9rem; color: var(--gray);">4.{{ rand(6, 9) }}</span>
                     </div>
-                    <button onclick="addToCart({{ $item->id }}, '{{ $item->name }}', {{ $item->price }}, '{{ $item->image }}')" class="btn btn-primary" style="width: 100%;">Add to Cart</button>
+                    
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div style="font-size: 1.3rem; font-weight: 700; color: var(--primary);">₱{{ number_format($item->price, 2) }}</div>
+                        <button onclick="addToCart({{ $item->id }}, '{{ $item->name }}', {{ $item->price }}, '{{ $item->image }}')" class="btn btn-primary" style="padding: 10px 20px;">
+                            Add to cart
+                        </button>
+                    </div>
                 </div>
             </div>
             @empty
@@ -138,19 +140,20 @@
         </div>
     </div>
 </section>
-
-<!-- Call to Action -->
-<section style="padding: 80px 0; background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%); color: white; text-align: center;">
-    <div class="container">
-        <h2 style="font-size: 2.5rem; margin-bottom: 20px;">Ready to Satisfy Your Cravings?</h2>
-        <p style="max-width: 700px; margin: 0 auto 40px; font-size: 1.1rem; opacity: 0.9;">Join LTO visitors and employees who've discovered the easiest way to order delicious food</p>
-        <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
-            <a href="/menu" class="btn btn-secondary">Order Now</a>
-            <a href="/stalls" class="btn" style="background: rgba(255,255,255,0.2); color: white; border: 2px solid rgba(255,255,255,0.3);">View All Stalls</a>
-        </div>
-        <div style="margin-top: 30px; color: rgba(255,255,255,0.8); font-size: 0.9rem;">
-            ✓ No delivery fees within LTO ✓ Affordable pricing for all ✓ Quick 10-15 min pickup
-        </div>
-    </div>
-</section>
 @endsection
+
+@push('scripts')
+<script>
+function toggleFavorite(itemId) {
+    // Toggle favorite functionality
+    const button = event.target;
+    if (button.textContent === '♡') {
+        button.textContent = '♥';
+        button.style.color = 'var(--primary)';
+    } else {
+        button.textContent = '♡';
+        button.style.color = '#000';
+    }
+}
+</script>
+@endpush

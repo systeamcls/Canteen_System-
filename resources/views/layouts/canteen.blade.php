@@ -4,14 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'LTO Canteen Central')</title>
+    <title>@yield('title', 'CuisiCourt')</title>
     
     <style>
         :root {
-            --primary: #2E5BBA;
-            --primary-light: #3b82f6;
-            --primary-lighter: #93c5fd;
-            --secondary: #f59e0b;
+            --primary: #FF6B35;
+            --primary-light: #FF8866;
+            --primary-lighter: #FFB399;
+            --secondary: #FF6B35;
             --light: #f8fafc;
             --dark: #1e293b;
             --gray: #64748b;
@@ -116,6 +116,42 @@
         
         .nav-links a:hover::after {
             width: 100%;
+        }
+        
+        .nav-search {
+            display: flex;
+            align-items: center;
+            background: #f3f4f6;
+            border-radius: 8px;
+            padding: 8px 12px;
+            margin-left: 20px;
+            margin-right: 20px;
+            min-width: 250px;
+        }
+        
+        .nav-search input {
+            border: none;
+            background: none;
+            outline: none;
+            color: var(--dark);
+            flex: 1;
+            padding: 4px 8px;
+        }
+        
+        .nav-search input::placeholder {
+            color: var(--gray);
+        }
+        
+        .cart-icon {
+            position: relative;
+            background: var(--primary);
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            margin-left: 10px;
         }
         
         .btn {
@@ -398,17 +434,25 @@
         <div class="container">
             <nav>
                 <div class="logo">
-                    <div class="logo-img">LTO</div>
-                    <h1>LTO Canteen Central</h1>
+                    <div class="logo-img">C</div>
+                    <h1>CuisiCourt</h1>
                 </div>
                 <div class="nav-links">
                     <a href="/" class="{{ request()->is('/') ? 'active' : '' }}">Home</a>
-                    <a href="/menu" class="{{ request()->is('menu*') ? 'active' : '' }}">Menu</a>
                     <a href="/stalls" class="{{ request()->is('stalls*') ? 'active' : '' }}">Stalls</a>
-                    <a href="/cart" class="btn btn-primary btn-cart">
-                        🛒 Cart
-                        <span class="cart-count" id="cartCount">0</span>
+                    <a href="/menu" class="{{ request()->is('menu*') ? 'active' : '' }}">Menu</a>
+                    
+                    <div class="nav-search">
+                        <span>🔍</span>
+                        <input type="text" placeholder="Search for dishes...">
+                    </div>
+                    
+                    <a href="/cart" class="cart-icon">
+                        🛒
+                        <span class="cart-count" id="cartCount">3</span>
                     </a>
+                    
+                    <a href="/profile" style="color: var(--dark); margin-left: 10px;">👤</a>
                 </div>
             </nav>
         </div>
@@ -424,8 +468,8 @@
         <div class="container">
             <div class="footer-content">
                 <div class="footer-column">
-                    <h3>LTO Canteen Central</h3>
-                    <p style="color: #cbd5e1; margin-top: 10px;">Your one-stop food destination at LTO</p>
+                    <h3>CuisiCourt</h3>
+                    <p style="color: #cbd5e1; margin-top: 10px;">Discover amazing food from multiple vendors in one place</p>
                 </div>
                 <div class="footer-column">
                     <h3>Quick Links</h3>
@@ -446,7 +490,7 @@
                 </div>
             </div>
             <div class="copyright">
-                &copy; 2023 LTO Canteen Central. All rights reserved.
+                &copy; 2023 CuisiCourt. All rights reserved.
             </div>
         </div>
     </footer>
