@@ -126,7 +126,7 @@
                     
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <div style="font-size: 1.3rem; font-weight: 700; color: var(--primary);">₱{{ number_format($item->price, 2) }}</div>
-                        <button onclick="addToCart({{ $item->id }}, '{{ $item->name }}', {{ $item->price }}, '{{ $item->image }}')" class="btn btn-primary" style="padding: 10px 20px;">
+                        <button onclick="addToCart({{ $item->id }}, {{ json_encode($item->name) }}, {{ $item->price }}, {{ json_encode($item->image ?: '') }})" class="btn btn-primary" style="padding: 10px 20px;">
                             Add to cart
                         </button>
                     </div>

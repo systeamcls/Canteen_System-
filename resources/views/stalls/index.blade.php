@@ -76,7 +76,7 @@
                                 <p style="margin: 0; font-size: 0.8rem; color: var(--gray);">{{ Str::limit($product->description, 30) }}</p>
                             </div>
                             <div style="text-align: right;">
-                                <button onclick="addToCart({{ $product->id }}, '{{ $product->name }}', {{ $product->price }}, '{{ $product->image }}')" 
+                                <button onclick="addToCart({{ $product->id }}, {{ json_encode($product->name) }}, {{ $product->price }}, {{ json_encode($product->image ?: '') }})" 
                                         style="background: var(--primary); color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.8rem;">
                                     Add
                                 </button>

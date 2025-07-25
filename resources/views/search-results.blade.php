@@ -86,7 +86,7 @@
                     
                     <div style="display: flex; gap: 10px;">
                         @if($product->stall->is_active)
-                        <button onclick="addToCart({{ $product->id }}, '{{ $product->name }}', {{ $product->price }}, '{{ $product->image }}')" class="btn btn-primary" style="flex: 1;">Add to Cart</button>
+                        <button onclick="addToCart({{ $product->id }}, {{ json_encode($product->name) }}, {{ $product->price }}, {{ json_encode($product->image ?: '') }})" class="btn btn-primary" style="flex: 1;">Add to Cart</button>
                         @else
                         <button class="btn" style="flex: 1; background: #e5e7eb; color: var(--gray); cursor: not-allowed;" disabled>Unavailable</button>
                         @endif
