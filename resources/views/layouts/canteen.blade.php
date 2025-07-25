@@ -434,17 +434,17 @@
         <div class="container">
             <nav>
                 <div class="logo">
-                    <div class="logo-img">C</div>
-                    <h1>CuisiCourt</h1>
+                    <div class="logo-img">K</div>
+                    <h1>Kajacms</h1>
                 </div>
                 <div class="nav-links">
+                    <a href="/menu" class="{{ request()->is('menu*') ? 'active' : '' }}">Our Menu</a>
                     <a href="/" class="{{ request()->is('/') ? 'active' : '' }}">Home</a>
                     <a href="/stalls" class="{{ request()->is('stalls*') ? 'active' : '' }}">Stalls</a>
-                    <a href="/menu" class="{{ request()->is('menu*') ? 'active' : '' }}">Menu</a>
                     
                     <div class="nav-search">
                         <span>🔍</span>
-                        <input type="text" placeholder="Search for dishes...">
+                        <input type="text" placeholder="Search products">
                     </div>
                     
                     <a href="/cart" class="cart-icon">
@@ -468,7 +468,7 @@
         <div class="container">
             <div class="footer-content">
                 <div class="footer-column">
-                    <h3>CuisiCourt</h3>
+                    <h3>Kajacms</h3>
                     <p style="color: #cbd5e1; margin-top: 10px;">Discover amazing food from multiple vendors in one place</p>
                 </div>
                 <div class="footer-column">
@@ -490,7 +490,7 @@
                 </div>
             </div>
             <div class="copyright">
-                &copy; 2023 CuisiCourt. All rights reserved.
+                &copy; 2023 Kajacms. All rights reserved.
             </div>
         </div>
     </footer>

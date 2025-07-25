@@ -1,6 +1,6 @@
 @extends('layouts.canteen')
 
-@section('title', 'Menu - CuisiCourt')
+@section('title', 'Menu - Kajacms')
 
 @section('content')
 <!-- Header Section -->
@@ -77,7 +77,7 @@
             <div class="card" style="overflow: hidden; border-radius: 16px; background: white;">
                 <div style="position: relative;">
                     <img src="{{ $product->image ? asset('storage/' . $product->image) : 'https://via.placeholder.com/300x200?text=No+Image' }}" alt="{{ $product->name }}" style="width: 100%; height: 200px; object-fit: cover;">
-                    <button onclick="toggleFavorite({{ $product->id }})" style="position: absolute; top: 15px; right: 15px; background: white; border: none; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                    <button onclick="toggleFavorite({{ json_encode($product->id) }})" style="position: absolute; top: 15px; right: 15px; background: white; border: none; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
                         ♡
                     </button>
                 </div>

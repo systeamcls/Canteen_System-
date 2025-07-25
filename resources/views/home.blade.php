@@ -1,6 +1,6 @@
 @extends('layouts.canteen')
 
-@section('title', 'Home - CuisiCourt')
+@section('title', 'Home - Kajacms')
 
 @section('content')
 <!-- Hero Section -->
