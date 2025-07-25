@@ -38,12 +38,12 @@
                 <input type="hidden" name="search" value="{{ $search }}">
                 <input type="hidden" name="stall" value="{{ $stallId }}">
                 
-                <button type="submit" name="category" value="" class="filter-btn {{ !$category ? 'active' : '' }}" style="background: {{ !$category ? 'var(--primary)' : 'white' }}; color: {{ !$category ? 'white' : 'var(--dark)' }}; border: 2px solid {{ !$category ? 'var(--primary)' : '#e5e7eb' }}; padding: 10px 20px; border-radius: 25px; cursor: pointer; font-weight: 500; transition: all 0.3s;">
+                <button type="submit" name="category" value="" class="filter-btn {{ !$category ? 'active' : '' }}" style="background: {{ !$category ? 'var(--primary)' : 'white' }}; color: {{ !$category ? 'white' : 'var(--dark)' }}; border: 2px solid {{ !$category ? 'var(--primary)' : '#e5e7eb' }}; padding: 12px 24px; border-radius: 25px; cursor: pointer; font-weight: 500; transition: all 0.3s; font-size: 1rem;">
                     All
                 </button>
                 
                 @foreach(['pizza' => 'Pizza', 'fast-food' => 'Fast Food', 'noodle' => 'Noodle', 'dessert' => 'Dessert', 'sea-food' => 'Sea Food', 'sushi' => 'Sushi', 'ramen' => 'Ramen'] as $key => $name)
-                <button type="submit" name="category" value="{{ $key }}" class="filter-btn {{ $category === $key ? 'active' : '' }}" style="background: {{ $category === $key ? 'var(--primary)' : 'white' }}; color: {{ $category === $key ? 'white' : 'var(--dark)' }}; border: 2px solid {{ $category === $key ? 'var(--primary)' : '#e5e7eb' }}; padding: 10px 20px; border-radius: 25px; cursor: pointer; font-weight: 500; transition: all 0.3s;">
+                <button type="submit" name="category" value="{{ $key }}" class="filter-btn {{ $category === $key ? 'active' : '' }}" style="background: {{ $category === $key ? 'var(--primary)' : 'white' }}; color: {{ $category === $key ? 'white' : 'var(--dark)' }}; border: 2px solid {{ $category === $key ? 'var(--primary)' : '#e5e7eb' }}; padding: 12px 24px; border-radius: 25px; cursor: pointer; font-weight: 500; transition: all 0.3s; font-size: 1rem;">
                     {{ $name }}
                 </button>
                 @endforeach
@@ -78,12 +78,16 @@
                 <div style="position: relative;">
                     <img src="{{ $product->image ? asset('storage/' . $product->image) : 'https://via.placeholder.com/300x200?text=No+Image' }}" alt="{{ $product->name }}" style="width: 100%; height: 200px; object-fit: cover;">
                     <button onclick="toggleFavorite({{ json_encode($product->id) }})" style="position: absolute; top: 15px; right: 15px; background: white; border: none; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-                        ♡
+                        💖
                     </button>
                 </div>
                 <div style="padding: 25px;">
                     <h3 style="font-size: 1.2rem; margin: 0 0 10px 0; color: var(--dark);">{{ $product->name }}</h3>
                     <p style="color: var(--gray); margin: 0 0 15px 0; font-size: 0.9rem; line-height: 1.4;">{{ Str::limit($product->description, 80) }}</p>
+                    
+                    @if(strlen($product->description) > 80)
+                    <p style="color: var(--primary); margin: 0 0 15px 0; font-size: 0.9rem; cursor: pointer;">many more...</p>
+                    @endif
                     
                     <div style="margin-bottom: 15px;">
                         <small style="color: var(--gray); background: #f1f5f9; padding: 4px 8px; border-radius: 12px;">{{ $product->stall->name }}</small>
@@ -169,12 +173,12 @@
 <script>
 function toggleFavorite(itemId) {
     const button = event.target;
-    if (button.textContent === '♡') {
-        button.textContent = '♥';
-        button.style.color = 'var(--primary)';
+    if (button.textContent === '💖') {
+        button.textContent = '🤍';
+        button.style.color = '#999';
     } else {
-        button.textContent = '♡';
-        button.style.color = '#000';
+        button.textContent = '💖';
+        button.style.color = 'var(--primary)';
     }
 }
 </script>

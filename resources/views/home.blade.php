@@ -4,7 +4,7 @@
 
 @section('content')
 <!-- Hero Section -->
-<section style="padding: 80px 0; background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600"><defs><linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:%23f3f4f6;stop-opacity:0.8"/><stop offset="100%" style="stop-color:%23e5e7eb;stop-opacity:0.9"/></linearGradient></defs><rect width="1200" height="600" fill="url(%23bg)"/></svg>') center/cover; position: relative; overflow: hidden;">
+<section style="padding: 80px 0; background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%); position: relative; overflow: hidden;">
     <!-- Background overlay with food images -->
     <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; opacity: 0.1; background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text x="10" y="20" font-size="12">🍕</text><text x="70" y="30" font-size="10">🍜</text><text x="30" y="50" font-size="8">🥗</text><text x="80" y="70" font-size="11">🍔</text><text x="20" y="80" font-size="9">🍰</text></svg>'); background-repeat: repeat;"></div>
     
