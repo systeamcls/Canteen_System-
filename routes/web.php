@@ -6,12 +6,25 @@ use App\Http\Livewire\Cart;
 use App\Http\Livewire\Checkout;
 use App\Http\Livewire\OrderSuccess;
 
-Route::middleware(['auth:sanctum', 'verified'])->group(function () {
-    // Render Livewire components through views
+// Guest browsing routes - allow both guests and authenticated users
+Route::middleware(['guest.or.auth'])->group(function () {
     Route::view('/menu', 'livewire.menu')->name('menu');
     Route::view('/cart', 'livewire.cart')->name('cart');
+});
+
+// Checkout routes with payment restrictions
+Route::middleware(['guest.or.auth', 'payment.restriction'])->group(function () {
     Route::view('/checkout', 'livewire.checkout')->name('checkout');
+});
+
+// Order success - accessible to both guests and authenticated users
+Route::middleware(['guest.or.auth'])->group(function () {
     Route::view('/order/success/{order}', 'livewire.order-success')->name('order.success');
+});
+
+// Authenticated user routes
+Route::middleware(['auth:sanctum', 'verified'])->group(function () {
+    // Additional authenticated routes can go here
 });
 
 Route::get('/', function () {

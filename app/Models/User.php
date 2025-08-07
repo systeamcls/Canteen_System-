@@ -27,6 +27,8 @@ class User extends Authenticatable
         'phone',
         'type',
         'is_active',
+        'preferred_payment_methods',
+        'can_use_onsite_payment',
     ];
 
     protected $hidden = [
@@ -39,6 +41,8 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'is_active' => 'boolean',
+        'preferred_payment_methods' => 'array',
+        'can_use_onsite_payment' => 'boolean',
     ];
 
     protected $appends = [
@@ -63,6 +67,22 @@ class User extends Authenticatable
     public function isCustomer()
     {
         return $this->hasRole('customer');
+    }
+
+    public function canUseOnsitePayment()
+    {
+        return $this->can_use_onsite_payment || $this->hasAnyRole(['admin', 'tenant', 'cashier', 'customer']);
+    }
+
+    public function getAllowedPaymentMethods()
+    {
+        $methods = ['online']; // All users can use online payment
+
+        if ($this->canUseOnsitePayment()) {
+            $methods[] = 'onsite';
+        }
+
+        return $methods;
     }
 
     public function stall(): HasOne
