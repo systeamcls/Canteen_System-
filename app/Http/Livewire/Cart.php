@@ -74,9 +74,16 @@ class Cart extends Component
 
     public function checkout()
     {
-        if (!Auth::check()) {
-        return redirect()->route('login');
-    }
+        // Check if user type is set
+        $userType = session('user_type');
+        if (!$userType) {
+            return redirect('/')->with('showModal', true);
+        }
+        
+        // For guests, no auth required, for employees, auth required
+        if ($userType === 'employee' && !Auth::check()) {
+            return redirect('/')->with('showModal', true);
+        }
 
         return redirect()->route('checkout');
     }

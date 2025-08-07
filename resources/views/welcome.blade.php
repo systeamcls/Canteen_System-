@@ -6,6 +6,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>LTO Canteen Central</title>
+    @livewireStyles
     <style>
         :root {
             --primary: #1e3a8a; /* Darker blue */
@@ -830,84 +831,14 @@
                     <a href="#features">Features</a>
                     <a href="#categories">Categories</a>
                     <a href="#testimonials">Testimonials</a>
-                    <button class="login-btn" onclick="openLoginModal()">Login</button>
+                    <button class="login-btn" onclick="Livewire.emit('openWelcomeModal')">Login</button>
                 </div>
             </nav>
         </div>
     </header>
 
-    <!-- Enhanced Login Modal -->
-    <div id="loginModal" class="modal-overlay">
-        <div class="modal-container">
-            <div class="modal-header">
-                <button class="modal-close" onclick="closeLoginModal()">&times;</button>
-                <h2 class="modal-title">Welcome to Canteen Central</h2>
-                <p class="modal-subtitle">Choose how you'd like to continue</p>            </div>            
-            <div class="modal-body">
-                <!-- Login Options -->
-                <div id="loginOptions">
-                    <!-- Guest Login -->
-                    <button class="login-option" onclick="loginAsGuest()">
-                        <div class="login-option-content">
-                            <div class="login-option-icon guest-icon">
-                                👤
-                            </div>
-                            <div class="login-option-text">
-                                <h3>Login as Guest</h3>
-                                <p>Browse and order without creating an account</p>
-                            </div>
-                            <div class="login-option-arrow">→</div>
-                        </div>
-                    </button>
-
-                    <!-- Employee Login -->
-                    <button class="login-option" onclick="showEmployeeForm()">
-                        <div class="login-option-content">
-                            <div class="login-option-icon employee-icon">
-                                👨‍💼
-                            </div>
-                            <div class="login-option-text">
-                                <h3>Employee Login</h3>
-                                <p>Enjoy a lot of perks and Discounts!</p>
-                            </div>
-                            <div class="login-option-arrow">→</div>
-                        </div>
-                    </button>
-                </div>
-
-                <!-- Employee Login Form -->
-                <div id="employeeForm" class="employee-form">
-                    <button class="back-btn" onclick="showLoginOptions()">
-                        ← Back to login options
-                    </button>
-                    
-                    <div class="form-divider">
-                        <span>Employee Sign In</span>
-                    </div>
-
-                    <form onsubmit="loginAsEmployee(event)">
-                        <div class="form-group">
-                            <label for="email" class="form-label">Email Address</label>
-                            <input type="email" id="email" name="email" class="form-input" placeholder="Enter your email" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="password" class="form-label">Password</label>
-                            <input type="password" id="password" name="password" class="form-input" placeholder="Enter your password" required>
-                        </div>
-
-                        <div id="loginError" class="error-message">
-                            <strong>Login Failed:</strong> <span id="errorText"></span>
-                        </div>
-
-                        <button type="submit" class="submit-btn" id="submitBtn">
-                            Sign In
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
+    <!-- Livewire Welcome Modal -->
+    @livewire('welcome-modal')
 
     <!-- Hero Section -->
     <!-- Hero Section -->
@@ -1087,163 +1018,18 @@
         </div>
     </footer>
 
+    @livewireScripts
     <script>
-        // Modal functionality
-        const modal = document.getElementById('loginModal');
-        const loginOptions = document.getElementById('loginOptions');
-        const employeeForm = document.getElementById('employeeForm');
-        const submitBtn = document.getElementById('submitBtn');
-        const loginError = document.getElementById('loginError');
-        const errorText = document.getElementById('errorText');
-
-        // Open modal
-        function openLoginModal() {
-            modal.classList.add('active');
-            document.body.style.overflow = 'hidden';
-            showLoginOptions();
-        }
-
-        // Close modal
-        function closeLoginModal() {
-            modal.classList.remove('active');
-            document.body.style.overflow = 'auto';
-            resetForm();
-        }
-
-        // Show login options
-        function showLoginOptions() {
-            loginOptions.style.display = 'block';
-            employeeForm.classList.remove('active');
-            resetForm();
-        }
-
-        // Show employee form
-        function showEmployeeForm() {
-            loginOptions.style.display = 'none';
-            employeeForm.classList.add('active');
-        }
-
-        // Reset form
-        function resetForm() {
-            const form = employeeForm.querySelector('form');
-            if (form) form.reset();
-            loginError.classList.remove('show');
-            submitBtn.classList.remove('loading');
-            submitBtn.disabled = false;
-            
-            // Remove error styling from inputs
-            const inputs = employeeForm.querySelectorAll('.form-input');
-            inputs.forEach(input => input.classList.remove('error'));
-        }
-
-        // Show error message
-        function showError(message) {
-            errorText.textContent = message;
-            loginError.classList.add('show');
-            
-            // Add error styling to inputs
-            const inputs = employeeForm.querySelectorAll('.form-input');
-            inputs.forEach(input => input.classList.add('error'));
-        }
-
-        // Guest login
-        function loginAsGuest() {
-            sessionStorage.setItem('userType', 'guest');
-            closeLoginModal();
-            
-            // Show success message or redirect
-            setTimeout(() => {
-                alert('Welcome, Guest! You can now browse our menu.');
-                // window.location.href = '/menu';
-            }, 300);
-        }
-
-        // Employee login
-        function loginAsEmployee(event) {
-            event.preventDefault();
-            
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            
-            // Reset previous errors
-            loginError.classList.remove('show');
-            submitBtn.classList.add('loading');
-            submitBtn.disabled = true;
-
-            // Simulate API call
-            setTimeout(() => {
-                // For demo purposes - replace with actual API call
-                if (email === 'admin@lto.gov.ph' && password === 'admin123') {
-                    sessionStorage.setItem('userType', 'employee');
-                    sessionStorage.setItem('userEmail', email);
-                    
-                    closeLoginModal();
-                    setTimeout(() => {
-                        alert('Welcome back! Redirecting to employee dashboard...');
-                        // window.location.href = '/dashboard';
-                    }, 300);
-                } else {
-                    showError('Invalid email or password. Please try again.');
-                    submitBtn.classList.remove('loading');
-                    submitBtn.disabled = false;
-                }
-            }, 1500); // Simulate network delay
-
-            /* Uncomment for actual API integration
-+            fetch('/login', {
-+                method: 'POST',
-+                headers: {
-+                    'Content-Type': 'application/json',
-+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-+                },
-+                body: JSON.stringify({ email, password })
-+            })
-+            .then(response => response.json())
-+            .then(data => {
-+                if (data.success) {
-+                    sessionStorage.setItem('userType', 'employee');
-+                    sessionStorage.setItem('userEmail', email);
-+                    closeLoginModal();
-+                    setTimeout(() => {
-+                        window.location.href = '/dashboard';
-+                    }, 300);
-+                } else {
-+                    showError(data.message || 'Invalid credentials. Please try again.');
-+                }
-+            })
-+            .catch(error => {
-+                showError('Network error. Please check your connection and try again.');
-+            })
-+            .finally(() => {
-+                submitBtn.classList.remove('loading');
-+                submitBtn.disabled = false;
-+            });
-            */
-        }
-
-        // Close modal when clicking outside
-        modal.addEventListener('click', function(event) {
-            if (event.target === modal) {
-                closeLoginModal();
-            }
-        });
-
-        // Close modal on escape key
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'Escape' && modal.classList.contains('active')) {
-                closeLoginModal();
-            }
-        });
-
-        // Form validation
-        const inputs = document.querySelectorAll('.form-input');
-        inputs.forEach(input => {
-            input.addEventListener('focus', function() {
-                this.classList.remove('error');
-                if (loginError.classList.contains('show')) {
-                    loginError.classList.remove('show');
-                }
+        // Auto-open modal if requested
+        @if(session('showModal'))
+            window.addEventListener('DOMContentLoaded', function() {
+                Livewire.emit('openWelcomeModal');
             });
+        @endif
+        
+        // Listen for user type updates
+        Livewire.on('userTypeUpdated', function(userType) {
+            console.log('User type updated to:', userType);
         });
     </script>
 </body>
