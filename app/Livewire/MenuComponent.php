@@ -23,13 +23,21 @@ class MenuComponent extends Component
 
     public function render()
     {
-        // Debug: Let's simplify the query to see if it works
-        $stalls = \App\Models\Stall::where('is_active', true)->get();
+        $stalls = \App\Models\Stall::with(['products' => function($query) {
+                $query->where('is_available', true)
+                    ->when($this->search, function($query) {
+                        $query->where('name', 'like', '%'.$this->search.'%');
+                    });
+            }])
+            ->where('is_active', true)
+            ->when($this->search, function($query) {
+                $query->where('name', 'like', '%'.$this->search.'%');
+            })
+            ->get();
         
         return view('livewire.menu-component', [
-            'stalls' => $stalls,
-            'debug_count' => $stalls->count()
-        ]);
+            'stalls' => $stalls
+        ])->layout('layouts.app');
     }
 
     public function addToCart($productId)
@@ -53,9 +61,9 @@ class MenuComponent extends Component
         }
 
         session()->put('cart', $cart);
-        $this->emit('cartUpdated');
+        $this->dispatch('cartUpdated');
 
-        $this->dispatchBrowserEvent('notify', [
+        $this->dispatch('notify', [
             'message' => 'Item added to cart!',
             'type' => 'success'
         ]);

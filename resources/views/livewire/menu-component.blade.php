@@ -40,16 +40,6 @@
 
     <!-- Stalls Grid -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <!-- Debug info -->
-        <div class="mb-4 p-4 bg-yellow-100 rounded">
-            Debug: Stalls count = {{ $debug_count ?? 'undefined' }}
-            @if(isset($stalls))
-                | Stalls variable exists with {{ count($stalls) }} items
-            @else
-                | Stalls variable does not exist
-            @endif
-        </div>
-        
         <div class="grid grid-cols-1 gap-8">
             @isset($stalls)  <!-- Check if variable exists -->
                 @foreach($stalls as $stall)
