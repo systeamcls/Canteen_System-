@@ -9,7 +9,7 @@ use App\Http\Livewire\OrderSuccess;
 // Guest browsing routes - allow both guests and authenticated users
 Route::middleware(['guest.or.auth'])->group(function () {
     Route::get('/menu', \App\Livewire\MenuComponent::class)->name('menu');
-    Route::view('/cart', 'livewire.cart')->name('cart');
+    Route::get('/cart', \App\Livewire\CartComponent::class)->name('cart');
 });
 
 // Checkout routes with payment restrictions
