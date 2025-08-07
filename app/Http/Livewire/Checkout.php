@@ -26,10 +26,14 @@ class Checkout extends Component
         // Get user type from session or determine based on auth status
         $this->userType = session('user_type') ?? (Auth::check() ? 'employee' : null);
 
-        // If no user type is set, show login modal
+        // If no user type is set, redirect to welcome page
         if (!$this->userType) {
-            $this->showLoginModal = true;
-            return;
+            return redirect('/')->with('showModal', true);
+        }
+
+        // For employees, ensure they are authenticated
+        if ($this->userType === 'employee' && !Auth::check()) {
+            return redirect('/')->with('showModal', true);
         }
 
         // Set default payment method based on user type
@@ -76,7 +80,9 @@ class Checkout extends Component
         $methods = [
             'online' => [
                 'name' => 'Online Payment',
-                'description' => 'Pay with card or e-wallet',
+                'description' => $this->userType === 'guest' 
+                    ? 'Pay with card or e-wallet (Required for guests)'
+                    : 'Pay with card or e-wallet',
                 'icon' => 'credit-card'
             ]
         ];
@@ -85,7 +91,7 @@ class Checkout extends Component
         if ($this->userType === 'employee') {
             $methods['cash'] = [
                 'name' => 'Cash Payment',
-                'description' => 'Pay at counter',
+                'description' => 'Pay at counter (Employee only)',
                 'icon' => 'cash'
             ];
         }
@@ -97,8 +103,12 @@ class Checkout extends Component
     {
         // Validate user type is set
         if (!$this->userType) {
-            $this->showLoginModal = true;
-            return;
+            return redirect('/')->with('showModal', true);
+        }
+
+        // For employees, ensure they are authenticated
+        if ($this->userType === 'employee' && !Auth::check()) {
+            return redirect('/')->with('showModal', true);
         }
 
         // Validate payment method based on user type
@@ -112,9 +122,12 @@ class Checkout extends Component
             'specialInstructions' => 'nullable|string|max:500',
         ]);
 
+        // Generate guest token for guest orders
+        $guestToken = $this->userType === 'guest' ? session('guest_session_id', uniqid('guest_', true)) : null;
+
         $order = Order::create([
             'user_id' => Auth::id() ?? null,
-            'guest_token' => $this->userType === 'guest' ? Str::random(32) : null,
+            'guest_token' => $guestToken,
             'order_number' => 'ORD-' . strtoupper(Str::random(8)),
             'status' => 'pending',
             'total_amount' => $this->total,
@@ -137,7 +150,10 @@ class Checkout extends Component
 
         // Store guest token in session if guest order
         if ($this->userType === 'guest') {
-            session()->put('guest_token', $order->guest_token);
+            session()->put('guest_orders', array_merge(
+                session('guest_orders', []), 
+                [$order->id]
+            ));
         }
 
         session()->forget('cart');

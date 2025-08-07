@@ -831,7 +831,7 @@
                     <a href="#features">Features</a>
                     <a href="#categories">Categories</a>
                     <a href="#testimonials">Testimonials</a>
-                    <button class="login-btn" onclick="Livewire.emit('openWelcomeModal')">Login</button>
+                    <button class="login-btn" onclick="openWelcomeModal()">Login</button>
                 </div>
             </nav>
         </div>
@@ -1020,16 +1020,21 @@
 
     @livewireScripts
     <script>
+        // Function to open the welcome modal
+        function openWelcomeModal() {
+            window.livewire.emit('openWelcomeModal');
+        }
+        
         // Auto-open modal if requested
         @if(session('showModal'))
             window.addEventListener('DOMContentLoaded', function() {
-                Livewire.emit('openWelcomeModal');
+                setTimeout(() => openWelcomeModal(), 100);
             });
         @endif
         
         // Listen for user type updates
-        Livewire.on('userTypeUpdated', function(userType) {
-            console.log('User type updated to:', userType);
+        window.addEventListener('userTypeUpdated', function(event) {
+            console.log('User type updated to:', event.detail);
         });
     </script>
 </body>

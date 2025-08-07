@@ -28,6 +28,15 @@ class WelcomeModal extends Component
     
     protected $listeners = ['openWelcomeModal' => 'open'];
 
+    public function mount()
+    {
+        // Auto-open modal if requested from session
+        if (session('showModal')) {
+            $this->showModal = true;
+            session()->forget('showModal');
+        }
+    }
+
     public function open()
     {
         $this->showModal = true;
@@ -80,7 +89,7 @@ class WelcomeModal extends Component
         $this->close();
         
         // Emit event for other components
-        $this->emit('userTypeUpdated', 'guest');
+        $this->dispatch('userTypeUpdated', 'guest');
         
         // Redirect to menu
         return redirect()->route('menu.index');
@@ -107,7 +116,7 @@ class WelcomeModal extends Component
                 $this->close();
                 
                 // Emit event for other components
-                $this->emit('userTypeUpdated', 'employee');
+                $this->dispatch('userTypeUpdated', 'employee');
                 
                 // Redirect to dashboard or menu
                 return redirect()->route('dashboard');
@@ -153,7 +162,7 @@ class WelcomeModal extends Component
             $this->close();
             
             // Emit event for other components
-            $this->emit('userTypeUpdated', 'employee');
+            $this->dispatch('userTypeUpdated', 'employee');
             
             // Redirect to dashboard
             return redirect()->route('dashboard');
