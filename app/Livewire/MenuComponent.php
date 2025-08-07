@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Http\Livewire;
+namespace App\Livewire;
 
 use App\Models\Stall;
 use App\Models\Product;
 use Livewire\Component;
 use Livewire\WithPagination;
 
-class Menu extends Component
+class MenuComponent extends Component
 {
     use WithPagination;
 
@@ -26,7 +26,7 @@ class Menu extends Component
         // Debug: Let's simplify the query to see if it works
         $stalls = \App\Models\Stall::where('is_active', true)->get();
         
-        return view('livewire.menu', [
+        return view('livewire.menu-component', [
             'stalls' => $stalls,
             'debug_count' => $stalls->count()
         ]);

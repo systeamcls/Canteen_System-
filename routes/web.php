@@ -8,7 +8,7 @@ use App\Http\Livewire\OrderSuccess;
 
 // Guest browsing routes - allow both guests and authenticated users
 Route::middleware(['guest.or.auth'])->group(function () {
-    Route::view('/menu', 'livewire.menu')->name('menu');
+    Route::view('/menu', 'menu')->name('menu');
     Route::view('/cart', 'livewire.cart')->name('cart');
 });
 

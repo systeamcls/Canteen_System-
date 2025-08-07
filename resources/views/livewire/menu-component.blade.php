@@ -69,7 +69,7 @@
 
                         <!-- Products Grid -->
                         <div class="p-4">
-                            @if($stall->products->where('is_available', true)->isNotEmpty())
+                            @if($stall->products && $stall->products->where('is_available', true)->isNotEmpty())
                                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                     @foreach($stall->products->where('is_available', true) as $product)
                                         <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
