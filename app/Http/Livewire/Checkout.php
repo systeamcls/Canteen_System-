@@ -17,19 +17,14 @@ class Checkout extends Component
     public $specialInstructions = '';
     public $orderType = 'onsite';
     public $userType = null;
-    public $showLoginModal = false;
-
-    protected $listeners = ['userTypeUpdated' => 'handleUserTypeUpdate'];
 
     public function mount()
     {
-        // Get user type from session or determine based on auth status
-        $this->userType = session('user_type') ?? (Auth::check() ? 'employee' : null);
-
-        // If no user type is set, show login modal
-        if (!$this->userType) {
-            $this->showLoginModal = true;
-            return;
+        // Determine user type based on authentication status
+        if (Auth::check()) {
+            $this->userType = 'employee';
+        } else {
+            $this->userType = 'guest';
         }
 
         // Set default payment method based on user type
@@ -40,9 +35,8 @@ class Checkout extends Component
 
     public function handleUserTypeUpdate($type)
     {
-        $this->userType = $type;
-        $this->showLoginModal = false;
-        $this->paymentMethod = $type === 'guest' ? 'online' : 'cash';
+        // This method is no longer needed since we use authentication
+        // but keeping it for backwards compatibility
     }
 
     public function loadCart()
@@ -81,8 +75,8 @@ class Checkout extends Component
             ]
         ];
 
-        // Only employees can access onsite payment
-        if ($this->userType === 'employee') {
+        // Only authenticated users (employees) can access onsite payment
+        if (Auth::check()) {
             $methods['cash'] = [
                 'name' => 'Cash Payment',
                 'description' => 'Pay at counter',
@@ -95,16 +89,10 @@ class Checkout extends Component
 
     public function placeOrder()
     {
-        // Validate user type is set
-        if (!$this->userType) {
-            $this->showLoginModal = true;
-            return;
-        }
-
-        // Validate payment method based on user type
-        $allowedPaymentMethods = $this->userType === 'guest' 
-            ? ['online'] 
-            : ['cash', 'online', 'card', 'e-wallet'];
+        // Validate payment method based on user authentication
+        $allowedPaymentMethods = Auth::check() 
+            ? ['cash', 'online', 'card', 'e-wallet'] 
+            : ['online', 'card', 'e-wallet'];
 
         $this->validate([
             'paymentMethod' => 'required|in:' . implode(',', $allowedPaymentMethods),
@@ -114,7 +102,7 @@ class Checkout extends Component
 
         $order = Order::create([
             'user_id' => Auth::id() ?? null,
-            'guest_token' => $this->userType === 'guest' ? Str::random(32) : null,
+            'guest_token' => !Auth::check() ? Str::random(32) : null,
             'order_number' => 'ORD-' . strtoupper(Str::random(8)),
             'status' => 'pending',
             'total_amount' => $this->total,
@@ -136,7 +124,7 @@ class Checkout extends Component
         }
 
         // Store guest token in session if guest order
-        if ($this->userType === 'guest') {
+        if (!Auth::check()) {
             session()->put('guest_token', $order->guest_token);
         }
 

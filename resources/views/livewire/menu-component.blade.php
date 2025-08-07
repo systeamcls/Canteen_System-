@@ -40,16 +40,6 @@
 
     <!-- Stalls Grid -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <!-- Debug info -->
-        <div class="mb-4 p-4 bg-yellow-100 rounded">
-            Debug: Stalls count = {{ $debug_count ?? 'undefined' }}
-            @if(isset($stalls))
-                | Stalls variable exists with {{ count($stalls) }} items
-            @else
-                | Stalls variable does not exist
-            @endif
-        </div>
-        
         <div class="grid grid-cols-1 gap-8">
             @isset($stalls)  <!-- Check if variable exists -->
                 @foreach($stalls as $stall)
@@ -69,7 +59,7 @@
 
                         <!-- Products Grid -->
                         <div class="p-4">
-                            @if($stall->products->where('is_available', true)->isNotEmpty())
+                            @if($stall->products && $stall->products->where('is_available', true)->isNotEmpty())
                                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                     @foreach($stall->products->where('is_available', true) as $product)
                                         <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
