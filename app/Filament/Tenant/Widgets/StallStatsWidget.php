@@ -8,12 +8,16 @@ use App\Models\Review;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
+
 
 class StallStatsWidget extends BaseWidget
 {
     protected function getStats(): array
     {
-        $stall = auth()->user()->stall;
+        $user = Auth::user();
+        $stall = $user->stall;
+
 
         $todaySales = Order::whereHas('items.product', function ($query) use ($stall) {
             $query->where('stall_id', $stall->id);

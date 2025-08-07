@@ -5,8 +5,17 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
+/**
+ * @property int $id
+ * @property string $name
+ * @property float $price
+ * @property string|null $image
+ * @property \App\Models\Stall|null $stall
+ */
+
 class Product extends Model
 {
+    
     use HasFactory;
 
     protected $fillable = [
@@ -15,6 +24,7 @@ class Product extends Model
         'description',
         'price',
         'image',
+        'category',
         'is_available',
     ];
 
@@ -32,4 +42,6 @@ class Product extends Model
     {
         return $this->hasMany(OrderItem::class);
     }
+
+    
 }

@@ -13,6 +13,7 @@ use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
+use App\Filament\Tenant\Widgets;
 
 class TenantPanelProvider extends PanelProvider
 {
@@ -68,6 +69,12 @@ class TenantPanelProvider extends PanelProvider
                 'Reviews',
                 'Reports',
                 'Settings'
+            ])
+            ->widgets([
+                Widgets\StallStatsWidget::class,
+                Widgets\TodayOrdersWidget::class,
+                Widgets\SalesChartWidget::class,
             ]);
+            
     }
 }

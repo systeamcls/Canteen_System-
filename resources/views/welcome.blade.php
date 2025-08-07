@@ -868,7 +868,7 @@
                             </div>
                             <div class="login-option-text">
                                 <h3>Employee Login</h3>
-                                <p>Access staff features and management tools</p>
+                                <p>Enjoy a lot of perks and Discounts!</p>
                             </div>
                             <div class="login-option-arrow">→</div>
                         </div>

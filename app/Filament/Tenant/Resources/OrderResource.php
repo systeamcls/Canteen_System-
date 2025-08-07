@@ -10,6 +10,7 @@ use Filament\Tables;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\Auth;
 
 class OrderResource extends Resource
 {
@@ -124,11 +125,11 @@ class OrderResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        // Only show orders containing products from the tenant's stall
-        return parent::getEloquentQuery()
-            ->whereHas('items.product.stall', function ($query) {
-                $query->where('user_id', auth()->id());
-            });
+    // Only show orders containing products from the tenant's stall
+    return parent::getEloquentQuery()
+        ->whereHas('items.product.stall', function ($query) {
+            $query->where('user_id', Auth::id()); // Changed from auth()->id()
+        });
     }
 
     public static function getPages(): array

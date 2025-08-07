@@ -4,9 +4,10 @@ namespace App\Http\Livewire;
 
 use App\Models\Product;
 use Livewire\Component;
+use Illuminate\Support\Facades\Auth;
 
 class Cart extends Component
-{
+{   
     public $cartItems = [];
     public $total = 0;
 
@@ -34,7 +35,7 @@ class Cart extends Component
                     'price' => $product->price,
                     'image' => $product->image,
                     'quantity' => $item['quantity'],
-                    'stall' => $product->stall ? $product->stall->name : 'Unknown Stall',
+                    'stall' => $product->stall?->name ?? 'Unknown Stall',
                     'subtotal' => $product->price * $item['quantity']
                 ];
                 $this->total += $product->price * $item['quantity'];
@@ -73,9 +74,9 @@ class Cart extends Component
 
     public function checkout()
     {
-        if (!auth()->check()) {
-            return redirect()->route('login');
-        }
+        if (!Auth::check()) {
+        return redirect()->route('login');
+    }
 
         return redirect()->route('checkout');
     }

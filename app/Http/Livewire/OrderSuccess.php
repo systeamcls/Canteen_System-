@@ -13,7 +13,7 @@ class OrderSuccess extends Component
 
     public function mount(Order $order)
     {
-        if ($order->user_id !== Auth::id())  {
+        if ($order->getAttribute('user_id') !== Auth::id())  {
             return redirect()->route('menu');
         }
         

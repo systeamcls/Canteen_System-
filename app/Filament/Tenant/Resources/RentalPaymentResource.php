@@ -10,6 +10,7 @@ use Filament\Tables;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\Auth; 
 
 class RentalPaymentResource extends Resource
 {
@@ -84,10 +85,10 @@ class RentalPaymentResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()
-            ->whereHas('stall', function ($query) {
-                $query->where('user_id', auth()->id());
-            });
+    return parent::getEloquentQuery()
+        ->whereHas('stall', function ($query) {
+            $query->where('user_id', Auth::id()); 
+        });
     }
 
     public static function getPages(): array
