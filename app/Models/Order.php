@@ -12,15 +12,20 @@ class Order extends Model
     protected $fillable = [
         'order_number',
         'user_id',
+        'guest_token',
         'status',
         'total_amount',
         'payment_method',
         'payment_status',
         'order_type',
+        'special_instructions',
+        'user_type',
+        'guest_details',
     ];
 
     protected $casts = [
         'total_amount' => 'decimal:2',
+        'guest_details' => 'array',
     ];
 
     public function user()
