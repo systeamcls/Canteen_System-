@@ -39,13 +39,15 @@ class MenuController extends Controller
         // Get all stalls for filter dropdown
         $stalls = Stall::where('is_active', true)->get();
 
-        // Get food categories (you might want to store these in database)
+        // Get food categories as specified in requirements
         $categories = [
-            'fresh-meals' => 'Fresh Meals',
-            'sandwiches' => 'Sandwiches',
-            'beverages' => 'Beverages',
-            'snacks' => 'Snacks',
-            'desserts' => 'Desserts'
+            'pizza' => 'Pizza',
+            'fast-food' => 'Fast Food',
+            'noodle' => 'Noodle',
+            'dessert' => 'Dessert',
+            'sea-food' => 'Sea Food',
+            'sushi' => 'Sushi',
+            'ramen' => 'Ramen'
         ];
 
         return view('menu', compact('products', 'stalls', 'categories', 'category', 'search', 'stallId'));

@@ -15,6 +15,12 @@ Route::get('/', function () {
     return view('welcome');
 })->name('welcome');
 
+// Simple route to set guest session for testing
+Route::get('/set-guest', function () {
+    session(['user_type' => 'guest']);
+    return redirect()->route('menu.index')->with('success', 'You are now browsing as a guest');
+});
+
 // Public routes accessible to both guests and employees
 Route::middleware(['web'])->group(function () {
     // Search functionality
