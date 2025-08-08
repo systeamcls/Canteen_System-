@@ -8,11 +8,11 @@
 
     <style>
         :root {
-            --primary: #2E5BBA;
-            --primary-light: #3b82f6;
-            --primary-lighter: #93c5fd;
+            --primary: #ea580c;
+            --primary-light: #f97316;
+            --primary-lighter: #fed7aa;
             --secondary: #f59e0b;
-            --light: #f8fafc;
+            --light: #fff7ed;
             --dark: #1e293b;
             --gray: #64748b;
             --success: #10b981;
@@ -398,8 +398,8 @@
         <div class="container">
             <nav>
                 <div class="logo">
-                    <div class="logo-img">LTO</div>
-                    <h1>LTO Canteen Central</h1>
+                    <div class="logo-img">K</div>
+                    <h1>KAJACMS</h1>
                 </div>
                 <div class="nav-links">
                     <a href="/" class="{{ request()->is('/') ? 'active' : '' }}">Home</a>
@@ -424,8 +424,8 @@
         <div class="container">
             <div class="footer-content">
                 <div class="footer-column">
-                    <h3>LTO Canteen Central</h3>
-                    <p style="color: #cbd5e1; margin-top: 10px;">Your one-stop food destination at LTO</p>
+                    <h3>KAJACMS</h3>
+                    <p style="color: #cbd5e1; margin-top: 10px;">Multi-Vendor Canteen Management System</p>
                 </div>
                 <div class="footer-column">
                     <h3>Quick Links</h3>
@@ -446,7 +446,7 @@
                 </div>
             </div>
             <div class="copyright">
-                &copy; 2023 LTO Canteen Central. All rights reserved.
+                &copy; 2025 KAJACMS. All rights reserved.
             </div>
         </div>
     </footer>

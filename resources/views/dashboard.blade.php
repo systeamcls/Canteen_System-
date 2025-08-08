@@ -1,105 +1,293 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Employee Dashboard') }}
+            {{ __('KAJACMS Dashboard') }}
         </h2>
     </x-slot>
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6">
-                <!-- User Type Info -->
-                <div class="mb-8 bg-green-50 border border-green-200 rounded-lg p-4">
-                    <div class="flex items-center">
-                        <div class="flex-shrink-0">
-                            <svg class="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                            </svg>
+            <!-- Dashboard Header -->
+            <div class="mb-8">
+                <h1 class="text-3xl font-bold" style="color: #ea580c; margin-bottom: 10px;">
+                    Welcome to KAJACMS Dashboard
+                </h1>
+                <p class="text-gray-600 text-lg">
+                    Hello {{ auth()->user()->name }}! You are logged in as: 
+                    <span style="background: #fef3c7; color: #92400e; padding: 4px 8px; border-radius: 6px; font-weight: 600;">
+                        @if(auth()->user()->hasRole('admin'))
+                            Admin (Concessionaire)
+                        @elseif(auth()->user()->hasRole('tenant'))
+                            Tenant
+                        @elseif(auth()->user()->hasRole('cashier'))
+                            Cashier
+                        @else
+                            Employee
+                        @endif
+                    </span>
+                </p>
+            </div>
+
+            <!-- Admin Dashboard -->
+            @if(auth()->user()->hasRole('admin'))
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <!-- System Overview -->
+                    <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6 border-l-4" style="border-left-color: #ea580c;">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">📊 System Overview</h3>
+                        <div class="space-y-3">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Total Stalls:</span>
+                                <span class="font-semibold" style="color: #ea580c;">{{ \App\Models\Stall::count() }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Active Tenants:</span>
+                                <span class="font-semibold" style="color: #ea580c;">{{ \App\Models\User::role('tenant')->count() }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Total Products:</span>
+                                <span class="font-semibold" style="color: #ea580c;">{{ \App\Models\Product::count() }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Total Orders:</span>
+                                <span class="font-semibold" style="color: #ea580c;">{{ \App\Models\Order::count() }}</span>
+                            </div>
                         </div>
-                        <div class="ml-4">
-                            <h3 class="text-lg font-medium text-green-800">Welcome, Employee!</h3>
-                            <p class="text-green-700">
-                                You are logged in as: <strong>{{ Auth::user()->name }}</strong> ({{ Auth::user()->email }})
-                            </p>
-                            <p class="text-sm text-green-600 mt-1">
-                                User Type: <span class="font-medium">{{ session('user_type', 'employee') }}</span>
-                                | Roles: {{ Auth::user()->roles->pluck('name')->join(', ') ?: 'customer' }}
-                            </p>
+                    </div>
+
+                    <!-- Revenue & Financial -->
+                    <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6 border-l-4 border-green-500">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">💰 Financial Overview</h3>
+                        <div class="space-y-3">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Monthly Revenue:</span>
+                                <span class="font-semibold text-green-600">₱{{ number_format(\App\Models\Order::sum('total_amount'), 2) }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Rental Income:</span>
+                                <span class="font-semibold text-green-600">₱{{ number_format(\App\Models\Stall::sum('rental_fee'), 2) }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Commission:</span>
+                                <span class="font-semibold text-green-600">₱{{ number_format(\App\Models\Order::sum('total_amount') * 0.05, 2) }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6 border-l-4 border-blue-500">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">⚡ Quick Actions</h3>
+                        <div class="space-y-2">
+                            <a href="/admin" class="block text-center py-3 px-4 rounded-lg text-white font-semibold transition-all hover:opacity-90" style="background: #ea580c;">
+                                🏢 Admin Panel
+                            </a>
+                            <a href="{{ route('menu.index') }}" class="block text-center py-3 px-4 rounded-lg font-semibold transition-all hover:opacity-90" style="background: #fed7aa; color: #ea580c;">
+                                🛒 View Menu
+                            </a>
+                            <a href="{{ route('stalls.index') }}" class="block text-center py-3 px-4 rounded-lg font-semibold transition-all hover:opacity-90" style="background: #fed7aa; color: #ea580c;">
+                                🏪 Manage Stalls
+                            </a>
                         </div>
                     </div>
                 </div>
+            @endif
 
-                <!-- Quick Actions -->
+            <!-- Tenant Dashboard -->
+            @if(auth()->user()->hasRole('tenant'))
+                @php
+                    $userStall = auth()->user()->stall;
+                    $stallProducts = $userStall ? $userStall->products : collect();
+                    $stallOrders = $userStall ? \App\Models\Order::whereHas('items.product', function($q) use ($userStall) {
+                        $q->where('stall_id', $userStall->id);
+                    }) : collect();
+                @endphp
+                
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                    <a href="{{ route('menu.index') }}" class="block p-6 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors">
-                        <div class="flex items-center">
-                            <svg class="h-8 w-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
-                            </svg>
-                            <div class="ml-4">
-                                <h3 class="text-lg font-medium text-blue-900">Browse Menu</h3>
-                                <p class="text-blue-700">View all available food items</p>
-                            </div>
-                        </div>
-                    </a>
-
-                    <a href="{{ route('cart') }}" class="block p-6 bg-orange-50 border border-orange-200 rounded-lg hover:bg-orange-100 transition-colors">
-                        <div class="flex items-center">
-                            <svg class="h-8 w-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13h8m-8 0V9a2 2 0 012-2h4a2 2 0 012 2v4"/>
-                            </svg>
-                            <div class="ml-4">
-                                <h3 class="text-lg font-medium text-orange-900">View Cart</h3>
-                                <p class="text-orange-700">Check your current orders</p>
-                            </div>
-                        </div>
-                    </a>
-
-                    <form method="POST" action="{{ route('logout') }}" class="block">
-                        @csrf
-                        <button type="submit" class="w-full p-6 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition-colors text-left">
-                            <div class="flex items-center">
-                                <svg class="h-8 w-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
-                                </svg>
-                                <div class="ml-4">
-                                    <h3 class="text-lg font-medium text-red-900">Logout</h3>
-                                    <p class="text-red-700">Sign out from your account</p>
+                    <!-- My Stall Overview -->
+                    <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6 border-l-4" style="border-left-color: #ea580c;">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">🏪 My Stall: {{ $userStall->name ?? 'No Stall Assigned' }}</h3>
+                        @if($userStall)
+                            <div class="space-y-3">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Location:</span>
+                                    <span class="font-semibold" style="color: #ea580c;">{{ $userStall->location }}</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Monthly Rent:</span>
+                                    <span class="font-semibold" style="color: #ea580c;">₱{{ number_format($userStall->rental_fee, 2) }}</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Products:</span>
+                                    <span class="font-semibold" style="color: #ea580c;">{{ $stallProducts->count() }}</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Status:</span>
+                                    <span class="px-2 py-1 rounded font-semibold {{ $userStall->is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                                        {{ $userStall->is_active ? 'Active' : 'Inactive' }}
+                                    </span>
                                 </div>
                             </div>
-                        </button>
-                    </form>
-                </div>
+                        @endif
+                    </div>
 
-                <!-- Employee Benefits -->
-                <div class="bg-gray-50 border border-gray-200 rounded-lg p-6">
-                    <h3 class="text-lg font-medium text-gray-900 mb-4">Employee Benefits</h3>
-                    <ul class="space-y-2 text-gray-700">
-                        <li class="flex items-center">
-                            <svg class="h-5 w-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                            </svg>
-                            Access to both online and cash payment options
-                        </li>
-                        <li class="flex items-center">
-                            <svg class="h-5 w-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                            </svg>
-                            Order history and profile management
-                        </li>
-                        <li class="flex items-center">
-                            <svg class="h-5 w-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                            </svg>
-                            Special employee discounts and offers
-                        </li>
-                        <li class="flex items-center">
-                            <svg class="h-5 w-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                            </svg>
-                            Dine-in and take-out options
-                        </li>
-                    </ul>
+                    <!-- Sales Overview -->
+                    <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6 border-l-4 border-green-500">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">📈 My Sales</h3>
+                        <div class="space-y-3">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Total Orders:</span>
+                                <span class="font-semibold text-green-600">{{ $stallOrders->count() }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Revenue:</span>
+                                <span class="font-semibold text-green-600">₱{{ number_format($stallOrders->sum('total_amount'), 2) }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Avg. Order:</span>
+                                <span class="font-semibold text-green-600">₱{{ $stallOrders->count() > 0 ? number_format($stallOrders->avg('total_amount'), 2) : '0.00' }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6 border-l-4 border-blue-500">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">⚡ Quick Actions</h3>
+                        <div class="space-y-2">
+                            <a href="/admin" class="block text-center py-3 px-4 rounded-lg text-white font-semibold transition-all hover:opacity-90" style="background: #ea580c;">
+                                🛠️ Manage Products
+                            </a>
+                            <a href="{{ route('menu.index') }}" class="block text-center py-3 px-4 rounded-lg font-semibold transition-all hover:opacity-90" style="background: #fed7aa; color: #ea580c;">
+                                👀 View My Products
+                            </a>
+                            @if($userStall)
+                            <a href="{{ route('stalls.show', $userStall) }}" class="block text-center py-3 px-4 rounded-lg font-semibold transition-all hover:opacity-90" style="background: #fed7aa; color: #ea580c;">
+                                🏪 View My Stall
+                            </a>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            @endif
+
+            <!-- Cashier Dashboard -->
+            @if(auth()->user()->hasRole('cashier'))
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <!-- Today's Orders -->
+                    <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6 border-l-4" style="border-left-color: #ea580c;">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">🛒 Today's Orders</h3>
+                        <div class="space-y-3">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Orders Processed:</span>
+                                <span class="font-semibold" style="color: #ea580c;">{{ \App\Models\Order::whereDate('created_at', today())->count() }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Total Sales:</span>
+                                <span class="font-semibold" style="color: #ea580c;">₱{{ number_format(\App\Models\Order::whereDate('created_at', today())->sum('total_amount'), 2) }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Pending Orders:</span>
+                                <span class="font-semibold text-yellow-600">{{ \App\Models\Order::where('status', 'pending')->count() }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- POS System -->
+                    <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6 border-l-4 border-green-500">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">💳 Point of Sale</h3>
+                        <div class="space-y-3">
+                            <a href="{{ route('menu.index') }}" class="block text-center py-4 px-4 rounded-lg text-white font-semibold text-lg transition-all hover:opacity-90" style="background: #ea580c;">
+                                🛒 Create Walk-in Order
+                            </a>
+                            <div class="text-center text-gray-600 text-sm">
+                                Process orders for customers at the canteen
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6 border-l-4 border-blue-500">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">⚡ Quick Actions</h3>
+                        <div class="space-y-2">
+                            <a href="/admin" class="block text-center py-3 px-4 rounded-lg font-semibold transition-all hover:opacity-90" style="background: #fed7aa; color: #ea580c;">
+                                📋 View All Orders
+                            </a>
+                            <a href="{{ route('stalls.index') }}" class="block text-center py-3 px-4 rounded-lg font-semibold transition-all hover:opacity-90" style="background: #fed7aa; color: #ea580c;">
+                                🏪 View All Stalls
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            @endif
+
+            <!-- Customer/Employee Dashboard (Default) -->
+            @if(auth()->user()->hasRole('customer') || !auth()->user()->hasAnyRole(['admin', 'tenant', 'cashier']))
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <!-- Browse Menu -->
+                    <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6 border-l-4" style="border-left-color: #ea580c;">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">🍽️ Browse Menu</h3>
+                        <p class="text-gray-600 mb-4">Explore delicious food from our multi-vendor canteen</p>
+                        <a href="{{ route('menu.index') }}" class="block text-center py-3 px-4 rounded-lg text-white font-semibold transition-all hover:opacity-90" style="background: #ea580c;">
+                            🛒 View Full Menu
+                        </a>
+                    </div>
+
+                    <!-- My Orders -->
+                    <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6 border-l-4 border-green-500">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">📋 My Orders</h3>
+                        @php
+                            $userOrders = \App\Models\Order::where('user_id', auth()->id())->latest()->take(3)->get();
+                        @endphp
+                        @if($userOrders->count() > 0)
+                            <div class="space-y-2">
+                                @foreach($userOrders as $order)
+                                    <div class="border border-gray-200 p-3 rounded">
+                                        <div class="flex justify-between mb-1">
+                                            <span class="font-semibold">Order #{{ $order->id }}</span>
+                                            <span class="text-green-600">₱{{ number_format($order->total_amount, 2) }}</span>
+                                        </div>
+                                        <div class="text-sm text-gray-600">{{ $order->created_at->format('M d, Y') }}</div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @else
+                            <p class="text-gray-600">No orders yet. Start ordering from the menu!</p>
+                        @endif
+                    </div>
+
+                    <!-- Explore Stalls -->
+                    <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6 border-l-4 border-blue-500">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">🏪 Explore Stalls</h3>
+                        <p class="text-gray-600 mb-4">Discover food from different vendors</p>
+                        <a href="{{ route('stalls.index') }}" class="block text-center py-3 px-4 rounded-lg font-semibold transition-all hover:opacity-90" style="background: #fed7aa; color: #ea580c;">
+                            🔍 Browse All Stalls
+                        </a>
+                    </div>
+                </div>
+            @endif
+
+            <!-- KAJACMS System Status -->
+            <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6 mb-8">
+                <h3 class="text-lg font-semibold text-gray-800 mb-6">📊 KAJACMS System Status</h3>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                    <div class="text-center p-6 rounded-lg" style="background: #fef3c7;">
+                        <div class="text-4xl mb-3">🏪</div>
+                        <div class="font-semibold" style="color: #92400e;">{{ \App\Models\Stall::count() }} Stalls</div>
+                        <div class="text-sm" style="color: #92400e;">Multi-vendor marketplace</div>
+                    </div>
+                    <div class="text-center p-6 rounded-lg" style="background: #fef3c7;">
+                        <div class="text-4xl mb-3">🍽️</div>
+                        <div class="font-semibold" style="color: #92400e;">{{ \App\Models\Product::count() }} Products</div>
+                        <div class="text-sm" style="color: #92400e;">Delicious options</div>
+                    </div>
+                    <div class="text-center p-6 rounded-lg" style="background: #fef3c7;">
+                        <div class="text-4xl mb-3">👥</div>
+                        <div class="font-semibold" style="color: #92400e;">{{ \App\Models\User::count() }} Users</div>
+                        <div class="text-sm" style="color: #92400e;">Active community</div>
+                    </div>
+                    <div class="text-center p-6 rounded-lg" style="background: #fef3c7;">
+                        <div class="text-4xl mb-3">🛒</div>
+                        <div class="font-semibold" style="color: #92400e;">{{ \App\Models\Order::count() }} Orders</div>
+                        <div class="text-sm" style="color: #92400e;">Successful transactions</div>
+                    </div>
                 </div>
             </div>
         </div>
