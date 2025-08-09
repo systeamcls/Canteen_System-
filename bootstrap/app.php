@@ -14,7 +14,15 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'checkusertype' => \App\Http\Middleware\CheckUserType::class,
+            'security.headers' => \App\Http\Middleware\SecurityHeaders::class,
+            'rate.limit.auth' => \App\Http\Middleware\RateLimitAuth::class,
         ]);
+
+        // Apply security headers globally
+        $middleware->append(\App\Http\Middleware\SecurityHeaders::class);
+        
+        // Apply auth rate limiting to web routes
+        $middleware->appendToGroup('web', \App\Http\Middleware\RateLimitAuth::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

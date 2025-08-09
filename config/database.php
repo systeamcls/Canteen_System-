@@ -149,6 +149,10 @@ return [
             'cluster' => env('REDIS_CLUSTER', 'redis'),
             'prefix' => env('REDIS_PREFIX', Str::slug((string) env('APP_NAME', 'laravel')).'-database-'),
             'persistent' => env('REDIS_PERSISTENT', false),
+            'ssl' => [
+                'verify_peer' => env('REDIS_TLS_CERT_VERIFY', true),
+                'verify_peer_name' => env('REDIS_TLS_CERT_VERIFY', true),
+            ],
         ],
 
         'default' => [
@@ -158,6 +162,7 @@ return [
             'password' => env('REDIS_PASSWORD'),
             'port' => env('REDIS_PORT', '6379'),
             'database' => env('REDIS_DB', '0'),
+            'scheme' => env('REDIS_SCHEME', 'tcp'),
         ],
 
         'cache' => [
@@ -167,6 +172,7 @@ return [
             'password' => env('REDIS_PASSWORD'),
             'port' => env('REDIS_PORT', '6379'),
             'database' => env('REDIS_CACHE_DB', '1'),
+            'scheme' => env('REDIS_SCHEME', 'tcp'),
         ],
 
     ],
