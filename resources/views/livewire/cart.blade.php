@@ -2,13 +2,13 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <h1 class="text-2xl font-bold text-gray-900 mb-8">Shopping Cart</h1>
 
-        @if(count($cartItems) > 0)
+        @if(count($cartItems ?? []) > 0)
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <!-- Cart Items -->
                 <div class="lg:col-span-2">
                     <div class="bg-white rounded-lg shadow-sm">
                         <div class="p-6 space-y-6">
-                            @foreach($cartItems as $item)
+                            @foreach($cartItems ?? [] as $item)
                                 <div class="flex items-center space-x-4 py-4 border-b border-gray-200 last:border-0">
                                     <!-- Product Image -->
                                     <div class="flex-shrink-0 w-24 h-24">
