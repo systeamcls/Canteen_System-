@@ -452,11 +452,28 @@
     </footer>
 
     <script>
+        // Laravel Routes for JavaScript - Prevents route() syntax errors
+        window.laravelRoutes = @json([
+            'home' => url('/'),
+            'menu.index' => route('menu.index', [], false),
+            'stalls.index' => route('stalls.index', [], false),
+            'stalls.show' => route('stalls.show', ['stall' => '_STALL_ID_'], false),
+            'cart' => route('cart', [], false),
+        ]);
+        
+        // Initialize RouteHelper with Laravel routes when available
+        if (window.RouteHelper) {
+            window.RouteHelper.setRoutes(window.laravelRoutes);
+        }
+        
         // Basic cart functionality
         let cart = JSON.parse(localStorage.getItem('cart')) || [];
         
         function updateCartCount() {
-            document.getElementById('cartCount').textContent = cart.length;
+            const cartCountElement = document.getElementById('cartCount');
+            if (cartCountElement) {
+                cartCountElement.textContent = cart.length;
+            }
         }
         
         function addToCart(productId, name, price, image) {
@@ -481,8 +498,37 @@
             alert(`${name} added to cart!`);
         }
         
+        // Safe navigation functions using proper route generation
+        // These replace problematic onclick handlers with route() calls
+        function navigateToMenu(stallId = null) {
+            if (stallId && window.RouteHelper) {
+                // Use RouteHelper for dynamic route generation
+                const url = window.RouteHelper.route('menu.index', { stall: stallId });
+                window.location.href = url;
+            } else if (window.laravelRoutes['menu.index']) {
+                window.location.href = window.laravelRoutes['menu.index'];
+            }
+        }
+        
+        function navigateToStall(stallId) {
+            // Proper URL generation without syntax errors
+            if (window.laravelRoutes['stalls.show'] && stallId) {
+                const baseUrl = window.laravelRoutes['stalls.show'];
+                const url = baseUrl.replace('_STALL_ID_', stallId);
+                window.location.href = url;
+            }
+        }
+        
+        // Safe navigation for filipino-classics or any specific stall
+        function navigateToFilipinoClassics() {
+            // This replaces the problematic: onclick="route(name: 'menu.index', parameters: ['stall' => 'filipino-classics'])"
+            navigateToMenu('filipino-classics');
+        }
+        
         // Initialize cart count on page load
-        updateCartCount();
+        document.addEventListener('DOMContentLoaded', function() {
+            updateCartCount();
+        });
     </script>
 
     @stack('scripts')
