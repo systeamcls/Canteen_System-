@@ -90,6 +90,11 @@ class Cart extends Component
 
     public function render()
     {
+        // Defensive programming: ensure cartItems is always an array
+        if (!is_array($this->cartItems)) {
+            $this->cartItems = [];
+        }
+        
         return view('livewire.cart');
     }
 }
