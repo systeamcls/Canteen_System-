@@ -9,7 +9,6 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\StallController;
 
-
 // Welcome page - first entry point
 Route::get('/', function () {
     return view('welcome');
@@ -22,6 +21,9 @@ Route::middleware(['web'])->group(function () {
 
     // Menu browsing (requires user type selection)
     Route::middleware(['checkusertype'])->group(function () {
+        // ADD THIS LINE - Home route for post-authentication
+        Route::get('/home', [HomeController::class, 'index'])->name('home.index');
+        
         Route::get('/menu', [MenuController::class, 'index'])->name('menu.index');
         Route::get('/menu/{product}', [MenuController::class, 'show'])->name('menu.show');
         Route::get('/stalls', [StallController::class, 'index'])->name('stalls.index');
@@ -44,7 +46,7 @@ Route::middleware([
     Route::get('/dashboard', function () {
         return view('dashboard');
     })->name('dashboard');
-// Additional employee-only routes can be added here
+    // Additional employee-only routes can be added here
 });
 
 // Admin and Tenant routes (require specific roles)

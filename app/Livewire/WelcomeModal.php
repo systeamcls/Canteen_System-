@@ -92,7 +92,7 @@ class WelcomeModal extends Component
         $this->dispatch('userTypeUpdated', 'guest');
 
         // Redirect to menu
-        return redirect()->route('menu.index');
+        return redirect()->route('home.index');
     }
 
     public function loginAsEmployee()

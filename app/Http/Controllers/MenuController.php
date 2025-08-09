@@ -48,7 +48,8 @@ class MenuController extends Controller
             'desserts' => 'Desserts'
         ];
 
-        return view('menu', compact('products', 'stalls', 'categories', 'category', 'search', 'stallId'));
+        // CHANGE THIS LINE: from 'menu' to 'menu.index'
+        return view('menu.index', compact('products', 'stalls', 'categories', 'category', 'search', 'stallId'));
     }
 
     public function show(Product $product)

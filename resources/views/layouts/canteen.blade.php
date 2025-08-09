@@ -82,21 +82,21 @@
         }
         
         .nav-links {
-            display: flex;
-            align-items: center;
-            gap: 30px;
+        display: flex;
+        align-items: center;
+        gap: 30px;  
         }
         
         .nav-links a {
-            text-decoration: none;
-            color: var(--dark);
-            font-weight: 500;
-            transition: color 0.3s;
-            position: relative;
+        text-decoration: none;
+        color: var(--dark);
+        font-weight: 500;
+        transition: color 0.3s;
+        position: relative;
         }
         
         .nav-links a:hover, .nav-links a.active {
-            color: var(--primary);
+        color: var(--primary);
         }
         
         .nav-links a.active::after {
@@ -402,13 +402,26 @@
                     <h1>LTO Canteen Central</h1>
                 </div>
                 <div class="nav-links">
-                    <a href="/" class="{{ request()->is('/') ? 'active' : '' }}">Home</a>
-                    <a href="/menu" class="{{ request()->is('menu*') ? 'active' : '' }}">Menu</a>
-                    <a href="/stalls" class="{{ request()->is('stalls*') ? 'active' : '' }}">Stalls</a>
-                    <a href="/cart" class="btn btn-primary btn-cart">
-                        🛒 Cart
-                        <span class="cart-count" id="cartCount">0</span>
+                    <a href="{{ route('home.index') }}" class="{{ request()->routeIs('home.*') ? 'active' : '' }}">Home</a>
+                    <a href="{{ route('menu.index') }}" class="{{ request()->routeIs('menu.*') ? 'active' : '' }}">Menu</a>
+                    <a href="{{ route('stalls.index') }}" class="{{ request()->routeIs('stalls.*') ? 'active' : '' }}">Stalls</a>
+                    <!-- Cart Icon with Counter -->
+                    <a href="{{ route('cart') }}" class="cart-link" style="position: relative;">
+                        <span style="font-size: 1.2rem;">🛒</span>
+                        <span id="cartCount" style="position: absolute; top: -8px; right: -8px; background: var(--error); color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: bold;">0</span>
                     </a>
+                    
+                <!-- User Type Badge -->
+                    <div style="background: var(--primary-lighter); color: var(--primary); padding: 8px 15px; border-radius: 20px; font-size: 0.9rem; font-weight: 600;">
+                        @if(session('user_type') === 'guest')
+                            👤 Guest
+                        @elseif(session('user_type') === 'employee')
+                            👨‍💼 Employee
+                        @else
+                            🔐 Login
+                        @endif
+                        </div>
+                    </div>
                 </div>
             </nav>
         </div>
