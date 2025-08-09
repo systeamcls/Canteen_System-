@@ -20,6 +20,8 @@
         <div style="display: flex; justify-content: center; gap: 20px; margin-bottom: 50px; flex-wrap: wrap;">
             <a href="/menu" class="btn btn-primary" style="font-size: 1.1rem;">🛒 Browse Menu</a>
             <a href="/stalls" class="btn btn-secondary" style="font-size: 1.1rem;">🏪 View Stalls</a>
+            <!-- Example of FIXED onclick handler - no more route() syntax errors -->
+            <button onclick="navigateToFilipinoClassics()" class="btn btn-secondary" style="font-size: 1.1rem;">🍽️ Filipino Classics</button>
         </div>
     </div>
 </section>
@@ -174,6 +176,7 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Fixed: Proper JavaScript event handling for "Add to Cart" buttons
     document.querySelectorAll('.add-to-cart-btn').forEach(button => {
         button.addEventListener('click', function() {
             const productId = this.dataset.productId;
@@ -184,6 +187,21 @@ document.addEventListener('DOMContentLoaded', function() {
             addToCart(productId, productName, productPrice, productImage);
         });
     });
+    
+    /* 
+    BEFORE (PROBLEMATIC): These would cause JavaScript syntax errors
+    
+    onclick="route(name: 'menu.index', parameters: ['stall' => 'filipino-classics'])"
+    onclick="window.location.href = route('stalls.show', {id: stallId})"
+    
+    AFTER (FIXED): Proper JavaScript function calls
+    
+    onclick="navigateToFilipinoClassics()"
+    onclick="navigateToStall(stallId)"
+    
+    The route URLs are now properly generated in PHP/Blade context 
+    and passed to JavaScript via window.laravelRoutes object.
+    */
 });
 </script>
 @endpush
