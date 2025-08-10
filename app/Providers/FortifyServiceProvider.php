@@ -35,11 +35,21 @@ class FortifyServiceProvider extends ServiceProvider
         Fortify::resetUserPasswordsUsing(ResetUserPassword::class);
         Fortify::redirectUserForTwoFactorAuthenticationUsing(RedirectIfTwoFactorAuthenticatable::class);
 
-        RateLimiter::for('login', function (Request $request) {
-            $throttleKey = Str::transliterate(Str::lower($request->input(Fortify::username())).'|'.$request->ip());
 
-            return Limit::perMinute(5)->by($throttleKey);
+        RateLimiter::for('login', function (Request $request) {
+            return Limit::none(); // Disable Fortify's default rate limiting
         });
+
+        //RateLimiter::for('login', function (Request $request) {
+        //    return Limit::perMinute((int) config('security.rate_limit_auth_attempts', 10))
+        //        ->by($request->ip()) // IP-based is more secure than email-based
+        //       ->response(function (Request $request, array $headers) {
+        //           return response()->json([
+        //                'message' => 'Too many login attempts. Please try again later.',
+        //                'retry_after' => $headers['X-RateLimit-Reset']
+        //            ], 429);
+        //        });
+        //});
 
         RateLimiter::for('two-factor', function (Request $request) {
             return Limit::perMinute(5)->by($request->session()->get('login.id'));

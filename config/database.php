@@ -158,6 +158,15 @@ return [
             'password' => env('REDIS_PASSWORD'),
             'port' => env('REDIS_PORT', '6379'),
             'database' => env('REDIS_DB', '0'),
+            // Enhanced: Redis TLS Security
+            'scheme' => config('security.redis.tls_enabled', false) ? 'tls' : 'tcp',
+            'context' => config('security.redis.tls_enabled', false) ? [
+                'ssl' => [
+                    'verify_peer' => config('security.redis.tls_verify_peer', true),
+                    'verify_peer_name' => config('security.redis.tls_verify_peer_name', true),
+                    'allow_self_signed' => env('REDIS_TLS_ALLOW_SELF_SIGNED', false),
+                ],
+            ] : [],
         ],
 
         'cache' => [
@@ -167,6 +176,15 @@ return [
             'password' => env('REDIS_PASSWORD'),
             'port' => env('REDIS_PORT', '6379'),
             'database' => env('REDIS_CACHE_DB', '1'),
+            // Enhanced: Redis TLS Security for cache
+            'scheme' => config('security.redis.tls_enabled', false) ? 'tls' : 'tcp',
+            'context' => config('security.redis.tls_enabled', false) ? [
+                'ssl' => [
+                    'verify_peer' => config('security.redis.tls_verify_peer', true),
+                    'verify_peer_name' => config('security.redis.tls_verify_peer_name', true),
+                    'allow_self_signed' => env('REDIS_TLS_ALLOW_SELF_SIGNED', false),
+                ],
+            ] : [],
         ],
 
     ],

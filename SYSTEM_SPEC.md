@@ -9,8 +9,6 @@
 
 ---
 
-# SYSTEM_SPEC.md
-
 ## 🔐 Authentication & Roles
 
 - Use **Laravel Jetstream** for authentication (login, registration, password reset).  
@@ -100,7 +98,7 @@ Both Admin and Stall Tenants act as **sellers** who can create and manage produc
 | Manage stalls                                | ✅    | ❌      | ❌     | ❌       | ❌    |
 | Add/edit/delete products                     | ✅    | ❌      | ✅     | ❌       | ❌    |
 | Toggle product visibility (Publish/Hide)     | ✅    | ❌      | ✅     | ❌       | ❌    |
-| View/manage orders for own products only    | ✅    | ✅*     | ✅     | ❌       | ❌    |
+| View/manage orders for own products only     | ✅    | ✅*     | ✅     | ❌       | ❌    |
 | Process onsite orders (POS)                  | ❌    | ✅      | ✅     | ❌       | ❌    |
 | View sales reports                           | ✅    | ❌      | ✅     | ❌       | ❌    |
 | Browse menu                                  | ✅    | ✅      | ✅     | ✅       | ✅    |
@@ -258,6 +256,19 @@ Both Admin and Stall Tenants act as **sellers** who can create and manage produc
 - Admin, Tenants, Cashiers: edit name, contact info, password.
 - Customers: edit name, contact, address, password.
 - Guests: no profiles.
+
+---
+
+## 📱 Responsiveness & Mobile Support
+
+- Use **Tailwind CSS**’ mobile-first utility classes to build a fully responsive UI.  
+- Navigation includes a **hamburger menu** on small screens for easy access.  
+- Layouts (grids, carousels, cards) adapt fluidly from mobile to desktop.  
+- Livewire components (cart sidebar, POS interface, filters) are optimized for touch and small screens.  
+- Ensure buttons, links, and interactive elements are sized appropriately for mobile taps.  
+- Test layouts on various screen sizes including smartphones and tablets.  
+- Maintain performance optimizations for slower mobile connections.
+
 
 
 

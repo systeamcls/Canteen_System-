@@ -22,3 +22,22 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# Security-related files
+/certificates/
+/ssl/
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+/config/secrets/
+/storage/oauth-*.key
+/storage/app/certificates/
+/.well-known/
+/backup/
+*.sql
+*.dump
+/logs/
+error.log
+access.log

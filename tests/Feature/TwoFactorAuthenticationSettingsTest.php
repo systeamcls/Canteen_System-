@@ -18,8 +18,9 @@ class TwoFactorAuthenticationSettingsTest extends TestCase
         if (! Features::canManageTwoFactorAuthentication()) {
             $this->markTestSkipped('Two factor authentication is not enabled.');
         }
-
-        $this->actingAs($user = User::factory()->create());
+        /** @var \App\Models\User $user */
+        $user = User::factory()->create();
+        $this->actingAs($user);
 
         $this->withSession(['auth.password_confirmed_at' => time()]);
 
@@ -37,8 +38,10 @@ class TwoFactorAuthenticationSettingsTest extends TestCase
         if (! Features::canManageTwoFactorAuthentication()) {
             $this->markTestSkipped('Two factor authentication is not enabled.');
         }
-
-        $this->actingAs($user = User::factory()->create());
+        
+        /** @var \App\Models\User $user */
+        $user = User::factory()->create();
+        $this->actingAs($user);
 
         $this->withSession(['auth.password_confirmed_at' => time()]);
 
@@ -59,8 +62,9 @@ class TwoFactorAuthenticationSettingsTest extends TestCase
         if (! Features::canManageTwoFactorAuthentication()) {
             $this->markTestSkipped('Two factor authentication is not enabled.');
         }
-
-        $this->actingAs($user = User::factory()->create());
+        /** @var \App\Models\User $user */
+        $user = User::factory()->create();
+        $this->actingAs($user);
 
         $this->withSession(['auth.password_confirmed_at' => time()]);
 
