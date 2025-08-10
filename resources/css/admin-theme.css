@@ -1,0 +1,116 @@
+/* Custom Dark Theme for Canteen Admin Dashboard */
+
+/* Override Filament's dark theme colors */
+:root {
+    --primary-50: #fef2f2;
+    --primary-100: #fee2e2;
+    --primary-200: #fecaca;
+    --primary-300: #fca5a5;
+    --primary-400: #f87171;
+    --primary-500: #ef4444;
+    --primary-600: #dc2626;
+    --primary-700: #b91c1c;
+    --primary-800: #991b1b;
+    --primary-900: #7f1d1d;
+    --primary-950: #450a0a;
+}
+
+/* Force dark theme background colors */
+.dark {
+    --fi-body-bg: theme('colors.gray.950');
+    --fi-sidebar-bg: theme('colors.black');
+    --fi-topbar-bg: theme('colors.gray.900');
+}
+
+/* Custom sidebar styling */
+.fi-sidebar {
+    background: linear-gradient(180deg, #000000 0%, #1f2937 100%);
+    border-right: 1px solid #374151;
+}
+
+/* Navigation items */
+.fi-sidebar-nav-item-active {
+    background: linear-gradient(90deg, #ef4444 0%, #dc2626 100%);
+    border-radius: 6px;
+}
+
+/* Topbar styling */
+.fi-topbar {
+    background: linear-gradient(90deg, #111827 0%, #1f2937 100%);
+    border-bottom: 1px solid #374151;
+}
+
+/* Widget cards */
+.fi-wi-stats-overview-stat {
+    background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+    border: 1px solid #374151;
+}
+
+/* Tables */
+.fi-ta-table {
+    background: #1f2937;
+}
+
+.fi-ta-row:hover {
+    background: #374151;
+}
+
+/* Forms */
+.fi-fo-field-wrp {
+    background: #1f2937;
+}
+
+/* Buttons */
+.fi-btn-primary {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    border: none;
+}
+
+.fi-btn-primary:hover {
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+}
+
+/* Badges */
+.fi-badge-success {
+    background: #10b981;
+    color: white;
+}
+
+.fi-badge-warning {
+    background: #f59e0b;
+    color: white;
+}
+
+.fi-badge-danger {
+    background: #ef4444;
+    color: white;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #1f2937;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #374151;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #4b5563;
+}
+
+/* Loading spinner */
+.fi-spinner {
+    border-top-color: #ef4444;
+}
+
+/* Modal styling */
+.fi-modal {
+    background: #1f2937;
+    border: 1px solid #374151;
+}
