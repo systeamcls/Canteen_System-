@@ -2,8 +2,11 @@
 
 namespace App\Models;
 
+use App\Events\OrderStatusChanged;
+use App\Notifications\OrderStatusNotification;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Facades\Notification;
 
 class Order extends Model
 {
@@ -44,6 +47,28 @@ class Order extends Model
 
         static::creating(function ($order) {
             $order->order_number = 'ORD-' . strtoupper(uniqid());
+        });
+
+        static::updated(function ($order) {
+            // Check if status was changed
+            if ($order->wasChanged('status')) {
+                $oldStatus = $order->getOriginal('status');
+                $newStatus = $order->status;
+                
+                // Dispatch broadcast event
+                OrderStatusChanged::dispatch($order, $oldStatus, $newStatus);
+                
+                // Send notification to customer if exists
+                if ($order->user) {
+                    $order->user->notify(new OrderStatusNotification($order, $oldStatus, $newStatus));
+                }
+                
+                // Send notification to admin users who manage this stall
+                $stallOwner = $order->items->first()?->product?->stall?->user;
+                if ($stallOwner && $stallOwner->hasRole('admin')) {
+                    $stallOwner->notify(new OrderStatusNotification($order, $oldStatus, $newStatus));
+                }
+            }
         });
     }
 }
