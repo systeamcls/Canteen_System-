@@ -77,6 +77,8 @@ class AdminPanelProvider extends PanelProvider
                 VerifyCsrfToken::class,
                 SubstituteBindings::class,
                 Authenticate::class,
+                \App\Http\Middleware\Enforce2FA::class,
+                \App\Http\Middleware\EnsureAdminHasStall::class,
             ])
             ->authMiddleware([
                 Authenticate::class,
