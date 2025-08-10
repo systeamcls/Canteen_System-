@@ -17,7 +17,9 @@ use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use App\Filament\Admin\Widgets\StatsOverviewWidget;
 use App\Filament\Admin\Widgets\LatestOrdersWidget;
 use App\Filament\Admin\Widgets\SalesChartWidget;
-
+use App\Filament\Admin\Widgets\TrendingItemsWidget;
+use App\Filament\Admin\Widgets\RecentReviewsWidget;
+use Filament\Support\Enums\MaxWidth;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -30,20 +32,27 @@ class AdminPanelProvider extends PanelProvider
             ->login()
             ->authGuard('web')
             ->colors([
+                'danger' => Color::Red,
+                'gray' => Color::Slate,
+                'info' => Color::Blue,
                 'primary' => [
-                    50 => '#fff8e1',
-                    100 => '#ffecb3',
-                    200 => '#ffe082',
-                    300 => '#ffd54f',
-                    400 => '#ffca28',
-                    500 => '#ffc107',
-                    600 => '#ffb300',
-                    700 => '#ffa000',
-                    800 => '#ff8f00',
-                    900 => '#ff6f00',
+                    50 => '#fef2f2',
+                    100 => '#fee2e2',
+                    200 => '#fecaca',
+                    300 => '#fca5a5',
+                    400 => '#f87171',
+                    500 => '#ef4444', // Main red color
+                    600 => '#dc2626',
+                    700 => '#b91c1c',
+                    800 => '#991b1b',
+                    900 => '#7f1d1d',
+                    950 => '#450a0a',
                 ],
+                'success' => Color::Emerald,
+                'warning' => Color::Orange,
             ])
-
+            ->darkMode(true) // Enable dark mode by default
+            ->darkModeForced(true) // Force dark mode
             ->discoverResources(
                 in: app_path('Filament/Admin/Resources'),
                 for: 'App\\Filament\\Admin\\Resources'
@@ -56,12 +65,8 @@ class AdminPanelProvider extends PanelProvider
                 in: app_path('Filament/Admin/Widgets'),
                 for: 'App\\Filament\\Admin\\Widgets'
             )
-            ->discoverPages(
-                in: app_path('Filament/Admin/Pages'),
-                for: 'App\\Filament\\Admin\\Pages'
-            )
             ->pages([
-                \App\Filament\Admin\Pages\Dashboard::class, // ⬅️ Add this
+                \App\Filament\Admin\Pages\Dashboard::class,
             ])
             ->middleware([
                 EncryptCookies::class,
@@ -77,17 +82,52 @@ class AdminPanelProvider extends PanelProvider
                 Authenticate::class,
             ])
             ->brandName('Canteen Admin')
+            ->brandLogo(asset('images/logo.png'))
+            ->favicon(asset('images/favicon.ico'))
+            ->maxContentWidth(MaxWidth::Full)
             ->navigationGroups([
-                'Stall Management',
-                'Orders',
-                'Staff',
-                'Reports',
-                'Settings'
+                'Overview' => [
+                    'label' => 'Overview',
+                    'icon' => 'heroicon-o-chart-pie',
+                    'sort' => 1,
+                ],
+                'Management' => [
+                    'label' => 'Management',
+                    'icon' => 'heroicon-o-building-storefront',
+                    'sort' => 2,
+                ],
+                'HR' => [
+                    'label' => 'Human Resources',
+                    'icon' => 'heroicon-o-users',
+                    'sort' => 3,
+                ],
+                'Analytics' => [
+                    'label' => 'Analytics',
+                    'icon' => 'heroicon-o-chart-bar',
+                    'sort' => 4,
+                ],
+                'System' => [
+                    'label' => 'System',
+                    'icon' => 'heroicon-o-cog-6-tooth',
+                    'sort' => 5,
+                ],
             ])
             ->widgets([
                 StatsOverviewWidget::class,
                 LatestOrdersWidget::class,
                 SalesChartWidget::class,
+                TrendingItemsWidget::class,
+                RecentReviewsWidget::class,
+            ])
+            ->topNavigation()
+            ->sidebarCollapsibleOnDesktop()
+            ->globalSearchKeyBindings(['command+k', 'ctrl+k'])
+            ->databaseNotifications()
+            ->databaseNotificationsPolling('30s')
+            ->breadcrumbs(false)
+            ->userMenuItems([
+                'profile' => 'Profile',
+                'logout' => 'Sign Out',
             ]);
     }
 }
