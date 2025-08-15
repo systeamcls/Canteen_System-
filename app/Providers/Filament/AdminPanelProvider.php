@@ -14,10 +14,7 @@ use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
-use App\Filament\Admin\Widgets\StatsOverviewWidget;
-use App\Filament\Admin\Widgets\LatestOrdersWidget;
-use App\Filament\Admin\Widgets\SalesChartWidget;
-
+use App\Http\Middleware\EnsureTwoFactorAuthenticated;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -30,20 +27,17 @@ class AdminPanelProvider extends PanelProvider
             ->login()
             ->authGuard('web')
             ->colors([
-                'primary' => [
-                    50 => '#fff8e1',
-                    100 => '#ffecb3',
-                    200 => '#ffe082',
-                    300 => '#ffd54f',
-                    400 => '#ffca28',
-                    500 => '#ffc107',
-                    600 => '#ffb300',
-                    700 => '#ffa000',
-                    800 => '#ff8f00',
-                    900 => '#ff6f00',
-                ],
+                'primary' => Color::Red,
+                'danger' => Color::Rose,
+                'gray' => Color::Slate,
+                'info' => Color::Blue,
+                'success' => Color::Emerald,
+                'warning' => Color::Orange,
             ])
-
+            ->darkMode()
+            ->brandName('Canteen Admin Panel')
+            ->brandLogo(asset('images/logo.png'))
+            ->favicon(asset('images/favicon.ico'))
             ->discoverResources(
                 in: app_path('Filament/Admin/Resources'),
                 for: 'App\\Filament\\Admin\\Resources'
@@ -56,12 +50,8 @@ class AdminPanelProvider extends PanelProvider
                 in: app_path('Filament/Admin/Widgets'),
                 for: 'App\\Filament\\Admin\\Widgets'
             )
-            ->discoverPages(
-                in: app_path('Filament/Admin/Pages'),
-                for: 'App\\Filament\\Admin\\Pages'
-            )
             ->pages([
-                \App\Filament\Admin\Pages\Dashboard::class, // ⬅️ Add this
+                \App\Filament\Admin\Pages\Dashboard::class,
             ])
             ->middleware([
                 EncryptCookies::class,
@@ -72,22 +62,22 @@ class AdminPanelProvider extends PanelProvider
                 VerifyCsrfToken::class,
                 SubstituteBindings::class,
                 Authenticate::class,
+                EnsureTwoFactorAuthenticated::class,
             ])
             ->authMiddleware([
                 Authenticate::class,
+                EnsureTwoFactorAuthenticated::class,
             ])
-            ->brandName('Canteen Admin')
             ->navigationGroups([
+                'Dashboard',
                 'Stall Management',
                 'Orders',
                 'Staff',
                 'Reports',
                 'Settings'
             ])
-            ->widgets([
-                StatsOverviewWidget::class,
-                LatestOrdersWidget::class,
-                SalesChartWidget::class,
-            ]);
+            ->sidebarCollapsibleOnDesktop()
+            ->maxContentWidth('full')
+            ->breadcrumbs(false);
     }
 }

@@ -27,6 +27,7 @@ class User extends Authenticatable
         'phone',
         'type',
         'is_active',
+        'admin_stall_id',
     ];
 
     protected $hidden = [
@@ -68,5 +69,15 @@ class User extends Authenticatable
     public function stall(): HasOne
     {
         return $this->hasOne(Stall::class);
+    }
+
+    public function adminStall()
+    {
+        return $this->belongsTo(Stall::class, 'admin_stall_id');
+    }
+
+    public function isStallAdmin()
+    {
+        return $this->hasRole('admin') && $this->admin_stall_id !== null;
     }
 }
