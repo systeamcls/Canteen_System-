@@ -14,7 +14,7 @@ class AdminLatestOrdersWidget extends BaseWidget
     protected static ?string $heading = 'Latest Orders';
     protected static ?int $sort = 7;
     protected int | string | array $columnSpan = 1;
-    protected static ?string $pollingInterval = '10s';
+    protected static ?string $pollingInterval = '15s';
 
     #[On('orderCreated')]
     public function refreshWidget(): void

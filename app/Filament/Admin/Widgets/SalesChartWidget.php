@@ -11,7 +11,7 @@ class AdminSalesChartWidget extends ChartWidget
 {
     protected static ?string $heading = '7-Day Sales Trend';
     protected static ?int $sort = 5;
-    protected int | string | array $columnSpan = 'full';
+    protected int | string | array $columnSpan = 1;
 
     protected function getData(): array
     {
