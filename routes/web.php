@@ -8,6 +8,9 @@ use App\Http\Livewire\OrderSuccess;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\StallController;
+use Illuminate\Support\Facades\Auth;
+use App\Filament\Admin\Pages\TwoFactorChallenge; // <-- add this
+
 
 // Welcome page - first entry point
 Route::get('/', function () {
@@ -57,3 +60,4 @@ Route::middleware([
 ])->group(function () {
     // Admin/Tenant specific routes will go here
 });
+

@@ -16,6 +16,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'checkusertype' => \App\Http\Middleware\CheckUserType::class,
             'security.headers' => \App\Http\Middleware\SecurityHeaders::class,
             'rate.limit.auth' => \App\Http\Middleware\RateLimitAuth::class,
+            'ensure-2fa-admin' => \App\Http\Middleware\EnsureTwoFactorAuthenticatedForAdmin::class,
+            'check-admin-cashier' => \App\Http\Middleware\CheckAdminOrCashierAccess::class,
         ]);
 
         // Apply security headers globally to all requests

@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @property float $price
  * @property string|null $image
  * @property \App\Models\Stall|null $stall
+ *  @property bool $is_available
  */
 
 class Product extends Model

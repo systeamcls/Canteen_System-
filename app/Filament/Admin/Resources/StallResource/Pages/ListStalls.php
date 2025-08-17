@@ -6,6 +6,7 @@ use App\Filament\Admin\Resources\StallResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 
+
 class ListStalls extends ListRecords
 {
     protected static string $resource = StallResource::class;
