@@ -95,7 +95,7 @@ class ReviewResource extends Resource
     {
         return parent::getEloquentQuery()
             ->whereHas('product.stall', function ($query) {
-                $query->where('user_id', Auth::id()); 
+                $query->where('tenant_id', Auth::id()); 
             });
     }
 

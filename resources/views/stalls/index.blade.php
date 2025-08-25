@@ -164,7 +164,7 @@
             <div style="text-align: center; padding: 30px; background: var(--light); border-radius: 12px;">
                 <div style="font-size: 2.5rem; margin-bottom: 15px;">🏷️</div>
                 <h3 style="font-size: 2rem; color: var(--primary); margin-bottom: 5px; font-weight: 700;">
-                    {{ App\Models\Product::distinct('category')->count() }}
+                    {{ App\Models\Stall::where('is_active', true)->count() }}
                 </h3>
                 <p style="color: var(--gray);">Food Categories</p>
             </div>

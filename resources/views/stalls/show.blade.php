@@ -8,7 +8,7 @@
     <div class="container">
         <div style="max-width: 800px;">
             <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
-                <h1 style="font-size: 3rem; margin: 0;">{{ $stall->name }}</h1>
+                <h1 style="font-size: 3rem; margin: 0;">{{ $stall ->name }}</h1>
                 <span class="status {{ $stall->is_active ? 'status-open' : 'status-closed' }}" style="font-size: 1rem; padding: 8px 16px;">
                     {{ $stall->is_active ? 'Open Now' : 'Closed' }}
                 </span>
@@ -100,19 +100,23 @@
                         <small style="color: var(--gray);">⏱️ {{ rand(10, 20) }} min prep</small>
                     </div>
 
-                    @if($stall->is_active)
-                    <button 
-                        class="btn btn-primary add-to-cart-btn" 
-                        style="width: 100%;"
-                        data-product-id="{{ $product->id }}"
-                        data-product-name="{{ $product->name }}"
-                        data-product-price="{{ $product->price }}"
-                        data-product-image="{{ $product->image }}"
-                                                                    >
-                        Add to Cart
-                    </button>
+                    @if($stall->is_active && $product->is_available)
+                        <div wire:key="menu-product-{{ $product->id }}">
+                            @livewire('add-to-cart-button', [
+                            'product' => $product,
+                            'showPrice' => false,
+                            'showQuantitySelector' => false,
+                            'buttonText' => 'Add to Cart',
+                            'buttonSize' => 'medium'
+                        ])
+                    @elseif(!$product->is_available)
+                        <button class="btn" style="width: 100%; background: #fbbf24; color: white; cursor: not-allowed;" disabled>
+                            Currently Unavailable
+                        </button>
                     @else
-                    <button class="btn" style="width: 100%; background: #e5e7eb; color: var(--gray); cursor: not-allowed;" disabled>Stall Closed</button>
+                        <button class="btn" style="width: 100%; background: #e5e7eb; color: var(--gray); cursor: not-allowed;" disabled>
+                            Stall Closed
+                        </button>
                     @endif
                 </div>
             </div>
@@ -143,6 +147,7 @@
                         </div>
                     </div>
 
+                    @if(isset($stall->rental_fee))
                     <div style="display: flex; align-items: center; gap: 15px;">
                         <div style="background: var(--primary); color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">💰</div>
                         <div>
@@ -150,6 +155,7 @@
                             <p style="color: var(--gray); margin: 0;">₱{{ number_format($stall->rental_fee, 2) }}</p>
                         </div>
                     </div>
+                    @endif
 
                     <div style="display: flex; align-items: center; gap: 15px;">
                         <div style="background: var(--primary); color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">🕐</div>
@@ -179,6 +185,11 @@
                         <div style="text-align: center;">
                             <div style="font-size: 2rem; color: var(--primary); font-weight: bold;">{{ rand(50, 200) }}</div>
                             <div style="color: var(--gray); font-size: 0.9rem;">Orders This Week</div>
+                        </div>
+
+                        <div style="text-align: center;">
+                            <div style="font-size: 2rem; color: var(--primary); font-weight: bold;">{{ $stall->products->where('is_available', true)->count() }}</div>
+                            <div style="color: var(--gray); font-size: 0.9rem;">Available Today</div>
                         </div>
                     </div>
                 </div>
@@ -224,18 +235,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-// Add to cart functionality
-    const addToCartButtons = document.querySelectorAll('.add-to-cart-btn');
-    
-    addToCartButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            const productId = this.dataset.productId;
-            const productName = this.dataset.productName;
-            const productPrice = this.dataset.productPrice;
-            const productImage = this.dataset.productImage;
-            
-            addToCart(productId, productName, productPrice, productImage);
-        });
-    });
+// Remove the old add to cart functionality since we're using Livewire components now
+// The Livewire AddToCartButton component handles all cart interactions
 </script>
 @endpush

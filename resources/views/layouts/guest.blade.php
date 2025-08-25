@@ -23,18 +23,18 @@
             <div class="flex justify-between h-16">
                 <div class="flex">
                     <div class="flex-shrink-0 flex items-center">
-                        <a href="{{ route('home') }}" class="text-2xl font-bold text-red-600">
+                        <a href="{{ route('home.index') }}" class="text-2xl font-bold text-red-600">
                             Kajacms
                         </a>
                     </div>
                     <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
-                        <a href="{{ route('menu') }}" class="inline-flex items-center px-1 pt-1 text-sm font-medium {{ request()->routeIs('menu') ? 'text-red-600 border-b-2 border-red-600' : 'text-gray-500 hover:text-gray-700' }}">
+                        <a href="{{ route('menu.index') }}" class="inline-flex items-center px-1 pt-1 text-sm font-medium {{ request()->routeIs('menu') ? 'text-red-600 border-b-2 border-red-600' : 'text-gray-500 hover:text-gray-700' }}">
                             Our Menu
                         </a>
-                        <a href="{{ route('home') }}" class="inline-flex items-center px-1 pt-1 text-sm font-medium {{ request()->routeIs('home') ? 'text-red-600 border-b-2 border-red-600' : 'text-gray-500 hover:text-gray-700' }}">
+                        <a href="{{ route('home.index') }}" class="inline-flex items-center px-1 pt-1 text-sm font-medium {{ request()->routeIs('home') ? 'text-red-600 border-b-2 border-red-600' : 'text-gray-500 hover:text-gray-700' }}">
                             Home
                         </a>
-                        <a href="{{ route('stalls') }}" class="inline-flex items-center px-1 pt-1 text-sm font-medium {{ request()->routeIs('stalls') ? 'text-red-600 border-b-2 border-red-600' : 'text-gray-500 hover:text-gray-700' }}">
+                        <a href="{{ route('stalls.index') }}" class="inline-flex items-center px-1 pt-1 text-sm font-medium {{ request()->routeIs('stalls') ? 'text-red-600 border-b-2 border-red-600' : 'text-gray-500 hover:text-gray-700' }}">
                             Stalls
                         </a>
                     </div>

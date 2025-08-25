@@ -82,20 +82,16 @@
                 <div style="padding: 20px;">
                     <h4 style="font-size: 1.1rem; color: var(--primary); margin-bottom: 8px; font-weight: 600;">{{ $product->name }}</h4>
                     <p style="color: var(--gray); font-size: 0.9rem; margin-bottom: 12px;">{{ Str::limit($product->description, 80) }}</p>
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <div>
-                            <span style="font-weight: 600; color: var(--primary); font-size: 1.1rem;">₱{{ number_format($product->price, 2) }}</span>
-                            <div style="font-size: 0.8rem; color: var(--gray);">{{ $product->stall->name }}</div>
-                        </div>
-                        
-                        <button class="add-to-cart-btn" 
-                                data-product-id="{{ $product->id }}" 
-                                data-product-name="{{ $product->name }}" 
-                                data-product-price="{{ $product->price }}"
-                                style="background: var(--success); color: white; padding: 8px 16px; border: none; border-radius: 6px; font-size: 0.9rem; cursor: pointer;">
-                            Add to Cart
-                        </button>
-                    </div>
+                    <div style="font-size: 0.8rem; color: var(--gray); margin-bottom: 15px;">{{ $product->stall->name }}</div>
+                    
+                    <!-- REPLACE THE OLD BUTTON WITH LIVEWIRE COMPONENT -->
+                    @livewire('add-to-cart-button', [
+                        'product' => $product,
+                        'showPrice' => true,
+                        'showQuantitySelector' => false,
+                        'buttonText' => 'Quick Add',
+                        'buttonSize' => 'medium'
+                    ], \Livewire\str('featured-product-' . $product->id))
                 </div>
             </div>
             @endforeach
@@ -153,85 +149,3 @@
     </div>
 </section>
 @endsection
-
-@push('scripts')
-<script>
-// Enhanced cart functionality with event delegation
-document.addEventListener('DOMContentLoaded', function() {
-    // Add event listener for all "Add to Cart" buttons
-    document.addEventListener('click', function(e) {
-        if (e.target.classList.contains('add-to-cart-btn')) {
-            e.preventDefault();
-            
-            const button = e.target;
-            const productId = button.getAttribute('data-product-id');
-            const productName = button.getAttribute('data-product-name');
-            const productPrice = button.getAttribute('data-product-price');
-            
-            addToCart(productId, productName, productPrice, '');
-        }
-    });
-});
-
-function addToCart(productId, name, price, image) {
-    let cart = JSON.parse(localStorage.getItem('cart')) || [];
-    
-    const existingItem = cart.find(item => item.id == productId);
-    
-    if (existingItem) {
-        existingItem.quantity += 1;
-    } else {
-        cart.push({
-            id: productId,
-            name: name,
-            price: parseFloat(price),
-            image: image || '',
-            quantity: 1
-        });
-    }
-    
-    localStorage.setItem('cart', JSON.stringify(cart));
-    updateCartCount();
-    
-    // Show success message
-    showSuccessMessage(name + ' added to cart!');
-}
-
-function updateCartCount() {
-    const cart = JSON.parse(localStorage.getItem('cart')) || [];
-    const cartCount = cart.reduce((total, item) => total + item.quantity, 0);
-    const cartCountElement = document.getElementById('cartCount');
-    if (cartCountElement) {
-        cartCountElement.textContent = cartCount;
-    }
-}
-
-function showSuccessMessage(message) {
-    // Create a temporary success message
-    const messageDiv = document.createElement('div');
-    messageDiv.innerHTML = message;
-    messageDiv.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background: var(--success);
-        color: white;
-        padding: 15px 20px;
-        border-radius: 8px;
-        z-index: 1000;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-        font-weight: 600;
-    `;
-    
-    document.body.appendChild(messageDiv);
-    
-    // Remove message after 3 seconds
-    setTimeout(() => {
-        document.body.removeChild(messageDiv);
-    }, 3000);
-}
-
-// Initialize cart count on page load
-updateCartCount();
-</script>
-@endpush

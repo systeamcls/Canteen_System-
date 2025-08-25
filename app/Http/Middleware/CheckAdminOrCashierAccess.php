@@ -7,17 +7,21 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Spatie\Permission\Models\Role;
+
 
 class CheckAdminOrCashierAccess
-{
+{   
+    
     public function handle(Request $request, Closure $next): Response
-    {
+    {   
+         /** @var \App\Models\User|\Spatie\Permission\Traits\HasRoles $user */
         $user = Auth::user();
-
+        
         if (!$user) {
             return redirect('/login');
         }
-
+        
         // CRITICAL: Only allow admin or cashier roles
         if (!$user->hasAnyRole(['admin', 'cashier'])) {
             // Log security violation

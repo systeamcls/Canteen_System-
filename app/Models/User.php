@@ -1,5 +1,7 @@
 <?php
 
+// 📁 app/Models/User.php (UPDATED - Safe merge with your existing model)
+
 namespace App\Models;
 
 use Laravel\Sanctum\HasApiTokens;
@@ -10,12 +12,12 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
- * @property \Illuminate\Support\Collection $roles
- * @method bool hasRole(string $role)
- * @method bool hasAnyRole(array|string $roles)
- * @method \Illuminate\Support\Collection getRoleNames()
+ * App\Models\User
+ *
+ * @mixin \Spatie\Permission\Traits\HasRoles
  */
 class User extends Authenticatable
 {
@@ -27,6 +29,7 @@ class User extends Authenticatable
     use TwoFactorAuthenticatable;
 
     protected $fillable = [
+        // Your existing fields
         'name',
         'email',
         'password',
@@ -34,6 +37,9 @@ class User extends Authenticatable
         'type',
         'is_active',
         'admin_stall_id',
+
+        // New fields for canteen system (will be added via migration)
+        'preferred_notification_channel',
     ];
 
     protected $hidden = [
@@ -48,12 +54,19 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_active' => 'boolean',
         ];
     }
 
     protected $appends = [
         'profile_photo_url',
     ];
+
+    /*
+    |--------------------------------------------------------------------------
+    | Your Existing Role Methods (preserved)
+    |--------------------------------------------------------------------------
+    */
 
     public function isAdmin()
     {
@@ -75,8 +88,19 @@ class User extends Authenticatable
         return $this->hasRole('customer');
     }
 
+    public function isStallAdmin()
+    {
+        return $this->hasRole('admin') && $this->admin_stall_id !== null;
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Your Existing Relationships (preserved)
+    |--------------------------------------------------------------------------
+    */
+
     /**
-     * Relationship: Stall assigned to tenant
+     * Relationship: Stall assigned to tenant (your existing)
      */
     public function assignedStall()
     {
@@ -93,18 +117,57 @@ class User extends Authenticatable
         return $this->belongsTo(Stall::class, 'admin_stall_id');
     }
 
-    public function isStallAdmin()
-    {
-        return $this->hasRole('admin') && $this->admin_stall_id !== null;
-    }
-
     /**
-     * Relationship: Rental payments for tenant
+     * Relationship: Rental payments for tenant (your existing)
      */
     public function rentalPayments()
     {
         return $this->hasMany(RentalPayment::class, 'tenant_id');
     }
+
+    /*
+    |--------------------------------------------------------------------------
+    | New Relationships for Canteen System
+    |--------------------------------------------------------------------------
+    */
+
+    /**
+     * Cart relationship
+     */
+    public function cart(): HasOne
+    {
+        return $this->hasOne(Cart::class);
+    }
+
+    /**
+     * Order groups (customer orders)
+     */
+    public function orderGroups(): HasMany
+    {
+        return $this->hasMany(OrderGroup::class);
+    }
+
+    /**
+     * Owned stall (for canteen system)
+     */
+    public function ownedStall(): HasOne
+    {
+        return $this->hasOne(Stall::class, 'owner_id');
+    }
+
+    /**
+     * Vendor orders (orders to fulfill)
+     */
+    public function vendorOrders(): HasMany
+    {
+        return $this->hasMany(Order::class, 'vendor_id');
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Your Existing Methods (preserved)
+    |--------------------------------------------------------------------------
+    */
 
     public function requiresTwoFactor(): bool
     {
@@ -126,5 +189,79 @@ class User extends Authenticatable
             // Fallback if roles aren't set up yet - allow all users
             return true;
         }
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | New Methods for Canteen System
+    |--------------------------------------------------------------------------
+    */
+
+    /**
+     * Get notification preferences
+     */
+    public function prefersEmailNotifications(): bool
+    {
+        $channel = $this->preferred_notification_channel ?? 'email';
+        return in_array($channel, ['email', 'both'], true);
+    }
+
+    public function prefersSmsNotifications(): bool
+    {
+        $channel = $this->preferred_notification_channel ?? 'email';
+        return in_array($channel, ['sms', 'both'], true);
+    }
+
+    public function getNotificationChannels(): array
+    {
+        $channels = [];
+
+        if ($this->prefersEmailNotifications() && $this->email) {
+            $channels[] = 'mail';
+        }
+
+        if ($this->prefersSmsNotifications() && $this->phone) {
+            $channels[] = 'sms';
+        }
+
+        return $channels;
+    }
+
+    /**
+     * Get the stall this user owns (works with multiple relationship types)
+     */
+    public function getOwnedStall(): ?Stall
+    {
+        // Try ownedStall first (new canteen system)
+        $stall = $this->ownedStall;
+        
+        if (!$stall) {
+            // Fallback to assignedStall (your existing system)
+            $stall = $this->assignedStall;
+        }
+
+        if (!$stall && $this->admin_stall_id) {
+            // Fallback to adminStall
+            $stall = $this->adminStall;
+        }
+
+        return $stall;
+    }
+
+    /**
+     * Check if user has a stall (any type)
+     */
+    public function hasStall(): bool
+    {
+        return $this->getOwnedStall() !== null;
+    }
+
+    /**
+     * Get user's stall ID (works with multiple relationship types)
+     */
+    public function getStallId(): ?int
+    {
+        $stall = $this->getOwnedStall();
+        return $stall?->id;
     }
 }

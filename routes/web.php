@@ -10,12 +10,21 @@ use App\Http\Controllers\MenuController;
 use App\Http\Controllers\StallController;
 use Illuminate\Support\Facades\Auth;
 use App\Filament\Admin\Pages\TwoFactorChallenge; // <-- add this
+use Illuminate\Http\Request;
+use App\Livewire\CheckoutForm;
+use App\Http\Controllers\CheckoutController;
+use App\Livewire\TestComponent;
+use App\Http\Controllers\WebhookController;
+
+
+
 
 
 // Welcome page - first entry point
 Route::get('/', function () {
     return view('welcome');
 })->name('welcome');
+
 
 // Public routes accessible to both guests and employees
 Route::middleware(['web'])->group(function () {
@@ -26,16 +35,53 @@ Route::middleware(['web'])->group(function () {
     Route::middleware(['checkusertype'])->group(function () {
         // ADD THIS LINE - Home route for post-authentication
         Route::get('/home', [HomeController::class, 'index'])->name('home.index');
-        
         Route::get('/menu', [MenuController::class, 'index'])->name('menu.index');
         Route::get('/menu/{product}', [MenuController::class, 'show'])->name('menu.show');
         Route::get('/stalls', [StallController::class, 'index'])->name('stalls.index');
         Route::get('/stalls/{stall}', [StallController::class, 'show'])->name('stalls.show');
 
-        // Cart and checkout (available to both guests and employees)
-        Route::view('/cart', 'livewire.cart')->name('cart');
-        Route::view('/checkout', 'livewire.checkout')->name('checkout');
-        Route::view('/order/success/{order}', 'livewire.order-success')->name('order.success');
+
+        Route::get('/cart', function() {
+            return redirect()->route('checkout.index');
+        })->name('cart');
+
+        Route::prefix('checkout')->name('checkout.')->group(function () {
+        Route::get('/', [CheckoutController::class, 'index'])->name('index');
+        Route::get('/success/{orderGroup}', [CheckoutController::class, 'success'])->name('success');
+        Route::get('/track/{orderGroup}', [CheckoutController::class, 'track'])->name('track');
+        });
+
+        // Convenience route (redirects to checkout.index)
+        Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout');
+
+        // Test route
+        Route::get('/test-livewire', TestComponent::class);
+
+        // Cart API routes
+        Route::post('/api/add-to-cart', function (Request $request) {
+            $cart = session()->get('cart', []);
+            $productId = $request->product_id;
+    
+            if (isset($cart[$productId])) {
+                $cart[$productId]['quantity']++;
+            } else {
+                $cart[$productId] = [
+                    'name' => $request->name,
+                    'price' => $request->price,
+                    'image' => $request->image,
+                    'quantity' => 1
+                ];
+            }
+    
+            session()->put('cart', $cart);
+            return response()->json(['success' => true]);
+        });
+
+        Route::get('/api/cart-count', function () {
+            $cart = session()->get('cart', []);
+            $count = array_sum(array_column($cart, 'quantity'));
+            return response()->json(['count' => $count]);
+        });
     });
 });
 
@@ -44,7 +90,6 @@ Route::middleware([
     'auth:sanctum',
     config('jetstream.auth_session'),
     'verified',
-    'user.type:employee'
 ])->group(function () {
     Route::get('/dashboard', function () {
         return view('dashboard');
@@ -60,4 +105,37 @@ Route::middleware([
 ])->group(function () {
     // Admin/Tenant specific routes will go here
 });
+
+// Webhook routes (outside other middleware for security)
+Route::middleware(['webhook.security'])->group(function () {
+    Route::post('/webhook/paymongo', [WebhookController::class, 'paymongo'])
+        ->name('webhook.paymongo');
+    
+    // Test webhook for development
+    Route::post('/webhook/test', [WebhookController::class, 'testWebhook'])
+        ->name('webhook.test');
+});
+
+// Payment redirect routes (accessible to all users)
+Route::get('/payment/success', function () {
+    // Debug logging
+    logger()->info('Payment success route accessed');
+    
+    // Check if view exists
+    if (view()->exists('payment.success')) {
+        logger()->info('View exists, rendering...');
+        return view('payment.success');
+    } else {
+        logger()->error('View does not exist at payment.success');
+        return response('Payment successful! View file missing.', 200);
+    }
+})->name('payment.success');
+
+Route::get('/payment/failed', function () {
+    return view('payment.failed');
+})->name('payment.failed');
+
+Route::get('/payment/cancelled', function () {
+    return view('payment.cancelled');
+})->name('payment.cancelled');
 

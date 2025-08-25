@@ -60,15 +60,9 @@ class ProductResource extends Resource
                             ->prefix('₱')
                             ->maxValue(999999.99)
                             ->step(0.01),
-                        Forms\Components\Select::make('category')
-                            ->options([
-                                'appetizer' => 'Appetizer',
-                                'main_course' => 'Main Course',
-                                'dessert' => 'Dessert',
-                                'beverage' => 'Beverage',
-                                'snack' => 'Snack',
-                                'combo' => 'Combo Meal',
-                            ])
+                        Forms\Components\Select::make('category_id')
+                            ->label('Category')
+                            ->relationship('category', 'name') // 'category' is the relationship in Product model   
                             ->required(),
                         Forms\Components\Textarea::make('description')
                             ->required()
@@ -103,9 +97,10 @@ class ProductResource extends Resource
                     ->searchable()
                     ->sortable()
                     ->weight('medium'),
-                Tables\Columns\TextColumn::make('category')
+                Tables\Columns\TextColumn::make('category.name')
+                    ->label('Category')
                     ->badge()
-                    ->color(fn (string $state): string => match ($state) {
+                    ->color(fn (string $state): string => match (strtolower($state)) {
                         'appetizer' => 'success',
                         'main_course' => 'primary',
                         'dessert' => 'warning',

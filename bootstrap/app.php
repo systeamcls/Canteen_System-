@@ -18,6 +18,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'rate.limit.auth' => \App\Http\Middleware\RateLimitAuth::class,
             'ensure-2fa-admin' => \App\Http\Middleware\EnsureTwoFactorAuthenticatedForAdmin::class,
             'check-admin-cashier' => \App\Http\Middleware\CheckAdminOrCashierAccess::class,
+            'check-tenant' => \App\Http\Middleware\CheckTenantAccess::class,
+            'webhook.security' => \App\Http\Middleware\WebhookSecurityMiddleware::class,
+
         ]);
 
         // Apply security headers globally to all requests
