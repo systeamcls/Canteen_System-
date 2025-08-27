@@ -1,5 +1,9 @@
 <?php
 
+// ========================================
+// IMPROVED USERRESOURCE.PHP 
+// ========================================
+
 namespace App\Filament\Admin\Resources;
 
 use App\Filament\Admin\Resources\UserResource\Pages;
@@ -12,24 +16,17 @@ use Filament\Forms\Form;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Filament\Notifications\Notification;
 
 class UserResource extends Resource
 {
     protected static ?string $model = User::class;
     protected static ?string $navigationIcon = 'heroicon-o-users';
-    
     protected static ?string $navigationGroup = 'User Management';
-    
     protected static ?int $navigationSort = 1;
-    
-    protected static ?string $navigationLabel = 'Users';
-    
-    protected static ?string $modelLabel = 'User';
-    
-    protected static ?string $pluralModelLabel = 'Users';
+
     public static function getEloquentQuery(): Builder
     {
-        // Only show tenants and cashiers, not customers or other admins
         return parent::getEloquentQuery()
             ->whereHas('roles', function ($query) {
                 $query->whereIn('name', ['tenant', 'cashier']);
@@ -41,57 +38,93 @@ class UserResource extends Resource
         return $form
             ->schema([
                 Forms\Components\Section::make('Personal Information')
+                    ->description('Basic user details')
                     ->schema([
-                        Forms\Components\TextInput::make('name')
-                            ->required()
-                            ->maxLength(255),
-                        Forms\Components\TextInput::make('email')
-                            ->email()
-                            ->required()
-                            ->unique(ignoreRecord: true)
-                            ->maxLength(255),
-                        Forms\Components\TextInput::make('phone')
-                            ->tel()
-                            ->maxLength(255),
-                        Forms\Components\TextInput::make('password')
-                            ->password()
-                            ->dehydrateStateUsing(fn ($state) => Hash::make($state))
-                            ->dehydrated(fn ($state) => filled($state))
-                            ->required(fn (string $context): bool => $context === 'create')
-                            ->maxLength(255)
-                            ->helperText('Leave blank to keep current password when editing.'),
-                    ])
-                    ->columns(2),
+                        Forms\Components\Grid::make(2)
+                            ->schema([
+                                Forms\Components\TextInput::make('name')
+                                    ->required()
+                                    ->maxLength(255)
+                                    ->placeholder('Full Name'),
+                                    
+                                Forms\Components\TextInput::make('email')
+                                    ->email()
+                                    ->required()
+                                    ->unique(ignoreRecord: true)
+                                    ->maxLength(255)
+                                    ->placeholder('email@example.com'),
+                            ]),
+
+                        Forms\Components\Grid::make(2)
+                            ->schema([
+                                Forms\Components\TextInput::make('phone')
+                                    ->tel()
+                                    ->maxLength(255)
+                                    ->placeholder('+63 912 345 6789'),
+                                    
+                                Forms\Components\TextInput::make('password')
+                                    ->password()
+                                    ->dehydrateStateUsing(fn ($state) => filled($state) ? Hash::make($state) : null)
+                                    ->dehydrated(fn ($state) => filled($state))
+                                    ->required(fn (string $context): bool => $context === 'create')
+                                    ->maxLength(255)
+                                    ->helperText('Leave blank to keep current password when editing.'),
+                            ]),
+                    ]),
 
                 Forms\Components\Section::make('Role & Access')
+                    ->description('Define user permissions and assignments')
                     ->schema([
-                        Forms\Components\Select::make('role')
-                            ->options([
-                                'tenant' => 'Tenant',
-                                'cashier' => 'Cashier',
-                            ])
-                            ->required()
-                            ->afterStateUpdated(function ($state, $set) {
-                                // Auto-assign stall for tenants
-                                if ($state === 'tenant') {
-                                    $adminStallId = Auth::user()->admin_stall_id;
-                                    if ($adminStallId) {
-                                        $set('admin_stall_id', $adminStallId);
-                                    }
-                                }
-                            }),
+                        Forms\Components\Grid::make(2)
+                            ->schema([
+                                Forms\Components\Select::make('role')
+                                    ->label('Role')
+                                    ->options([
+                                        'tenant' => 'Tenant',
+                                        'cashier' => 'Cashier',
+                                    ])
+                                    ->required()
+                                    ->default('tenant')
+                                    ->dehydrated(false)
+                                    ->afterStateHydrated(function (Forms\Components\Select $component, $record) {
+                                        if ($record && $record->roles->isNotEmpty()) {
+                                            $component->state($record->roles->first()->name);
+                                        }
+                                    })
+                                    ->live()
+                                    ->helperText('Select the user\'s primary role'),
+
+                                Forms\Components\Toggle::make('is_active')
+                                    ->label('Active Account')
+                                    ->helperText('User can login and access the system')
+                                    ->default(true),
+                            ]),
+
                         Forms\Components\Select::make('admin_stall_id')
+                            ->label('Assigned Stall')
                             ->relationship('adminStall', 'name')
                             ->searchable()
                             ->preload()
-                            ->default(fn () => Auth::user()->admin_stall_id)
-                            ->hidden(fn (Forms\Get $get) => $get('role') !== 'tenant')
-                            ->required(fn (Forms\Get $get) => $get('role') === 'tenant'),
-                        Forms\Components\Toggle::make('is_active')
-                            ->required()
-                            ->default(true),
+                            ->visible(fn (Forms\Get $get) => $get('role') === 'tenant')
+                            ->required(fn (Forms\Get $get) => $get('role') === 'tenant')
+                            ->helperText('Which stall should this tenant manage?'),
+                    ]),
+
+                Forms\Components\Section::make('Additional Settings')
+                    ->description('Optional configurations')
+                    ->schema([
+                        Forms\Components\Select::make('preferred_notification_channel')
+                            ->label('Notification Preference')
+                            ->options([
+                                'email' => 'Email Only',
+                                'sms' => 'SMS Only',
+                                'both' => 'Both Email & SMS',
+                            ])
+                            ->default('email')
+                            ->helperText('How should we send notifications?'),
                     ])
-                    ->columns(2)
+                    ->collapsible()
+                    ->collapsed(),
             ]);
     }
 
@@ -101,36 +134,54 @@ class UserResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->searchable()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('email')
-                    ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->weight('medium')
+                    ->description(fn ($record) => $record->email),
+
                 Tables\Columns\TextColumn::make('phone')
-                    ->searchable(),
+                    ->searchable()
+                    ->placeholder('No phone')
+                    ->icon('heroicon-m-phone'),
+
                 Tables\Columns\TextColumn::make('roles.name')
                     ->label('Role')
                     ->formatStateUsing(fn ($state) => ucfirst($state))
+                    ->badge()
                     ->color(fn (string $state): string => match ($state) {
                         'tenant' => 'success',
                         'cashier' => 'info',
+                        'admin' => 'warning',
                         default => 'gray',
                     }),
+
                 Tables\Columns\TextColumn::make('adminStall.name')
-                    ->label('Assigned Stall')
-                    ->default('None'),
-                Tables\Columns\IconColumn::make('is_active')
-                    ->boolean()
-                    ->sortable(),
+                    ->label('Stall')
+                    ->placeholder('None assigned')
+                    ->badge()
+                    ->color('primary')
+                    ->url(fn ($record) => $record->adminStall ? 
+                        route('filament.admin.resources.stalls.view', $record->adminStall) : null),
+
+                Tables\Columns\ViewColumn::make('status_indicator')
+                    ->label('Status')
+                    ->view('components.user-status'),
+
+                Tables\Columns\TextColumn::make('last_login_at')
+                    ->label('Last Login')
+                    ->since()
+                    ->placeholder('Never')
+                    ->toggleable(),
+
                 Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime()
+                    ->dateTime('M j, Y')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('role')
                     ->options([
-                        'tenant' => 'Tenant',
-                        'cashier' => 'Cashier',
+                        'tenant' => 'Tenants',
+                        'cashier' => 'Cashiers',
                     ])
                     ->query(function (Builder $query, array $data): Builder {
                         return $query->when(
@@ -140,27 +191,95 @@ class UserResource extends Resource
                             }),
                         );
                     }),
-                Tables\Filters\TernaryFilter::make('is_active'),
+
+                Tables\Filters\TernaryFilter::make('is_active')
+                    ->label('Account Status')
+                    ->placeholder('All users')
+                    ->trueLabel('Active only')
+                    ->falseLabel('Inactive only'),
+
+                Tables\Filters\SelectFilter::make('stall')
+                    ->label('Assigned Stall')
+                    ->relationship('adminStall', 'name')
+                    ->searchable()
+                    ->preload(),
+
+                Tables\Filters\Filter::make('recent_login')
+                    ->label('Active Users')
+                    ->query(fn (Builder $query) => 
+                        $query->where('last_login_at', '>=', now()->subDays(30))
+                    )
+                    ->toggle(),
             ])
             ->actions([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\ActionGroup::make([
+                    Tables\Actions\ViewAction::make(),
+                    Tables\Actions\EditAction::make(),
+                    
+                    Tables\Actions\Action::make('toggle_status')
+                        ->label(fn ($record) => $record->is_active ? 'Deactivate' : 'Activate')
+                        ->icon(fn ($record) => $record->is_active ? 'heroicon-o-x-circle' : 'heroicon-o-check-circle')
+                        ->color(fn ($record) => $record->is_active ? 'danger' : 'success')
+                        ->action(function ($record) {
+                            $record->update(['is_active' => !$record->is_active]);
+                            $status = $record->is_active ? 'activated' : 'deactivated';
+                            Notification::make()->title("User {$status} successfully")->success()->send();
+                        })
+                        ->requiresConfirmation(),
+
+                    Tables\Actions\Action::make('send_welcome')
+                        ->label('Send Welcome Email')
+                        ->icon('heroicon-o-envelope')
+                        ->color('info')
+                        ->visible(fn ($record) => $record->is_active && !$record->email_verified_at)
+                        ->action(function ($record) {
+                            // Add your welcome email logic here
+                            Notification::make()->title('Welcome email sent')->success()->send();
+                        }),
+
+                    Tables\Actions\DeleteAction::make(),
+                ])
+                ->label('Actions')
+                ->icon('heroicon-m-ellipsis-vertical')
+                ->size('sm')
+                ->color('gray'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\BulkAction::make('activate')
+                        ->label('Activate Selected')
+                        ->icon('heroicon-o-check-circle')
+                        ->color('success')
+                        ->action(fn ($records) => $records->each->update(['is_active' => true]))
+                        ->deselectRecordsAfterCompletion(),
+
+                    Tables\Actions\BulkAction::make('deactivate')
+                        ->label('Deactivate Selected')
+                        ->icon('heroicon-o-x-circle')
+                        ->color('danger')
+                        ->action(fn ($records) => $records->each->update(['is_active' => false]))
+                        ->requiresConfirmation()
+                        ->deselectRecordsAfterCompletion(),
+
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
+            ])
+            ->emptyStateHeading('No users found')
+            ->emptyStateDescription('Start by creating your first tenant or cashier user.')
+            ->emptyStateIcon('heroicon-o-users')
+            ->emptyStateActions([
+                Tables\Actions\CreateAction::make()
+                    ->label('Add User')
+                    ->icon('heroicon-o-plus'),
             ]);
     }
-
     public static function getPages(): array
     {
-        return [
-            'index' => Pages\ListUsers::route('/'),
-            'create' => Pages\CreateUser::route('/create'),
-            'view' => Pages\ViewUser::route('/{record}'),
-            'edit' => Pages\EditUser::route('/{record}/edit'),
+    return [
+        'index' => Pages\ListUsers::route('/'),
+        'create' => Pages\CreateUser::route('/create'),
+        'view' => Pages\ViewUser::route('/{record}'),
+        'edit' => Pages\EditUser::route('/{record}/edit'),
         ];
     }
 }

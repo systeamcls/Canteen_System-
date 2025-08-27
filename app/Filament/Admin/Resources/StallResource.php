@@ -1,5 +1,9 @@
 <?php
 
+// ========================================
+// IMPROVED STALLRESOURCE.PHP
+// ========================================
+
 namespace App\Filament\Admin\Resources;
 
 use App\Filament\Admin\Resources\StallResource\Pages;
@@ -12,9 +16,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
 use Filament\Notifications\Notification;
-use Filament\Infolists\Infolist;
-use Filament\Infolists\Components;
-use Illuminate\Support\Facades\Auth;
 
 class StallResource extends Resource
 {
@@ -22,123 +23,139 @@ class StallResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-building-storefront';
     protected static ?string $navigationGroup = 'Management';
     protected static ?int $navigationSort = 1;
-    protected static ?string $navigationLabel = 'Stalls';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
                 Forms\Components\Section::make('Basic Information')
-                    ->description('Manage stall details and configuration')
+                    ->description('Stall identity and location details')
                     ->schema([
-                        Forms\Components\TextInput::make('name')
-                            ->required()
-                            ->maxLength(255)
-                            ->live(onBlur: true)
-                            ->afterStateUpdated(fn (Forms\Set $set, ?string $state) => 
-                                $set('slug', \Illuminate\Support\Str::slug($state))
-                            ),
-                        
-                        Forms\Components\TextInput::make('location')
-                            ->required()
-                            ->maxLength(255)
-                            ->helperText('Physical location in the canteen'),
-                            
+                        Forms\Components\Grid::make(2)
+                            ->schema([
+                                Forms\Components\TextInput::make('name')
+                                    ->required()
+                                    ->maxLength(255)
+                                    ->placeholder('e.g. Mario\'s Kitchen')
+                                    ->unique(ignoreRecord: true),
+                                
+                                Forms\Components\TextInput::make('location')
+                                    ->required()
+                                    ->maxLength(255)
+                                    ->placeholder('e.g. Ground Floor, Section A')
+                                    ->helperText('Physical location in the canteen'),
+                            ]),
+
                         Forms\Components\Textarea::make('description')
+                            ->placeholder('Describe the stall\'s specialty, cuisine type, or unique features...')
                             ->maxLength(500)
                             ->rows(3)
                             ->columnSpanFull(),
-                    ])
-                    ->columns(2),
+                    ]),
 
-                Forms\Components\Section::make('Management')
+                Forms\Components\Section::make('Management & Assignment')
+                    ->description('Who manages and operates this stall')
                     ->schema([
-                        Forms\Components\Select::make('owner_id')
-                            ->label('Stall Owner')
-                            ->relationship('owner', 'name')
-                            ->searchable()
-                            ->preload()
-                            ->createOptionForm([
-                                Forms\Components\TextInput::make('name')->required(),
-                                Forms\Components\TextInput::make('email')->email()->required(),
-                                Forms\Components\TextInput::make('phone')->tel(),
-                            ]),
-                            
-                        Forms\Components\Select::make('tenant_id')
-                            ->label('Current Tenant')
-                            ->relationship('tenant', 'name')
-                            ->searchable()
-                            ->preload()
-                            ->options(function () {
-                                return User::role('tenant')
-                                    ->where('is_active', true)
-                                    ->pluck('name', 'id');
-                            })
-                            ->helperText('Assign a tenant to manage this stall'),
+                        Forms\Components\Grid::make(2)
+                            ->schema([
+                                Forms\Components\Select::make('tenant_id')
+                                    ->label('Assigned Tenant')
+                                    ->relationship('tenant', 'name')
+                                    ->searchable()
+                                    ->preload()
+                                    ->options(function ($record) {
+                                        $query = User::role('tenant')
+                                        ->where('is_active',    true)
+                                        ->whereDoesntHave('assignedStall'); // This prevents double assignment
+                                        if ($record && $record->tenant_id) {
+                                            $query->orWhere('id', $record->tenant_id);
+                                        }
+                                        return $query->pluck('name', 'id');
+                                    })
+                                    ->placeholder('Select a tenant')
+                                    ->helperText('The person responsible for operating this stall')
+                                    ->createOptionForm([
+                                        Forms\Components\TextInput::make('name')->required(),
+                                        Forms\Components\TextInput::make('email')->email()->required(),
+                                        Forms\Components\TextInput::make('phone')->tel(),
+                                        Forms\Components\Hidden::make('role')->default('tenant'),
+                                    ])
+                                    ->createOptionModalHeading('Create New Tenant'),
 
-                        Forms\Components\Select::make('user_id')
-                            ->label('Assigned Manager')
-                            ->relationship('user', 'name')
-                            ->searchable()
-                            ->preload()
-                            ->helperText('Primary user responsible for this stall'),
-                    ])
-                    ->columns(1),
+                                Forms\Components\Toggle::make('is_active')
+                                    ->label('Stall Active')
+                                    ->helperText('Can accept orders and operate')
+                                    ->default(true),
+                            ]),
+                    ]),
 
                 Forms\Components\Section::make('Business Settings')
+                    ->description('Operating hours, fees, and policies')
                     ->schema([
-                        Forms\Components\TimePicker::make('opening_time')
-                            ->seconds(false)
-                            ->default('08:00'),
-                        
-                        Forms\Components\TimePicker::make('closing_time')
-                            ->seconds(false)
-                            ->default('18:00'),
-                            
-                        Forms\Components\TextInput::make('rental_fee')
-                            ->label('Monthly Rental Fee')
-                            ->required()
-                            ->numeric()
-                            ->prefix('₱')
-                            ->step(0.01)
-                            ->minValue(0)
-                            ->maxValue(999999.99)
-                            ->default(5000),
-                        
-                        Forms\Components\TextInput::make('commission_rate')
-                            ->label('Commission Rate (%)')
-                            ->required()
-                            ->numeric()
-                            ->suffix('%')
-                            ->step(0.01)
-                            ->minValue(0)
-                            ->maxValue(100)
-                            ->default(15.00),
-                            
-                        Forms\Components\TextInput::make('contact_number')
-                            ->tel()
-                            ->maxLength(20),
+                        Forms\Components\Grid::make(3)
+                            ->schema([
+                                Forms\Components\TimePicker::make('opening_time')
+                                    ->label('Opening Time')
+                                    ->seconds(false)
+                                    ->default('08:00'),
+                                
+                                Forms\Components\TimePicker::make('closing_time')
+                                    ->label('Closing Time')
+                                    ->seconds(false)
+                                    ->default('18:00'),
 
-                        Forms\Components\Toggle::make('is_active')
-                            ->required()
-                            ->default(true),
-                    ])
-                    ->columns(3),
+                                Forms\Components\TextInput::make('contact_number')
+                                    ->label('Contact Number')
+                                    ->tel()
+                                    ->maxLength(20)
+                                    ->placeholder('+63 912 345 6789'),
+                            ]),
 
-                Forms\Components\Section::make('Branding')
+                        Forms\Components\Grid::make(2)
+                            ->schema([
+                                Forms\Components\TextInput::make('rental_fee')
+                                    ->label('Monthly Rental Fee')
+                                    ->required()
+                                    ->numeric()
+                                    ->prefix('₱')
+                                    ->step(0.01)
+                                    ->minValue(0)
+                                    ->default(5000.00)
+                                    ->rules(['regex:/^\d+(\.\d{1,2})?$/'])
+                                    ->helperText('Amount tenant pays monthly'),
+                        
+                                Forms\Components\TextInput::make('commission_rate')
+                                    ->label('Commission Rate (%)')
+                                    ->required()
+                                    ->numeric()
+                                    ->suffix('%')
+                                    ->step(0.01)
+                                    ->minValue(0)
+                                    ->maxValue(100)
+                                    ->default(15.00)
+                                    ->helperText('Percentage of sales as commission'),
+                            ]),
+                    ]),
+
+                Forms\Components\Section::make('Branding & Media')
+                    ->description('Logo and visual identity')
                     ->schema([
                         Forms\Components\FileUpload::make('logo')
                             ->image()
                             ->directory('stall-logos')
-                            ->visibility('public')
                             ->imageEditor()
                             ->imageEditorAspectRatios(['1:1'])
                             ->imageResizeMode('cover')
-                            ->imageResizeTargetWidth('300')
-                            ->imageResizeTargetHeight('300')
-                            ->maxSize(2048),
+                            ->imageResizeTargetWidth('400')
+                            ->imageResizeTargetHeight('400')
+                            ->visibility('public') // Ensure this is set
+                            ->disk('public') // Add this line
+                            ->maxSize(2048)
+                            ->helperText('Square logo recommended, max 2MB')
+                            ->columnSpanFull(),
                     ])
-                    ->collapsible(),
+                    ->collapsible()
+                    ->collapsed(),
             ]);
     }
 
@@ -148,17 +165,14 @@ class StallResource extends Resource
             ->columns([
                 Tables\Columns\ImageColumn::make('logo')
                     ->circular()
-                    ->size(50),
+                    ->size(50)
+                    ->defaultImageUrl(asset('images/default-stall.png')),
 
                 Tables\Columns\TextColumn::make('name')
                     ->searchable()
                     ->sortable()
-                    ->weight('bold'),
-                    
-                Tables\Columns\TextColumn::make('location')
-                    ->searchable()
-                    ->badge()
-                    ->color('primary'),
+                    ->weight('bold')
+                    ->description(fn ($record) => $record->location),
 
                 Tables\Columns\TextColumn::make('tenant.name')
                     ->label('Tenant')
@@ -166,57 +180,41 @@ class StallResource extends Resource
                     ->placeholder('Vacant')
                     ->badge()
                     ->color(fn ($state) => $state ? 'success' : 'warning')
-                    ->url(fn ($record) => $record->tenant ? 
-                        route('filament.admin.resources.users.view', $record->tenant) : null
-                    ),
+                    ->url(fn ($record) => $record->tenant ?  
+                        route('filament.admin.resources.users.view', $record->tenant) : null),
 
-                Tables\Columns\TextColumn::make('rental_status')
-                    ->label('Rental Status')
-                    ->badge()
-                    ->getStateUsing(fn ($record) => $record->getCurrentRentalStatus())
-                    ->color(fn (string $state): string => match($state) {
-                        'vacant' => 'gray',
-                        'no_payment' => 'warning', 
-                        'pending' => 'warning',
-                        'paid' => 'success',
-                        'partially_paid' => 'info',
-                        'overdue' => 'danger',
-                        default => 'gray'
-                    }),
-                    
+                Tables\Columns\ViewColumn::make('performance_metrics')
+                    ->label('Performance')
+                    ->view('components.stall-metrics'),
+
                 Tables\Columns\TextColumn::make('rental_fee')
-                    ->label('Monthly Rent')
+                    ->label('Rent')
                     ->money('PHP')
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('commission_rate')
                     ->label('Commission')
                     ->suffix('%')
-                    ->sortable(),
-                    
-                Tables\Columns\IconColumn::make('is_active')
-                    ->label('Active')
-                    ->boolean()
-                    ->sortable(),
+                    ->alignCenter(),
+
+                Tables\Columns\ViewColumn::make('status_indicators')
+                    ->label('Status')
+                    ->view('components.stall-status'),
 
                 Tables\Columns\TextColumn::make('products_count')
                     ->label('Products')
                     ->counts('products')
                     ->badge()
                     ->color('info'),
-                    
-                Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('tenant')
                     ->relationship('tenant', 'name')
-                    ->placeholder('All tenants'),
+                    ->searchable()
+                    ->preload(),
 
                 Tables\Filters\TernaryFilter::make('is_active')
-                    ->label('Active Status')
+                    ->label('Status')
                     ->placeholder('All stalls')
                     ->trueLabel('Active only')
                     ->falseLabel('Inactive only'),
@@ -226,8 +224,18 @@ class StallResource extends Resource
                     ->query(fn (Builder $query) => $query->whereNull('tenant_id'))
                     ->toggle(),
                 
-                Tables\Filters\Filter::make('overdue_payments')
-                    ->label('Overdue Payments')
+                Tables\Filters\Filter::make('high_performance')
+                    ->label('High Performers')
+                    ->query(function (Builder $query) {
+                        return $query->whereHas('orders', function ($q) {
+                            $q->where('created_at', '>=', now()->subMonth())
+                              ->where('status', 'completed');
+                        }, '>=', 50);
+                    })
+                    ->toggle(),
+
+                Tables\Filters\Filter::make('overdue_rent')
+                    ->label('Overdue Rent')
                     ->query(fn (Builder $query) => 
                         $query->whereHas('rentalPayments', fn ($q) => 
                             $q->where('status', 'overdue')
@@ -238,64 +246,53 @@ class StallResource extends Resource
             ->actions([
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
-
+                
                 Tables\Actions\ActionGroup::make([
-                    Tables\Actions\Action::make('assign_tenant')
-                        ->label('Assign Tenant')
-                        ->icon('heroicon-o-user-plus')
-                        ->color('success')
-                        ->visible(fn ($record) => !$record->tenant_id)
+                    Tables\Actions\Action::make('view_performance')
+                        ->label('View Analytics')
+                        ->icon('heroicon-o-chart-bar')
+                        ->color('info')
+                        ->url(fn ($record) => route('filament.admin.resources.orders.index', [
+                            'tableFilters[stall][value]' => $record->id
+                        ])),
+
+                    Tables\Actions\Action::make('manage_tenant')
+                        ->label(fn ($record) => $record->tenant_id ? 'Change Tenant' : 'Assign Tenant')
+                        ->icon(fn ($record) => $record->tenant_id ? 'heroicon-o-arrow-path' : 'heroicon-o-user-plus')
+                        ->color(fn ($record) => $record->tenant_id ? 'warning' : 'success')
                         ->form([
                             Forms\Components\Select::make('tenant_id')
                                 ->label('Select Tenant')
-                                ->options(function () {
+                                ->options(function ($record) {
                                     return User::role('tenant')
                                         ->where('is_active', true)
-                                        ->whereDoesntHave('assignedStall')
+                                        ->where(function ($query) use ($record) {
+                                            $query->whereDoesntHave('assignedStall')
+                                                  ->orWhere('id', $record->tenant_id);
+                                        })
                                         ->pluck('name', 'id');
                                 })
-                                ->required()
                                 ->searchable()
-                                ->placeholder('Choose an available tenant'),
+                                ->placeholder('Choose a tenant'),
                         ])
                         ->action(function ($record, array $data) {
-                            $record->update(['tenant_id' => $data['tenant_id']]);
+                            $oldTenant = $record->tenant?->name;
+                            $record->update(['tenant_id' => $data['tenant_id'] ?: null]);
+                            $newTenant = $record->fresh()->tenant?->name;
                             
-                            Notification::make()
-                                ->title('Tenant assigned successfully')
-                                ->success()
-                                ->send();
+                            if ($newTenant) {
+                                $message = $oldTenant ? "Tenant changed from {$oldTenant} to {$newTenant}" : "Tenant {$newTenant} assigned";
+                            } else {
+                                $message = "Tenant {$oldTenant} removed";
+                            }
+                            
+                            Notification::make()->title($message)->success()->send();
                         }),
 
-                    Tables\Actions\Action::make('remove_tenant')
-                        ->label('Remove Tenant')
-                        ->icon('heroicon-o-user-minus')
-                        ->color('danger')
-                        ->visible(fn ($record) => $record->tenant_id)
-                        ->requiresConfirmation()
-                        ->modalHeading('Remove Tenant')
-                        ->modalDescription('This will remove the tenant assignment. Are you sure?')
-                        ->action(function ($record) {
-                            $record->update(['tenant_id' => null]);
-                            
-                            Notification::make()
-                                ->title('Tenant removed successfully')
-                                ->success()
-                                ->send();
-                        }),
-                    
-                    Tables\Actions\Action::make('view_payments')
-                        ->label('View Payments')
-                        ->icon('heroicon-o-banknotes')
-                        ->color('info')
-                        ->url(fn ($record) => route('filament.admin.resources.rental-payments.index', [
-                            'tableFilters[stall][value]' => $record->id
-                        ])),
-                        
                     Tables\Actions\Action::make('create_payment')
-                        ->label('Create Payment')
-                        ->icon('heroicon-o-plus-circle')
-                        ->color('warning')
+                        ->label('Record Payment')
+                        ->icon('heroicon-o-banknotes')
+                        ->color('primary')
                         ->visible(fn ($record) => $record->tenant_id)
                         ->url(fn ($record) => route('filament.admin.resources.rental-payments.create', [
                             'stall_id' => $record->id,
@@ -305,144 +302,82 @@ class StallResource extends Resource
 
                     Tables\Actions\Action::make('toggle_status')
                         ->label(fn ($record) => $record->is_active ? 'Deactivate' : 'Activate')
-                        ->icon(fn ($record) => $record->is_active ? 'heroicon-o-x-circle' : 'heroicon-o-check-circle')
+                        ->icon(fn ($record) => $record->is_active ? 'heroicon-o-pause-circle' : 'heroicon-o-play-circle')
                         ->color(fn ($record) => $record->is_active ? 'danger' : 'success')
-                        ->requiresConfirmation()
-                        ->action(fn ($record) => $record->update(['is_active' => !$record->is_active])),
-                ])
-                    ->label('Actions')
-                    ->icon('heroicon-m-ellipsis-vertical')
-                    ->size('sm')
-                    ->color('gray'),
+                        ->action(function ($record) {
+                            $record->update(['is_active' => !$record->is_active]);
+                            $status = $record->is_active ? 'activated' : 'deactivated';
+                            Notification::make()->title("Stall {$status}")->success()->send();
+                        })
+                        ->requiresConfirmation(),
 
-                Tables\Actions\DeleteAction::make(),
+                    Tables\Actions\DeleteAction::make(),
+                ])
+                ->label('Actions')
+                ->icon('heroicon-m-ellipsis-vertical')
+                ->size('sm')
+                ->color('gray'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-
-                    Tables\Actions\BulkAction::make('activate')
+                    Tables\Actions\BulkAction::make('bulk_activate')
                         ->label('Activate Selected')
-                        ->icon('heroicon-o-check-circle')
+                        ->icon('heroicon-o-play-circle')
                         ->color('success')
                         ->action(fn ($records) => $records->each->update(['is_active' => true]))
-                        ->requiresConfirmation(),
+                        ->deselectRecordsAfterCompletion(),
 
-                    Tables\Actions\BulkAction::make('deactivate')
+                    Tables\Actions\BulkAction::make('bulk_deactivate')
                         ->label('Deactivate Selected')
-                        ->icon('heroicon-o-x-circle')
+                        ->icon('heroicon-o-pause-circle')
                         ->color('danger')
                         ->action(fn ($records) => $records->each->update(['is_active' => false]))
-                        ->requiresConfirmation(),
+                        ->requiresConfirmation()
+                        ->deselectRecordsAfterCompletion(),
+
+                    Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ])
-            ->defaultSort('created_at', 'desc')
+            ->emptyStateHeading('No stalls registered')
+            ->emptyStateDescription('Create your first stall to start managing the canteen.')
+            ->emptyStateIcon('heroicon-o-building-storefront')
+            ->emptyStateActions([
+                Tables\Actions\CreateAction::make()
+                    ->label('Add First Stall')
+                    ->icon('heroicon-o-plus'),
+            ])
             ->striped()
-            ->poll('30s');
-    }
-
-    public static function infolist(Infolist $infolist): Infolist
-    {
-        return $infolist
-            ->schema([
-                Components\Section::make('Stall Overview')
-                    ->schema([
-                        Components\Split::make([
-                            Components\ImageEntry::make('logo')
-                                ->hiddenLabel()
-                                ->size(120)
-                                ->grow(false),
-                            Components\Grid::make(2)
-                                ->schema([
-                                    Components\TextEntry::make('name')
-                                        ->size('lg')
-                                        ->weight('bold'),
-                                    Components\TextEntry::make('location'),
-                                    Components\IconEntry::make('is_active')
-                                        ->label('Status')
-                                        ->boolean(),
-                                    Components\TextEntry::make('created_at')
-                                        ->dateTime(),
-                                ]),
-                        ]),
-                        Components\TextEntry::make('description')
-                            ->columnSpanFull()
-                            ->placeholder('No description provided'),
-                    ])
-                    ->columns(1),
-
-                Components\Section::make('Management')
-                    ->schema([
-                        Components\TextEntry::make('owner.name')
-                            ->label('Owner'),
-                        Components\TextEntry::make('tenant.name')
-                            ->label('Current Tenant')
-                            ->placeholder('Vacant'),
-                        Components\TextEntry::make('user.name')
-                            ->label('Assigned Manager')
-                            ->placeholder('None assigned'),
-                        Components\TextEntry::make('getCurrentRentalStatus')
-                            ->label('Rental Status')
-                            ->badge()
-                            ->color(fn (string $state): string => match($state) {
-                                'vacant' => 'gray',
-                                'no_payment' => 'warning', 
-                                'pending' => 'warning',
-                                'paid' => 'success',
-                                'partially_paid' => 'info',
-                                'overdue' => 'danger',
-                                default => 'gray'
-                            }),
-                    ])
-                    ->columns(2),
-
-                Components\Section::make('Business Details')
-                    ->schema([
-                        Components\TextEntry::make('rental_fee')
-                            ->money('PHP'),
-                        Components\TextEntry::make('commission_rate')
-                            ->suffix('%'),
-                        Components\TextEntry::make('opening_time')
-                            ->time(),
-                        Components\TextEntry::make('closing_time')
-                            ->time(),
-                        Components\TextEntry::make('contact_number')
-                            ->placeholder('Not provided'),
-                        Components\TextEntry::make('products_count')
-                            ->label('Total Products')
-                            ->getStateUsing(fn ($record) => $record->products()->count()),
-                    ])
-                    ->columns(3),
-            ]);
-    }
-
-    public static function getPages(): array
-    {
-        return [
-            'index' => Pages\ListStalls::route('/'),
-            'create' => Pages\CreateStall::route('/create'),
-            'view' => Pages\ViewStall::route('/{record}'),
-            'edit' => Pages\EditStall::route('/{record}/edit'),
-        ];
+            ->defaultSort('created_at', 'desc');
     }
 
     public static function getNavigationBadge(): ?string
     {
-        return static::getModel()::count();
+        $total = static::getModel()::count();
+        $active = static::getModel()::where('is_active', true)->count();
+        return $total > 0 ? "{$active}/{$total}" : null;
     }
 
     public static function getNavigationBadgeColor(): ?string
     {
         $total = static::getModel()::count();
-        $maxStalls = config('canteen.max_stalls', 10); // Make this configurable
+        if ($total === 0) return 'gray';
         
-        return $total >= $maxStalls ? 'danger' : 'success';
+        $active = static::getModel()::where('is_active', true)->count();
+        $ratio = $active / $total;
+        
+        return match(true) {
+            $ratio >= 0.8 => 'success',
+            $ratio >= 0.5 => 'warning',
+            default => 'danger',
+        };
     }
-
-    // Make stall limit configurable
-    public static function canCreate(): bool
-    {
-        $maxStalls = config('canteen.max_stalls', 10);
-        return Stall::count() < $maxStalls;
-    }
+    public static function getPages(): array
+{
+    return [
+        'index' => Pages\ListStalls::route('/'),
+        'create' => Pages\CreateStall::route('/create'),
+        'view' => Pages\ViewStall::route('/{record}'),
+        'edit' => Pages\EditStall::route('/{record}/edit'),
+    ];
+}
 }

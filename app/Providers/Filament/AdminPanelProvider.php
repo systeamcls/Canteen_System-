@@ -66,6 +66,7 @@ class AdminPanelProvider extends PanelProvider
             // CRITICAL: Redirect after login based on role
             ->loginRouteSlug('login')
             ->homeUrl(function () {
+                /** @var \App\Models\User $user */
                 $user = Auth::user();
 
                 if (!$user) return '/login';

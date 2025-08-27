@@ -17,7 +17,19 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 /**
  * App\Models\User
  *
- * @mixin \Spatie\Permission\Traits\HasRoles
+ * Common Spatie Permission helper methods:
+ *
+ * @method bool hasRole(string|array $roles, string|null $guard = null)
+ * @method bool hasAnyRole(string|array $roles, string|null $guard = null)
+ * @method bool hasAllRoles(string|array $roles, string|null $guard = null)
+ * @method \Spatie\Permission\Models\Role|array assignRole(...$roles)
+ * @method \Spatie\Permission\Models\Role[] syncRoles(...$roles)
+ * @method void removeRole(string|\Spatie\Permission\Contracts\Role $role)
+ * @method bool hasPermissionTo(string|\Spatie\Permission\Contracts\Permission $permission, string|null $guard = null)
+ * @method bool hasAnyPermission(string|array ...$permissions)
+ * @method \Spatie\Permission\Models\Permission|array givePermissionTo(...$permissions)
+ * @method \Spatie\Permission\Models\Permission[] syncPermissions(...$permissions)
+ * @method void revokePermissionTo(string|\Spatie\Permission\Contracts\Permission $permission)
  */
 class User extends Authenticatable
 {
