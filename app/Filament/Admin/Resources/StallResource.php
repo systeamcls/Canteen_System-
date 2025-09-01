@@ -16,13 +16,15 @@ use Illuminate\Database\Eloquent\Builder;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
 use Filament\Notifications\Notification;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
+
 
 class StallResource extends Resource
 {
     protected static ?string $model = Stall::class;
     protected static ?string $navigationIcon = 'heroicon-o-building-storefront';
-    protected static ?string $navigationGroup = 'Management';
-    protected static ?int $navigationSort = 1;
+    protected static ?string $navigationGroup = 'Admin Management';
+    protected static ?int $navigationSort = 2;
 
     public static function form(Form $form): Form
     {
@@ -143,15 +145,13 @@ class StallResource extends Resource
                         Forms\Components\FileUpload::make('logo')
                             ->image()
                             ->directory('stall-logos')
-                            ->imageEditor()
-                            ->imageEditorAspectRatios(['1:1'])
-                            ->imageResizeMode('cover')
-                            ->imageResizeTargetWidth('400')
-                            ->imageResizeTargetHeight('400')
-                            ->visibility('public') // Ensure this is set
-                            ->disk('public') // Add this line
+                            ->disk('public')
+                            ->visibility('public')
                             ->maxSize(2048)
-                            ->helperText('Square logo recommended, max 2MB')
+                            ->acceptedFileTypes(['image/jpeg', 'image/png'])
+                            ->helperText('Max 2MB. JPEG or PNG format.')
+                            ->deletable(true)
+                            ->removeUploadedFileButtonPosition('right')
                             ->columnSpanFull(),
                     ])
                     ->collapsible()
@@ -371,6 +371,12 @@ class StallResource extends Resource
             default => 'danger',
         };
     }
+
+    public static function canCreate(): bool
+{
+    return true;
+}
+
     public static function getPages(): array
 {
     return [

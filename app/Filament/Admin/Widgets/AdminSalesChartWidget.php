@@ -9,13 +9,16 @@ use Illuminate\Support\Facades\Auth;
 
 class AdminSalesChartWidget extends ChartWidget
 {
-    protected static ?string $heading = '7-Day Sales Trend';
-    protected static ?int $sort = 5;
+    protected static ?string $heading = 'Sales Trend Analysis';
+    protected static ?int $sort = 2;
     protected int | string | array $columnSpan = [
-    'md' => 2,
-    'lg' => 2,
-];
+        'md' => 2,
+        'lg' => 2,
+        'xl' => 2,
+        '2xl' => 3,
+    ];
 
+    public ?string $filter = '7days';
 
     protected function getData(): array
     {
@@ -26,7 +29,7 @@ class AdminSalesChartWidget extends ChartWidget
             return [
                 'datasets' => [
                     [
-                        'label' => 'Daily Sales',
+                        'label' => 'No Data Available',
                         'data' => [0, 0, 0, 0, 0, 0, 0],
                         'borderColor' => '#ef4444',
                         'backgroundColor' => 'rgba(239, 68, 68, 0.1)',
@@ -38,20 +41,28 @@ class AdminSalesChartWidget extends ChartWidget
             ];
         }
 
-        $data = $this->getDailySalesData($stallId);
+        $days = match ($this->filter) {
+            '7days' => 7,
+            '14days' => 14,
+            '30days' => 30,
+            default => 7,
+        };
+
+        $data = $this->getDailySalesData($stallId, $days);
 
         return [
             'datasets' => [
                 [
                     'label' => 'Daily Sales (PHP)',
                     'data' => $data['sales'],
-                    'borderColor' => '#ef4444',
-                    'backgroundColor' => 'rgba(239, 68, 68, 0.1)',
+                    'borderColor' => '#10b981',
+                    'backgroundColor' => 'rgba(16, 185, 129, 0.1)',
                     'fill' => true,
                     'tension' => 0.4,
-                    'pointBackgroundColor' => '#ef4444',
+                    'pointBackgroundColor' => '#10b981',
                     'pointBorderColor' => '#ffffff',
                     'pointBorderWidth' => 2,
+                    'pointRadius' => 4,
                 ],
             ],
             'labels' => $data['labels'],
@@ -63,6 +74,15 @@ class AdminSalesChartWidget extends ChartWidget
         return 'line';
     }
 
+    protected function getFilters(): ?array
+    {
+        return [
+            '7days' => 'Last 7 Days',
+            '14days' => 'Last 14 Days', 
+            '30days' => 'Last 30 Days',
+        ];
+    }
+
     protected function getOptions(): array
     {
         return [
@@ -71,36 +91,51 @@ class AdminSalesChartWidget extends ChartWidget
             'plugins' => [
                 'legend' => [
                     'display' => true,
+                    'position' => 'top',
                     'labels' => [
-                        'color' => '#e2e8f0',
+                        'padding' => 20,
+                        'usePointStyle' => true,
+                    ],
+                ],
+                'tooltip' => [
+                    'backgroundColor' => 'rgba(0, 0, 0, 0.8)',
+                    'titleColor' => '#ffffff',
+                    'bodyColor' => '#ffffff',
+                    'cornerRadius' => 8,
+                    'callbacks' => [
+                        'label' => "function(context) { 
+                            return 'Sales: PHP ' + context.parsed.y.toLocaleString(); 
+                        }",
                     ],
                 ],
             ],
             'scales' => [
                 'x' => [
-                    'ticks' => [
-                        'color' => '#94a3b8',
-                    ],
+                    'display' => true,
                     'grid' => [
-                        'color' => '#334155',
+                        'display' => false,
                     ],
                 ],
                 'y' => [
+                    'display' => true,
+                    'beginAtZero' => true,
+                    'grid' => [
+                        'color' => 'rgba(0, 0, 0, 0.1)',
+                    ],
                     'ticks' => [
-                        'color' => '#94a3b8',
                         'callback' => "function(value) { return 'PHP ' + value.toLocaleString(); }",
                     ],
-                    'grid' => [
-                        'color' => '#334155',
-                    ],
                 ],
+            ],
+            'interaction' => [
+                'intersect' => false,
+                'mode' => 'index',
             ],
         ];
     }
 
-    protected function getDailySalesData($stallId): array
+    protected function getDailySalesData($stallId, $days): array
     {
-        $days = 7;
         $sales = [];
         $labels = [];
 
@@ -114,7 +149,15 @@ class AdminSalesChartWidget extends ChartWidget
             ->sum('total_amount');
 
             $sales[] = (float) $dailySales;
-            $labels[] = $date->format('M d');
+            
+            // Format labels based on period
+            if ($days <= 7) {
+                $labels[] = $date->format('M j');
+            } elseif ($days <= 14) {
+                $labels[] = $i % 2 === 0 ? $date->format('M j') : '';
+            } else {
+                $labels[] = $i % 3 === 0 ? $date->format('M j') : '';
+            }
         }
 
         return [

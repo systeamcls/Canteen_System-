@@ -23,7 +23,7 @@ class RentalPaymentResource extends Resource
 {
     protected static ?string $model = RentalPayment::class;
     protected static ?string $navigationIcon = 'heroicon-o-banknotes';
-    protected static ?string $navigationGroup = 'Canteen Management';
+    protected static ?string $navigationGroup = 'Admin Management';
     protected static ?string $navigationLabel = 'Rental Payments';
     protected static ?int $navigationSort = 3;
 

@@ -1,0 +1,464 @@
+/* Menu Page Styles - CSP Compliant */
+
+/* Hero Section */
+.hero-section {
+    padding: 80px 20px 120px;
+    background: linear-gradient(135deg, #FF6B35 0%, #FF4500 50%, #DC2626 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 2;
+}
+
+.hero-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 60px;
+}
+
+.hero-text {
+    flex: 1;
+    min-width: 320px;
+    max-width: 500px;
+}
+
+.hero-title {
+    color: white;
+    font-size: 3.75rem;
+    font-weight: 800;
+    margin-bottom: 24px;
+    line-height: 1.1;
+    text-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    font-family: system-ui, -apple-system, sans-serif;
+}
+
+.hero-description {
+    color: rgba(255,255,255,0.9);
+    font-size: 1.125rem;
+    margin-bottom: 32px;
+    line-height: 1.6;
+    font-weight: 400;
+}
+
+.hero-pills {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.hero-pill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(10px);
+    padding: 8px 16px;
+    border-radius: 50px;
+    color: white;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.hero-visual {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    min-height: 300px;
+}
+
+.hero-circle {
+    width: 280px;
+    height: 280px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    backdrop-filter: blur(20px);
+}
+
+.hero-emoji {
+    font-size: 80px;
+    filter: drop-shadow(0 8px 16px rgba(0,0,0,0.2));
+}
+
+.float-element {
+    position: absolute;
+    background: rgba(16, 185, 129, 0.2);
+    backdrop-filter: blur(10px);
+    padding: 12px;
+    border-radius: 50%;
+    animation: float 3s ease-in-out infinite;
+}
+
+.float-1 {
+    top: 10%;
+    right: 10%;
+    background: rgba(16, 185, 129, 0.2);
+}
+
+.float-2 {
+    bottom: 20%;
+    left: 5%;
+    background: rgba(239, 68, 68, 0.2);
+    animation-direction: reverse;
+}
+
+.float-icon {
+    font-size: 24px;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+}
+
+/* Search Section */
+.search-section {
+    position: relative;
+    z-index: 10;
+    margin-top: -60px;
+    padding: 0 20px 40px;
+}
+
+.search-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.search-card {
+    background: white;
+    border-radius: 24px;
+    padding: 32px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+}
+
+.search-form {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.search-input-wrapper {
+    position: relative;
+    flex: 1;
+    min-width: 300px;
+}
+
+.search-icon {
+    position: absolute;
+    left: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9ca3af;
+    z-index: 1;
+}
+
+.search-input {
+    width: 100%;
+    padding: 16px 20px 16px 52px;
+    border: 2px solid #f1f5f9;
+    border-radius: 16px;
+    font-size: 16px;
+    background: #fafafa;
+    transition: all 0.3s ease;
+    outline: none;
+}
+
+.search-input:focus {
+    border-color: #FF6B35;
+    background: white;
+    outline: 2px solid #FF6B35;
+    outline-offset: 2px;
+}
+
+.stall-select {
+    padding: 16px 20px;
+    border: 2px solid #f1f5f9;
+    border-radius: 16px;
+    background: #fafafa;
+    min-width: 160px;
+    font-size: 16px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    outline: none;
+}
+
+.stall-select:focus {
+    border-color: #FF6B35;
+    background: white;
+    outline: 2px solid #FF6B35;
+    outline-offset: 2px;
+}
+
+.search-btn {
+    background: #FF6B35;
+    color: white;
+    padding: 16px 32px;
+    border: none;
+    border-radius: 16px;
+    font-weight: 600;
+    font-size: 16px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(255, 107, 53, 0.3);
+}
+
+.search-btn:hover {
+    background: #FF4500;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 107, 53, 0.4);
+}
+
+.search-btn:focus {
+    outline: 2px solid #FF6B35;
+    outline-offset: 2px;
+}
+
+.clear-btn {
+    background: #f8fafc;
+    color: #64748b;
+    padding: 16px 24px;
+    border-radius: 16px;
+    font-weight: 500;
+    border: 2px solid #f1f5f9;
+    transition: all 0.3s ease;
+    text-decoration: none;
+}
+
+.clear-btn:hover {
+    background: #f1f5f9;
+    color: #374151;
+}
+
+/* Categories Section */
+.categories-section {
+    padding: 60px 0 40px;
+    background: #fafbfc;
+}
+
+.categories-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.category-pills {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 60px;
+}
+
+.category-pill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    border-radius: 50px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+    background: white;
+    color: #64748b;
+    border-color: #e2e8f0;
+}
+
+.category-pill.active {
+    background: #1e293b;
+    color: white;
+    box-shadow: 0 4px 14px rgba(30, 41, 59, 0.3);
+}
+
+.category-pill:hover {
+    transform: translateY(-2px);
+}
+
+.section-header {
+    text-align: left;
+    margin-bottom: 32px;
+}
+
+.section-title {
+    color: #1e293b;
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+    font-family: system-ui, -apple-system, sans-serif;
+}
+
+.section-subtitle {
+    color: #64748b;
+    font-size: 1.125rem;
+    margin: 0;
+}
+
+/* Products Section */
+.products-section {
+    padding: 0 0 80px;
+    background: #fafbfc;
+}
+
+.products-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px;
+}
+
+.pagination-wrapper {
+    margin-top: 60px;
+    display: flex;
+    justify-content: center;
+}
+
+.pagination-card {
+    background: white;
+    padding: 20px;
+    border-radius: 20px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+}
+
+/* No Results */
+.no-results {
+    text-align: center;
+    padding: 80px 32px;
+    background: white;
+    border-radius: 24px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+}
+
+.no-results-icon {
+    font-size: 4rem;
+    margin-bottom: 24px;
+    opacity: 0.3;
+}
+
+.no-results-title {
+    color: #1e293b;
+    margin-bottom: 16px;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.no-results-text {
+    color: #64748b;
+    margin-bottom: 32px;
+    font-size: 1.125rem;
+}
+
+.no-results-btn {
+    display: inline-block;
+    background: #FF6B35;
+    color: white;
+    padding: 16px 32px;
+    border-radius: 16px;
+    text-decoration: none;
+    font-weight: 600;
+    box-shadow: 0 4px 14px rgba(255, 107, 53, 0.3);
+    transition: all 0.3s ease;
+}
+
+.no-results-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 107, 53, 0.4);
+}
+
+/* Scrollbar Styling */
+*::-webkit-scrollbar {
+    height: 6px;
+    width: 6px;
+}
+
+*::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 10px;
+}
+
+*::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* Universal Box Sizing */
+* {
+    box-sizing: border-box;
+}
+
+/* Focus Styles */
+button:focus,
+input:focus,
+select:focus {
+    outline: 2px solid #FF6B35;
+    outline-offset: 2px;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .hero-title {
+        font-size: 2.5rem !important;
+    }
+    
+    .hero-content {
+        text-align: center;
+    }
+    
+    .hero-visual {
+        display: none;
+    }
+    
+    .search-form {
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .search-input-wrapper,
+    .stall-select {
+        width: 100% !important;
+        min-width: unset !important;
+    }
+
+    .category-pills {
+        gap: 8px;
+    }
+
+    .category-pill {
+        padding: 10px 16px;
+        font-size: 14px;
+    }
+
+    .section-title {
+        font-size: 1.5rem;
+    }
+
+    .search-card {
+        padding: 24px;
+    }
+
+    .hero-section {
+        padding: 60px 20px 100px;
+    }
+}

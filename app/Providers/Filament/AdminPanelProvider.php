@@ -44,10 +44,10 @@ class AdminPanelProvider extends PanelProvider
                 in: app_path('Filament/Admin/Widgets'),
                 for: 'App\\Filament\\Admin\\Widgets'
             )
+            ->sidebarCollapsibleOnDesktop()
             ->navigationGroups([
                 NavigationGroup::make('Canteen Management'),
-                NavigationGroup::make('Orders & Sales'),
-                NavigationGroup::make('User Management'),
+                NavigationGroup::make('Admin Management'),
                 NavigationGroup::make('System'),
             ])
             ->middleware([
@@ -62,6 +62,7 @@ class AdminPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
                 \App\Http\Middleware\CheckAdminOrCashierAccess::class,
+                \App\Http\Middleware\EnsureTwoFactorAuthenticated::class,
             ])
             // CRITICAL: Redirect after login based on role
             ->loginRouteSlug('login')

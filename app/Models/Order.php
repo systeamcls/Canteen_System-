@@ -263,31 +263,26 @@ class Order extends Model
     |--------------------------------------------------------------------------
     */
     protected static function boot()
-    {
-        parent::boot();
+{
+    parent::boot();
 
-        static::creating(function ($order) {
-            if (empty($order->order_number)) {
-                $order->order_number = 'ORD-' . strtoupper(uniqid());
-            }
-        });
+    static::creating(function ($order) {
+        if (empty($order->order_number)) {
+            $order->order_number = 'ORD-' . strtoupper(uniqid());
+        }
+    });
 
-        static::created(function ($order) {
-            if (class_exists(OrderCreated::class)) {
-                event(new OrderCreated($order));
-            }
-        });
+    static::created(function ($order) {
+        if (class_exists(OrderCreated::class)) {
+            event(new OrderCreated($order));
+        }
+    });
 
-        static::updating(function ($order) {
-            if ($order->isDirty('status')) {
-                $order->_oldStatus = $order->getOriginal('status');
-            }
-        });
-
-        static::updated(function ($order) {
-            if (isset($order->_oldStatus) && class_exists(OrderStatusUpdated::class)) {
-                event(new OrderStatusUpdated($order, $order->_oldStatus));
-            }
-        });
-    }
+    static::updated(function ($order) {
+        if ($order->wasChanged('status') && class_exists(OrderStatusUpdated::class)) {
+            $oldStatus = $order->getOriginal('status');
+            event(new OrderStatusUpdated($order, $oldStatus));
+        }
+    });
+}
 }

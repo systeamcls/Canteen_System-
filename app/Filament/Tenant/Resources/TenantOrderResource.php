@@ -11,6 +11,7 @@ use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Tenant\Resources\TenantOrderResource\Pages;
+use Filament\Notifications\Notification;
 
 class TenantOrderResource extends Resource
 {
@@ -20,16 +21,20 @@ class TenantOrderResource extends Resource
     protected static ?string $navigationLabel = 'My Orders';
     protected static ?int $navigationSort = 1;
 
-    // Tenant sees ONLY orders for their stall's products
     public static function getEloquentQuery(): Builder
     {
         $user = Auth::user();
-        
+        $stall = $user->assignedStall;
+
+        if (!$stall) {
+            return parent::getEloquentQuery()->whereRaw('1 = 0');
+        }
+
         return parent::getEloquentQuery()
-            ->whereHas('items.product.stall', function (Builder $q) use ($user) {
-                $q->where('tenant_id', $user->id);
+            ->whereHas('items.product', function (Builder $query) use ($stall) {
+                $query->where('stall_id', $stall->id);
             })
-            ->with(['items.product', 'user']);
+            ->with(['user', 'items.product']);
     }
 
     public static function form(Form $form): Form
@@ -38,41 +43,52 @@ class TenantOrderResource extends Resource
             ->schema([
                 Forms\Components\Section::make('Order Information')
                     ->schema([
-                        Forms\Components\TextInput::make('order_reference')
+                        Forms\Components\TextInput::make('order_number')
                             ->disabled()
                             ->columnSpan(1),
 
                         Forms\Components\Select::make('status')
                             ->options([
                                 'pending' => 'Pending',
-                                'confirmed' => 'Confirmed',
-                                'preparing' => 'Preparing',
-                                'ready' => 'Ready for Pickup',
+                                'processing' => 'Processing',
                                 'completed' => 'Completed',
                                 'cancelled' => 'Cancelled',
                             ])
                             ->required()
-                            ->live()
-                            ->helperText('Update to notify customer of order progress')
+                            ->helperText('Update order status to notify customer')
                             ->columnSpan(1),
 
-                        Forms\Components\TextInput::make('customer_name')
+                        Forms\Components\TextInput::make('customer_display')
+                            ->label('Customer')
                             ->disabled()
-                            ->formatStateUsing(fn ($record) => 
-                                $record?->user ? $record->user->name : $record?->customer_name
-                            )
+                            ->formatStateUsing(function ($record) {
+                                if ($record?->user) {
+                                    return $record->user->name;
+                                }
+                                if ($record?->customer_name) {
+                                    return $record->customer_name;
+                                }
+                                if ($record?->guest_details) {
+                                    $details = is_string($record->guest_details) 
+                                        ? json_decode($record->guest_details, true) 
+                                        : $record->guest_details;
+                                    if (is_array($details) && isset($details['name'])) {
+                                        return $details['name'];
+                                    }
+                                }
+                                return 'Guest Customer';
+                            })
                             ->columnSpan(1),
 
-                        Forms\Components\TextInput::make('customer_phone')
+                        Forms\Components\TextInput::make('order_type')
                             ->disabled()
-                            ->formatStateUsing(fn ($record) => 
-                                $record?->user ? $record->user->phone : $record?->customer_phone
-                            )
+                            ->formatStateUsing(fn ($state) => ucfirst($state ?? 'Unknown'))
                             ->columnSpan(1),
 
                         Forms\Components\TextInput::make('total_amount')
                             ->disabled()
-                            ->prefix('₱')
+                            ->prefix('PHP ')
+                            ->formatStateUsing(fn ($state) => number_format($state ?? 0, 2))
                             ->columnSpan(1),
 
                         Forms\Components\TextInput::make('estimated_completion')
@@ -82,39 +98,68 @@ class TenantOrderResource extends Resource
                             ->helperText('How long until ready?')
                             ->columnSpan(1),
 
+                        Forms\Components\Textarea::make('special_instructions')
+                            ->label('Customer Instructions')
+                            ->disabled()
+                            ->columnSpanFull(),
+
                         Forms\Components\Textarea::make('notes')
-                            ->label('Order Notes')
-                            ->placeholder('Add any special instructions or notes')
+                            ->label('Internal Notes')
+                            ->placeholder('Add notes about this order...')
                             ->columnSpanFull(),
                     ])
                     ->columns(2),
 
-                Forms\Components\Section::make('Order Items')
+                Forms\Components\Section::make('Order Items from Your Stall')
                     ->schema([
-                        Forms\Components\Repeater::make('items')
-                            ->relationship()
+                        Forms\Components\Repeater::make('stall_items')
+                            ->label('')
+                            ->relationship(false)
                             ->schema([
-                                Forms\Components\TextInput::make('product.name')
+                                Forms\Components\TextInput::make('product_name')
                                     ->disabled()
                                     ->label('Product'),
                                 Forms\Components\TextInput::make('quantity')
                                     ->numeric()
                                     ->disabled(),
-                                Forms\Components\TextInput::make('price')
-                                    ->prefix('₱')
+                                Forms\Components\TextInput::make('unit_price')
+                                    ->prefix('PHP ')
                                     ->disabled()
-                                    ->label('Unit Price'),
+                                    ->label('Unit Price')
+                                    ->formatStateUsing(fn ($state) => number_format($state ?? 0, 2)),
                                 Forms\Components\TextInput::make('subtotal')
-                                    ->prefix('₱')
+                                    ->prefix('PHP ')
                                     ->disabled()
-                                    ->formatStateUsing(fn ($state, $record) => 
-                                        number_format($record?->quantity * $record?->price, 2)
-                                    ),
+                                    ->formatStateUsing(fn ($state) => number_format($state ?? 0, 2)),
                             ])
                             ->columns(4)
                             ->addable(false)
                             ->deletable(false)
-                            ->reorderable(false),
+                            ->reorderable(false)
+                            ->default(function ($record) {
+                                if (!$record) return [];
+                                
+                                $user = Auth::user();
+                                $stall = $user->assignedStall;
+                                
+                                if (!$stall) return [];
+                                
+                                return $record->items()
+                                    ->whereHas('product', function ($query) use ($stall) {
+                                        $query->where('stall_id', $stall->id);
+                                    })
+                                    ->with('product')
+                                    ->get()
+                                    ->map(function ($item) {
+                                        return [
+                                            'product_name' => $item->product_name,
+                                            'quantity' => $item->quantity,
+                                            'unit_price' => $item->unit_price,
+                                            'subtotal' => $item->subtotal,
+                                        ];
+                                    })
+                                    ->toArray();
+                            }),
                     ]),
             ]);
     }
@@ -123,29 +168,88 @@ class TenantOrderResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('order_reference')
+                Tables\Columns\TextColumn::make('order_number')
+                    ->label('Order #')
                     ->searchable()
                     ->copyable()
-                    ->copyMessage('Order reference copied!'),
+                    ->weight('medium')
+                    ->color('primary'),
 
-                Tables\Columns\TextColumn::make('customer_name')
-                    ->formatStateUsing(fn ($record) => 
-                        $record->user ? $record->user->name : $record->customer_name
-                    )
-                    ->searchable()
-                    ->sortable(),
+                Tables\Columns\TextColumn::make('customer_display')
+                    ->label('Customer')
+                    ->getStateUsing(function (Order $record): string {
+                        if ($record->user) {
+                            return $record->user->name;
+                        }
+                        if ($record->customer_name) {
+                            return $record->customer_name;
+                        }
+                        if ($record->guest_details) {
+                            $details = is_string($record->guest_details) 
+                                ? json_decode($record->guest_details, true) 
+                                : $record->guest_details;
+                            if (is_array($details) && isset($details['name'])) {
+                                return $details['name'];
+                            }
+                        }
+                        return 'Guest Customer';
+                    })
+                    ->searchable(['customer_name'])
+                    ->icon('heroicon-m-user'),
+
+                Tables\Columns\TextColumn::make('stall_items_preview')
+                    ->label('My Items')
+                    ->getStateUsing(function (Order $record): string {
+                        $user = Auth::user();
+                        $stall = $user->assignedStall;
+                        
+                        if (!$stall) return 'No stall assigned';
+
+                        $stallItems = $record->items()
+                            ->whereHas('product', function ($query) use ($stall) {
+                                $query->where('stall_id', $stall->id);
+                            })
+                            ->with('product')
+                            ->get();
+
+                        if ($stallItems->isEmpty()) {
+                            return 'No items from your stall';
+                        }
+
+                        return $stallItems->map(function ($item) {
+                            return $item->quantity . '× ' . $item->product_name;
+                        })->take(2)->join(', ') . ($stallItems->count() > 2 ? '...' : '');
+                    })
+                    ->wrap(),
+
+                Tables\Columns\TextColumn::make('stall_revenue')
+                    ->label('My Revenue')
+                    ->getStateUsing(function (Order $record): float {
+                        $user = Auth::user();
+                        $stall = $user->assignedStall;
+                        
+                        if (!$stall) return 0;
+
+                        return $record->items()
+                            ->whereHas('product', function ($query) use ($stall) {
+                                $query->where('stall_id', $stall->id);
+                            })
+                            ->sum('subtotal');
+                    })
+                    ->money('PHP')
+                    ->weight('semibold')
+                    ->color('success'),
 
                 Tables\Columns\TextColumn::make('total_amount')
+                    ->label('Order Total')
                     ->money('PHP')
-                    ->sortable(),
+                    ->color('gray'),
 
                 Tables\Columns\TextColumn::make('status')
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
                         'pending' => 'warning',
-                        'confirmed' => 'primary',
-                        'preparing' => 'info',
-                        'ready' => 'success',
+                        'processing' => 'info',
                         'completed' => 'success',
                         'cancelled' => 'danger',
                         default => 'gray',
@@ -168,16 +272,13 @@ class TenantOrderResource extends Resource
                 Tables\Columns\TextColumn::make('estimated_completion')
                     ->label('Est. Ready')
                     ->suffix(' min')
-                    ->placeholder('Not set')
-                    ->sortable(),
+                    ->placeholder('Not set'),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('status')
                     ->options([
                         'pending' => 'Pending',
-                        'confirmed' => 'Confirmed',
-                        'preparing' => 'Preparing',
-                        'ready' => 'Ready',
+                        'processing' => 'Processing',
                         'completed' => 'Completed',
                         'cancelled' => 'Cancelled',
                     ]),
@@ -185,7 +286,7 @@ class TenantOrderResource extends Resource
                 Tables\Filters\SelectFilter::make('order_type')
                     ->options([
                         'online' => 'Online',
-                        'onsite' => 'Onsite',
+                        'onsite' => 'Walk-in',
                     ]),
 
                 Tables\Filters\Filter::make('today')
@@ -196,7 +297,7 @@ class TenantOrderResource extends Resource
                 Tables\Filters\Filter::make('active_orders')
                     ->label('Active Orders')
                     ->query(fn (Builder $query) => 
-                        $query->whereIn('status', ['pending', 'confirmed', 'preparing', 'ready'])
+                        $query->whereIn('status', ['pending', 'processing'])
                     )
                     ->toggle(),
             ])
@@ -204,68 +305,118 @@ class TenantOrderResource extends Resource
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
 
-                // Quick status change actions
                 Tables\Actions\ActionGroup::make([
-                    Tables\Actions\Action::make('confirm')
-                        ->icon('heroicon-o-check-circle')
-                        ->color('primary')
-                        ->visible(fn ($record) => $record->status === 'pending')
-                        ->action(fn ($record) => $record->update(['status' => 'confirmed'])),
-
-                    Tables\Actions\Action::make('start_preparing')
-                        ->label('Start Prep')
-                        ->icon('heroicon-o-clock')
+                    Tables\Actions\Action::make('start_processing')
+                        ->label('Start Processing')
+                        ->icon('heroicon-o-play')
                         ->color('info')
-                        ->visible(fn ($record) => $record->status === 'confirmed')
-                        ->action(fn ($record) => $record->update(['status' => 'preparing'])),
+                        ->visible(fn ($record) => $record->status === 'pending')
+                        ->action(function ($record) {
+                            $record->status = 'processing';
+                            $record->save();
+                            
+                            Notification::make()
+                                ->title('Order processing started')
+                                ->success()
+                                ->send();
+                        })
+                        ->requiresConfirmation(),
 
-                    Tables\Actions\Action::make('mark_ready')
-                        ->label('Ready')
-                        ->icon('heroicon-o-bell-alert')
+                    Tables\Actions\Action::make('mark_completed')
+                        ->label('Mark Completed')
+                        ->icon('heroicon-o-check-circle')
                         ->color('success')
-                        ->visible(fn ($record) => $record->status === 'preparing')
-                        ->action(fn ($record) => $record->update(['status' => 'ready'])),
+                        ->visible(fn ($record) => in_array($record->status, ['pending', 'processing']))
+                        ->action(function ($record) {
+                            $record->status = 'completed';
+                            $record->save();
+                            
+                            Notification::make()
+                                ->title('Order marked as completed')
+                                ->success()
+                                ->send();
+                        })
+                        ->requiresConfirmation(),
 
-                    Tables\Actions\Action::make('complete')
-                        ->icon('heroicon-o-check-badge')
-                        ->color('success')
-                        ->visible(fn ($record) => $record->status === 'ready')
-                        ->action(fn ($record) => $record->update(['status' => 'completed'])),
+                    Tables\Actions\Action::make('cancel_order')
+                        ->label('Cancel Order')
+                        ->icon('heroicon-o-x-circle')
+                        ->color('danger')
+                        ->visible(fn ($record) => in_array($record->status, ['pending', 'processing']))
+                        ->form([
+                            Forms\Components\Textarea::make('cancellation_reason')
+                                ->label('Cancellation Reason')
+                                ->required()
+                                ->placeholder('Please provide a reason for cancellation...'),
+                        ])
+                        ->action(function ($record, array $data) {
+                            $record->status = 'cancelled';
+                            $record->notes = ($record->notes ? $record->notes . "\n\n" : '') 
+                                . 'Cancelled: ' . $data['cancellation_reason'];
+                            $record->save();
+                            
+                            Notification::make()
+                                ->title('Order cancelled')
+                                ->warning()
+                                ->send();
+                        }),
                 ])
                 ->label('Update Status')
-                ->color('primary')
-                ->icon('heroicon-o-arrow-path'),
+                ->icon('heroicon-m-ellipsis-vertical'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\BulkAction::make('confirm_orders')
-                        ->label('Confirm Selected')
-                        ->icon('heroicon-o-check-circle')
-                        ->color('primary')
-                        ->action(fn ($records) => 
-                            $records->each(fn ($record) => 
-                                $record->status === 'pending' ? $record->update(['status' => 'confirmed']) : null
-                            )
-                        ),
-
-                    Tables\Actions\BulkAction::make('start_preparing')
-                        ->label('Start Preparing')
-                        ->icon('heroicon-o-clock')
+                    Tables\Actions\BulkAction::make('start_processing_bulk')
+                        ->label('Start Processing')
+                        ->icon('heroicon-o-play')
                         ->color('info')
-                        ->action(fn ($records) => 
-                            $records->each(fn ($record) => 
-                                $record->status === 'confirmed' ? $record->update(['status' => 'preparing']) : null
-                            )
-                        ),
+                        ->action(function ($records) {
+                            $processed = 0;
+                            foreach ($records as $record) {
+                                if ($record->status === 'pending') {
+                                    $record->status = 'processing';
+                                    $record->save();
+                                    $processed++;
+                                }
+                            }
+                            
+                            Notification::make()
+                                ->title("{$processed} orders set to processing")
+                                ->success()
+                                ->send();
+                        })
+                        ->requiresConfirmation(),
+
+                    Tables\Actions\BulkAction::make('mark_completed_bulk')
+                        ->label('Mark Completed')
+                        ->icon('heroicon-o-check-circle')
+                        ->color('success')
+                        ->action(function ($records) {
+                            $completed = 0;
+                            foreach ($records as $record) {
+                                if (in_array($record->status, ['pending', 'processing'])) {
+                                    $record->status = 'completed';
+                                    $record->save();
+                                    $completed++;
+                                }
+                            }
+                            
+                            Notification::make()
+                                ->title("{$completed} orders marked as completed")
+                                ->success()
+                                ->send();
+                        })
+                        ->requiresConfirmation(),
                 ]),
             ])
             ->defaultSort('created_at', 'desc')
-            ->poll('30s') // Auto-refresh every 30 seconds
-            ->emptyStateHeading('No Orders Yet')
-            ->emptyStateDescription('Orders for your stall will appear here once customers start ordering.')
+            ->poll('30s')
+            ->emptyStateHeading('No orders yet')
+            ->emptyStateDescription('Orders for your stall will appear here when customers place them.')
             ->emptyStateIcon('heroicon-o-shopping-bag');
     }
 
+    
     public static function getPages(): array
     {
         return [
@@ -275,15 +426,36 @@ class TenantOrderResource extends Resource
         ];
     }
 
-    // Tenants cannot create orders (customers do that)
     public static function canCreate(): bool
     {
         return false;
     }
 
-    // Tenants cannot delete orders (for record keeping)
     public static function canDelete($record): bool
     {
         return false;
+    }
+
+    public static function getNavigationBadge(): ?string
+    {
+        $user = Auth::user();
+        $stall = $user?->assignedStall;
+        
+        if (!$stall) return null;
+
+        $pending = static::getEloquentQuery()
+            ->whereIn('status', ['pending', 'processing'])
+            ->count();
+
+        return $pending > 0 ? (string) $pending : null;
+    }
+
+    public static function getNavigationBadgeColor(): ?string
+    {
+        return 'warning';
+    }
+    public static function canViewAny(): bool
+    {
+    return Auth::user()?->assignedStall !== null;
     }
 }

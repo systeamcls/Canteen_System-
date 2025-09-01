@@ -2,18 +2,21 @@
 
 namespace App\Providers\Filament;
 
+use Filament\Http\Middleware\Authenticate;
+use Filament\Http\Middleware\DisableBladeIconComponents;
+use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use Filament\Pages;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
-use Filament\Http\Middleware\Authenticate;
-use Illuminate\Session\Middleware\StartSession;
+use Filament\Widgets;
+use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
+use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\AuthenticateSession;
+use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
-use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
-use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
-use Filament\Navigation\NavigationGroup;
 
 class TenantPanelProvider extends PanelProvider
 {
@@ -23,44 +26,24 @@ class TenantPanelProvider extends PanelProvider
             ->id('tenant')
             ->path('tenant')
             ->login()
-            ->authGuard('web')
-            ->colors([
-                'primary' => Color::Green,
-            ])
-            ->darkMode()
             ->brandName('Tenant Dashboard')
-            ->discoverResources(
-                in: app_path('Filament/Tenant/Resources'),
-                for: 'App\\Filament\\Tenant\\Resources'
-            )
-            ->resources([
-                \App\Filament\Tenant\Resources\TenantStallResource::class,
-                \App\Filament\Tenant\Resources\TenantProductResource::class,
-                \App\Filament\Tenant\Resources\TenantOrderResource::class,
+            ->colors([
+                'primary' => Color::Blue,
+                'success' => Color::Green,
+                'warning' => Color::Orange,
+                'danger' => Color::Red,
             ])
-            ->discoverPages(
-                in: app_path('Filament/Tenant/Pages'),
-                for: 'App\\Filament\\Tenant\\Pages'
-            )
-            ->discoverWidgets(
-                in: app_path('Filament/Tenant/Widgets'),
-                for: 'App\\Filament\\Tenant\\Widgets'
-            )
-            ->navigationGroups([
-                NavigationGroup::make('My Stall')
-                    ->icon('heroicon-o-building-storefront'),
-                NavigationGroup::make('Products')
-                    ->icon('heroicon-o-cube'),
-                NavigationGroup::make('Orders & Sales')
-                    ->icon('heroicon-o-shopping-cart'),
-                NavigationGroup::make('Reviews')
-                    ->icon('heroicon-o-star'),
-                NavigationGroup::make('Finance')
-                    ->icon('heroicon-o-currency-dollar'),
-                NavigationGroup::make('Reports')
-                    ->icon('heroicon-o-chart-bar'),
-                NavigationGroup::make('Account')
-                    ->icon('heroicon-o-user-circle'),
+            ->discoverResources(in: app_path('Filament/Tenant/Resources'), for: 'App\\Filament\\Tenant\\Resources')
+            ->discoverPages(in: app_path('Filament/Tenant/Pages'), for: 'App\\Filament\\Tenant\\Pages')
+            ->pages([
+                
+            ])
+            ->discoverWidgets(in: app_path('Filament/Tenant/Widgets'), for: 'App\\Filament\\Tenant\\Widgets')
+            ->widgets([
+                Widgets\AccountWidget::class,
+            ])
+            ->pages([
+                \App\Filament\Tenant\Pages\TwoFactorChallenge::class, 
             ])
             ->middleware([
                 EncryptCookies::class,
@@ -70,13 +53,22 @@ class TenantPanelProvider extends PanelProvider
                 ShareErrorsFromSession::class,
                 VerifyCsrfToken::class,
                 SubstituteBindings::class,
+                DisableBladeIconComponents::class,
+                DispatchServingFilamentEvent::class,
             ])
             ->authMiddleware([
                 Authenticate::class,
-               
+                //\App\Http\Middleware\EnsureTwoFactorAuthenticated::class,
             ])
-            ->homeUrl('/tenant')
-            ->sidebarCollapsibleOnDesktop();
-            //->viteTheme('resources/css/filament/tenant/theme.css');
+            ->authGuard('web')
+            ->sidebarCollapsibleOnDesktop()
+            ->navigationGroups([
+                'Dashboard',
+                'Stall Management',
+                'Products',
+                'Orders & Sales',
+                'Reviews',
+                'Finance',
+            ]);
     }
 }

@@ -7,9 +7,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Storage;
+
 
 /**
- * @property int $id
+ * @property int $id    
  * @property string $name
  * @property float $price
  * @property string|null $image
@@ -100,5 +102,26 @@ class Product extends Model
     public function toggleAvailability(): void
     {
         $this->update(['is_available' => !$this->is_available]);
+    }
+
+    /**
+     * Get reviews for this product
+     */
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
+    }
+    public function getImageUrlAttribute()
+    {
+        if (!$this->image) {
+            return asset('images/default-product.png');
+        }
+
+        // Check if file exists and return proper URL
+        if (Storage::disk('public')->exists($this->image)) {
+            return asset('storage/' . $this->image);
+        }
+
+        return asset('images/default-product.png');
     }
 }

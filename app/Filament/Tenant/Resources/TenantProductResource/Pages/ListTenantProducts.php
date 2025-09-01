@@ -9,4 +9,11 @@ use Filament\Resources\Pages\ListRecords;
 class ListTenantProducts extends ListRecords
 {
     protected static string $resource = TenantProductResource::class;
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            Actions\CreateAction::make(),
+        ];
+    }
 }

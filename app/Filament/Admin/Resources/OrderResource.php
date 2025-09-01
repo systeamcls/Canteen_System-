@@ -21,7 +21,7 @@ class OrderResource extends Resource
 {
     protected static ?string $model = Order::class;
     protected static ?string $navigationIcon = 'heroicon-o-shopping-bag';
-    protected static ?string $navigationGroup = 'Orders & Sales';
+    protected static ?string $navigationGroup = 'Canteen Management';
     protected static ?int $navigationSort = 1;
 
     public static function getEloquentQuery(): Builder
@@ -45,6 +45,86 @@ class OrderResource extends Resource
         ->latest();
 }
 
+     public static function form(Form $form): Form
+    {
+        return $form
+            ->schema([
+                Forms\Components\Section::make('Order Details')
+                    ->schema([
+                        Forms\Components\TextInput::make('order_number')
+                            ->required()
+                            ->disabled()
+                            ->dehydrated(false),
+                        
+                        Forms\Components\Select::make('status')
+                            ->required()
+                            ->options([
+                                'pending' => 'Pending',
+                                'processing' => 'Processing',
+                                'completed' => 'Completed',
+                                'cancelled' => 'Cancelled',
+                            ])
+                            ->native(false),
+                        
+                        Forms\Components\Grid::make(2)
+                            ->schema([
+                                Forms\Components\TextInput::make('customer_name')
+                                    ->label('Customer Name')
+                                    ->disabled()
+                                    ->dehydrated(false),
+                                
+                                Forms\Components\TextInput::make('customer_phone')
+                                    ->label('Customer Phone')
+                                    ->disabled()
+                                    ->dehydrated(false),
+                            ]),
+                    ]),
+                
+                Forms\Components\Section::make('Payment Information')
+                    ->schema([
+                        Forms\Components\Grid::make(3)
+                            ->schema([
+                                Forms\Components\Select::make('payment_method')
+                                    ->options([
+                                        'cash' => 'Cash',
+                                        'gcash' => 'GCash',
+                                        'paymaya' => 'PayMaya',
+                                        'card' => 'Credit/Debit Card',
+                                    ])
+                                    ->native(false),
+                                
+                                Forms\Components\Select::make('payment_status')
+                                    ->required()
+                                    ->options([
+                                        'pending' => 'Pending',
+                                        'paid' => 'Paid',
+                                        'failed' => 'Failed',
+                                    ])
+                                    ->native(false),
+                                
+                                Forms\Components\TextInput::make('total_amount')
+                                    ->label('Total Amount')
+                                    ->prefix('₱')
+                                    ->numeric()
+                                    ->disabled()
+                                    ->dehydrated(false),
+                            ]),
+                    ]),
+                
+                Forms\Components\Section::make('Additional Information')
+                    ->schema([
+                        Forms\Components\Textarea::make('special_instructions')
+                            ->rows(3)
+                            ->columnSpanFull(),
+                        
+                        Forms\Components\Textarea::make('notes')
+                            ->label('Admin Notes')
+                            ->rows(3)
+                            ->columnSpanFull(),
+                    ])
+                    ->collapsible(),
+            ]);
+    }
     public static function table(Table $table): Table
     {
         return $table
@@ -57,7 +137,7 @@ class OrderResource extends Resource
                     ->weight('semibold')
                     ->color('primary'),
 
-                // ✅ FIXED: Better customer name handling
+               
                 Tables\Columns\TextColumn::make('customer_info')
                     ->label('Customer')
                     ->getStateUsing(function (Order $record): string {
@@ -69,7 +149,7 @@ class OrderResource extends Resource
                             return $record->customer_name;
                         }
                         
-                        // ✅ FIXED: Proper JSON handling
+                        
                         if ($record->guest_details) {
                             $details = is_string($record->guest_details) 
                                 ? json_decode($record->guest_details, true) 
@@ -82,10 +162,10 @@ class OrderResource extends Resource
                         
                         return 'Guest Customer';
                     })
-                    ->searchable(['customer_name', 'users.name'])
+                    ->searchable(['customer_name'])
                     ->icon('heroicon-m-user'),
 
-                // ✅ FIXED: Better stall items display
+                
                 Tables\Columns\TextColumn::make('my_stall_items')
                     ->label('My Stall Items')
                     ->getStateUsing(function (Order $record): string {

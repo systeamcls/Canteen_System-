@@ -2,11 +2,11 @@
     <div class="max-w-md mx-auto">
         <x-filament::section>
             <x-slot name="heading">
-                Admin Panel - Security Check
+                Tenant Dashboard - Security Check
             </x-slot>
             
             <x-slot name="description">
-                Please enter your 2FA code to access the admin panel.
+                Please enter your 2FA code to access the tenant dashboard.
             </x-slot>
             
             <form wire:submit="verify">

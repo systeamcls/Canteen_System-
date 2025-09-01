@@ -18,18 +18,18 @@ return Application::configure(basePath: dirname(__DIR__))
             'rate.limit.auth' => \App\Http\Middleware\RateLimitAuth::class,
             'ensure-2fa-admin' => \App\Http\Middleware\EnsureTwoFactorAuthenticatedForAdmin::class,
             'check-admin-cashier' => \App\Http\Middleware\CheckAdminOrCashierAccess::class,
-            'check-tenant' => \App\Http\Middleware\CheckTenantAccess::class,
+            'filament.2fa' => \App\Http\Middleware\EnsureTwoFactorAuthenticated::class,
             'webhook.security' => \App\Http\Middleware\WebhookSecurityMiddleware::class,
 
         ]);
 
-        // Apply security headers globally to all requests
+        // Security headers globally to all requests
         $middleware->append(\App\Http\Middleware\SecurityHeaders::class);
 
-        // Apply authentication rate limiting to web routes
+        // Rate limiting to web routes
         $middleware->appendToGroup('web', \App\Http\Middleware\RateLimitAuth::class);
 
-        // Apply authentication rate limiting to API routes as well
+        // Raate limiting to API routes as wel
         $middleware->appendToGroup('api', \App\Http\Middleware\RateLimitAuth::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

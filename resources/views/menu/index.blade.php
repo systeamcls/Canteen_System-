@@ -3,116 +3,77 @@
 @section('title', 'Menu - LTO Canteen Central')
 
 @section('content')
-<!-- Hero Section with Burger Image -->
-<section style="padding: 100px 0 60px; background: linear-gradient(135deg, #2E5BBA 0%, #3b82f6 100%); position: relative; overflow: hidden;">
-    <div class="container">
-        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 40px;">
+<!-- Hero Section -->
+<section style="padding: 80px 20px 120px; background: linear-gradient(135deg, #FF6B35 0%, #FF4500 50%, #DC2626 100%); position: relative; overflow: hidden; border-radius: 0 0 48px 48px;">
+    <div class="container" style="max-width: 1200px; margin: 0 auto; position: relative; z-index: 2;">
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 60px;">
             <!-- Left Content -->
-            <div style="flex: 1; min-width: 300px;">
-                <div style="background: rgba(255,255,255,0.1); padding: 8px 20px; border-radius: 25px; display: inline-block; margin-bottom: 20px;">
-                    <span style="color: white; font-size: 14px; font-weight: 600;">🍽️ Fresh & Delicious</span>
-                </div>
-                <h1 style="color: white; font-size: 3.5rem; font-weight: 800; margin: 0 0 20px 0; line-height: 1.1;">Our Menu</h1>
-                <p style="color: rgba(255,255,255,0.9); font-size: 1.2rem; margin: 0 0 30px 0; line-height: 1.6;">
+            <div style="flex: 1; min-width: 320px; max-width: 500px;">
+                <h1 style="color: white; font-size: 3rem; font-weight: 800; margin-bottom: 24px; line-height: 1.1; text-shadow: 0 4px 12px rgba(0,0,0,0.2); font-family: system-ui, -apple-system, sans-serif;">
+                    Our Menu
+                </h1>
+                <p style="color: rgba(255,255,255,0.9); font-size: 1.125rem; margin-bottom: 32px; line-height: 1.6; font-weight: 400;">
                     Discover amazing food from multiple vendors in one place. Fresh ingredients, bold flavors, and tasty options for everyone.
                 </p>
-                <div style="display: flex; gap: 15px; flex-wrap: wrap;">
-                    <span style="background: rgba(255,255,255,0.2); padding: 8px 16px; border-radius: 20px; color: white; font-size: 14px; font-weight: 500;">
+                
+                <!-- Feature Pills -->
+                <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                    <div style="display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); padding: 8px 16px; border-radius: 50px; color: white; font-size: 14px; font-weight: 500;">
                         ⚡ Fast Service
-                    </span>
-                    <span style="background: rgba(255,255,255,0.2); padding: 8px 16px; border-radius: 20px; color: white; font-size: 14px; font-weight: 500;">
-                        🥘 Multiple Cuisines
-                    </span>
-                    <span style="background: rgba(255,255,255,0.2); padding: 8px 16px; border-radius: 20px; color: white; font-size: 14px; font-weight: 500;">
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); padding: 8px 16px; border-radius: 50px; color: white; font-size: 14px; font-weight: 500;">
+                        🌐 Multiple Cuisines
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); padding: 8px 16px; border-radius: 50px; color: white; font-size: 14px; font-weight: 500;">
                         💰 Great Prices
-                    </span>
+                    </div>
                 </div>
             </div>
-            
-            <!-- Right Content - Burger Image -->
-            <div style="flex: 1; text-align: center; position: relative;">
-                <div style="position: relative; display: inline-block;">
-                    <!-- Main Burger Image -->
-                    <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDMwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxjaXJjbGUgY3g9IjE1MCIgY3k9IjE1MCIgcj0iMTQwIiBmaWxsPSIjRkY2QjM1Ii8+CjxyZWN0IHg9IjUwIiB5PSI4MCIgd2lkdGg9IjIwMCIgaGVpZ2h0PSIyMCIgcng9IjEwIiBmaWxsPSIjQjQ1MzA5Ii8+CjxyZWN0IHg9IjUwIiB5PSIxMTAiIHdpZHRoPSIyMDAiIGhlaWdodD0iMzAiIHJ4PSIxNSIgZmlsbD0iIzIyQzU1RSIvPgo8cmVjdCB4PSI1MCIgeT0iMTUwIiB3aWR0aD0iMjAwIiBoZWlnaHQ9IjQwIiByeD0iMjAiIGZpbGw9IiM5MjQwMEQiLz4KPHJlY3QgeD0iNTAiIHk9IjIwMCIgd2lkdGg9IjIwMCIgaGVpZ2h0PSIyMCIgcng9IjEwIiBmaWxsPSIjQjQ1MzA5Ii8+Cjx0ZXh0IHg9IjE1MCIgeT0iMjUwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSJ3aGl0ZSIgZm9udC1zaXplPSIyNCIgZm9udC13ZWlnaHQ9ImJvbGQiPvCfjYQ8L3RleHQ+Cjwvc3ZnPgo=" 
-                         alt="Delicious Burger" 
-                         style="width: 280px; height: 280px; filter: drop-shadow(0 20px 40px rgba(0,0,0,0.3));">
-                    
-                    <!-- Floating elements -->
-                    <div style="position: absolute; top: 20px; right: -20px; background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); padding: 12px; border-radius: 15px; animation: float 3s ease-in-out infinite;">
-                        <span style="font-size: 24px;">🔥</span>
-                    </div>
-                    <div style="position: absolute; bottom: 30px; left: -30px; background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); padding: 12px; border-radius: 15px; animation: float 3s ease-in-out infinite reverse;">
-                        <span style="font-size: 24px;">⭐</span>
-                    </div>
+
+            <!-- Right Visual -->
+            <div style="flex: 1; display: flex; justify-content: center; align-items: center; position: relative; min-height: 300px;">
+                <div style="width: 320px; height: 320px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; position: relative; backdrop-filter: blur(20px);">
+                    <!-- Burger Emoji - Made Bigger -->
+                    <div style="font-size: 120px; filter: drop-shadow(0 8px 16px rgba(0,0,0,0.2));">🍔</div>
+                </div>
+                
+                <!-- Floating Elements -->
+                <div style="position: absolute; top: 10%; right: 10%; background: rgba(16, 185, 129, 0.2); backdrop-filter: blur(10px); padding: 12px; border-radius: 50%; animation: float 3s ease-in-out infinite;">
+                    <div style="font-size: 24px;">⭐</div>
+                </div>
+                <div style="position: absolute; bottom: 20%; left: 5%; background: rgba(239, 68, 68, 0.2); backdrop-filter: blur(10px); padding: 12px; border-radius: 50%; animation: float 3s ease-in-out infinite reverse;">
+                    <div style="font-size: 24px;">🔥</div>
                 </div>
             </div>
         </div>
     </div>
-    
-    <!-- Background Pattern -->
-    <div style="position: absolute; top: 0; right: 0; width: 100%; height: 100%; background: url('data:image/svg+xml,<svg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"><g fill="none" fill-rule="evenodd"><g fill="%23ffffff" fill-opacity="0.05"><circle cx="30" cy="30" r="1"/></g></svg>'); opacity: 0.3;"></div>
 </section>
 
-<!-- Categories Section -->
-<section style="padding: 40px 0 20px; background: #f8fafc; border-top: 1px solid #e2e8f0;">
-    <div class="container">
-        <!-- Category Navigation -->
-        <div style="display: flex; gap: 15px; overflow-x: auto; padding: 0 0 20px 0; scrollbar-width: none; -ms-overflow-style: none;">
-            <a href="{{ route('menu.index') }}" 
-               style="min-width: 80px; text-align: center; padding: 15px 20px; background: {{ !request('category') ? '#2E5BBA' : 'white' }}; color: {{ !request('category') ? 'white' : '#2E5BBA' }}; border-radius: 20px; text-decoration: none; font-weight: 600; border: 2px solid #2E5BBA; transition: all 0.3s; flex-shrink: 0; box-shadow: {{ !request('category') ? '0 4px 15px rgba(46,91,186,0.3)' : '0 2px 8px rgba(0,0,0,0.06)' }};">
-                <div style="font-size: 24px; margin-bottom: 8px;">🍽️</div>
-                <div style="font-size: 12px; line-height: 1.2; font-weight: 600;">All Items</div>
-            </a>
-            
-            <!-- Update these to use actual category filtering from your MenuController -->
-            <a href="{{ route('menu.index', ['category' => 'breakfast']) }}" 
-               style="min-width: 80px; text-align: center; padding: 15px 20px; background: {{ request('category') === 'breakfast' ? '#2E5BBA' : 'white' }}; color: {{ request('category') === 'breakfast' ? 'white' : '#2E5BBA' }}; border-radius: 20px; text-decoration: none; font-weight: 600; border: 2px solid #2E5BBA; transition: all 0.3s; flex-shrink: 0; box-shadow: {{ request('category') === 'breakfast' ? '0 4px 15px rgba(46,91,186,0.3)' : '0 2px 8px rgba(0,0,0,0.06)' }};">
-                <div style="font-size: 24px; margin-bottom: 8px;">🥞</div>
-                <div style="font-size: 12px; line-height: 1.2; font-weight: 600;">Breakfast</div>
-            </a>
-            
-            <a href="{{ route('menu.index', ['category' => 'rice']) }}" 
-               style="min-width: 80px; text-align: center; padding: 15px 20px; background: {{ request('category') === 'rice' ? '#2E5BBA' : 'white' }}; color: {{ request('category') === 'rice' ? 'white' : '#2E5BBA' }}; border-radius: 20px; text-decoration: none; font-weight: 600; border: 2px solid #2E5BBA; transition: all 0.3s; flex-shrink: 0; box-shadow: {{ request('category') === 'rice' ? '0 4px 15px rgba(46,91,186,0.3)' : '0 2px 8px rgba(0,0,0,0.06)' }};">
-                <div style="font-size: 24px; margin-bottom: 8px;">🍚</div>
-                <div style="font-size: 12px; line-height: 1.2; font-weight: 600;">Rice Meals</div>
-            </a>
-            
-            <a href="{{ route('menu.index', ['category' => 'pasta']) }}" 
-               style="min-width: 80px; text-align: center; padding: 15px 20px; background: {{ request('category') === 'pasta' ? '#2E5BBA' : 'white' }}; color: {{ request('category') === 'pasta' ? 'white' : '#2E5BBA' }}; border-radius: 20px; text-decoration: none; font-weight: 600; border: 2px solid #2E5BBA; transition: all 0.3s; flex-shrink: 0; box-shadow: {{ request('category') === 'pasta' ? '0 4px 15px rgba(46,91,186,0.3)' : '0 2px 8px rgba(0,0,0,0.06)' }};">
-                <div style="font-size: 24px; margin-bottom: 8px;">🍝</div>
-                <div style="font-size: 12px; line-height: 1.2; font-weight: 600;">Pasta & Noodles</div>
-            </a>
-            
-            <a href="{{ route('menu.index', ['category' => 'snacks']) }}" 
-               style="min-width: 80px; text-align: center; padding: 15px 20px; background: {{ request('category') === 'snacks' ? '#2E5BBA' : 'white' }}; color: {{ request('category') === 'snacks' ? 'white' : '#2E5BBA' }}; border-radius: 20px; text-decoration: none; font-weight: 600; border: 2px solid #2E5BBA; transition: all 0.3s; flex-shrink: 0; box-shadow: {{ request('category') === 'snacks' ? '0 4px 15px rgba(46,91,186,0.3)' : '0 2px 8px rgba(0,0,0,0.06)' }};">
-                <div style="font-size: 24px; margin-bottom: 8px;">🍟</div>
-                <div style="font-size: 12px; line-height: 1.2; font-weight: 600;">Snacks</div>
-            </a>
-            
-            <a href="{{ route('menu.index', ['category' => 'beverages']) }}" 
-               style="min-width: 80px; text-align: center; padding: 15px 20px; background: {{ request('category') === 'beverages' ? '#2E5BBA' : 'white' }}; color: {{ request('category') === 'beverages' ? 'white' : '#2E5BBA' }}; border-radius: 20px; text-decoration: none; font-weight: 600; border: 2px solid #2E5BBA; transition: all 0.3s; flex-shrink: 0; box-shadow: {{ request('category') === 'beverages' ? '0 4px 15px rgba(46,91,186,0.3)' : '0 2px 8px rgba(0,0,0,0.06)' }};">
-                <div style="font-size: 24px; margin-bottom: 8px;">🥤</div>
-                <div style="font-size: 12px; line-height: 1.2; font-weight: 600;">Beverages</div>
-            </a>
-        </div>
-
-        <!-- Search Bar -->
-        <div style="background: white; border-radius: 15px; padding: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 30px;">
-            <form action="{{ route('menu.index') }}" method="GET" style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
-                <!-- Preserve current category in search -->
+<!-- Floating Search Card -->
+<section style="position: relative; z-index: 10; margin-top: -60px; padding: 0 20px 40px;">
+    <div class="container" style="max-width: 1200px; margin: 0 auto;">
+        <div style="background: white; border-radius: 24px; padding: 32px; box-shadow: 0 20px 60px rgba(0,0,0,0.1); border: 1px solid rgba(255,255,255,0.2);">
+            <form action="{{ route('menu.index') }}" method="GET" style="display: flex; gap: 16px; align-items: center; flex-wrap: wrap;">
                 @if(request('category'))
                     <input type="hidden" name="category" value="{{ request('category') }}">
                 @endif
-                
-                <div style="flex: 1; min-width: 250px;">
-                    <input type="text" name="search" value="{{ request('search') }}" 
-                           placeholder="Search for food items..." 
-                           style="width: 100%; padding: 12px 16px; border: 1px solid #e2e8f0; border-radius: 12px; font-size: 15px; outline: none; transition: border-color 0.2s;"
-                           onfocus="this.style.borderColor='#2E5BBA'"
-                           onblur="this.style.borderColor='#e2e8f0'">
+
+                <!-- Search Input -->
+                <div style="position: relative; flex: 1; min-width: 300px;">
+                    <svg style="position: absolute; left: 20px; top: 50%; transform: translateY(-50%); color: #9ca3af; z-index: 1;" width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clip-rule="evenodd"/>
+                    </svg>
+                    <input type="text" name="search" value="{{ request('search') }}"
+                           placeholder="Search for delicious food items..."
+                           style="width: 100%; padding: 16px 20px 16px 52px; border: 2px solid #f1f5f9; border-radius: 16px; font-size: 16px; background: #fafafa; transition: all 0.3s ease; outline: none;"
+                           onfocus="this.style.borderColor='#FF6B35'; this.style.background='white'"
+                           onblur="this.style.borderColor='#f1f5f9'; this.style.background='#fafafa'">
                 </div>
-                
-                <select name="stall" style="padding: 12px 16px; border: 1px solid #e2e8f0; border-radius: 12px; background: white; min-width: 150px; font-size: 14px; outline: none;">
+
+                <!-- Stall Dropdown -->
+                <select name="stall" style="padding: 16px 20px; border: 2px solid #f1f5f9; border-radius: 16px; background: #fafafa; min-width: 160px; font-size: 16px; font-weight: 500; transition: all 0.3s ease; outline: none;"
+                        onfocus="this.style.borderColor='#FF6B35'; this.style.background='white'"
+                        onblur="this.style.borderColor='#f1f5f9'; this.style.background='#fafafa'">
                     <option value="">All Stalls</option>
                     @foreach(App\Models\Stall::where('is_active', true)->get() as $stall)
                         <option value="{{ $stall->id }}" {{ request('stall') == $stall->id ? 'selected' : '' }}>
@@ -121,75 +82,158 @@
                     @endforeach
                 </select>
 
-                <button type="submit" style="background: #2E5BBA; color: white; padding: 12px 20px; border: none; border-radius: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s;"
-                        onmouseover="this.style.background='#1e40af'"
-                        onmouseout="this.style.background='#2E5BBA'">
+                <!-- Search Button -->
+                <button type="submit" style="background: #FF6B35; color: white; padding: 16px 32px; border: none; border-radius: 16px; font-weight: 600; font-size: 16px; transition: all 0.3s ease; cursor: pointer; box-shadow: 0 4px 14px rgba(255, 107, 53, 0.3);"
+                        onmouseover="this.style.background='#FF4500'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(255, 107, 53, 0.4)'"
+                        onmouseout="this.style.background='#FF6B35'; this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 14px rgba(255, 107, 53, 0.3)'">
                     Search
                 </button>
 
+                <!-- Clear Button -->
                 @if(request()->hasAny(['search', 'category', 'stall']))
-                    <a href="{{ route('menu.index') }}" style="background: #f1f5f9; color: #64748b; padding: 12px 20px; border-radius: 12px; text-decoration: none; font-weight: 500; transition: all 0.2s;"
-                       onmouseover="this.style.background='#e2e8f0'"
-                       onmouseout="this.style.background='#f1f5f9'">
+                    <a href="{{ route('menu.index') }}" style="background: #f8fafc; color: #64748b; padding: 16px 24px; border-radius: 16px; font-weight: 500; border: 2px solid #f1f5f9; transition: all 0.3s ease; text-decoration: none;"
+                       onmouseover="this.style.background='#f1f5f9'; this.style.color='#374151'"
+                       onmouseout="this.style.background='#f8fafc'; this.style.color='#64748b'">
                         Clear
                     </a>
                 @endif
             </form>
         </div>
+    </div>
+</section>
 
-        <!-- Results Header -->
-        <div style="margin-bottom: 25px;">
-            <h2 style="color: #1e293b; font-size: 24px; font-weight: 700; margin: 0 0 6px 0;">
-                @if(request('category'))
-                    {{ ucfirst(str_replace('-', ' ', request('category'))) }} Items
-                @elseif(request('search'))
-                    Search Results
-                @else
-                    All Menu Items
-                @endif
+<!-- Categories Section -->
+<section style="padding: 24px 0 16px; background: #fafbfc; position: sticky; top: 60px; z-index: 50; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+    <div class="container" style="max-width: 1200px; margin: 0 auto; padding: 0 20px;">
+        
+        <!-- Desktop Category Pills -->
+        <div class="category-desktop" style="display: flex; justify-content: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
+            <!-- All Items -->
+            <button class="filter-category active" data-category="all" 
+               style="display: flex; align-items: center; gap: 8px; padding: 12px 24px; border-radius: 50px; text-decoration: none; font-weight: 500; transition: all 0.3s ease; border: 2px solid transparent; background: #1e293b; color: white; box-shadow: 0 4px 14px rgba(30, 41, 59, 0.3); cursor: pointer;"
+               onmouseover="this.style.transform='translateY(-2px)'"
+               onmouseout="this.style.transform='translateY(0)'">
+                <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm0 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V8zm0 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1v-2z" clip-rule="evenodd"/>
+                </svg>
+                All Items
+            </button>
+
+            <!-- Fresh Meats -->
+            <button class="filter-category" data-category="fresh-meals"
+               style="display: flex; align-items: center; gap: 8px; padding: 12px 24px; border-radius: 50px; text-decoration: none; font-weight: 500; transition: all 0.3s ease; border: 2px solid #e2e8f0; background: white; color: #64748b; cursor: pointer;"
+               onmouseover="this.style.transform='translateY(-2px)'"
+               onmouseout="this.style.transform='translateY(0)'">
+                <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"/>
+                </svg>
+                Fresh Meats
+            </button>
+
+            <!-- Sandwiches -->
+            <button class="filter-category" data-category="sandwiches"
+               style="display: flex; align-items: center; gap: 8px; padding: 12px 24px; border-radius: 50px; text-decoration: none; font-weight: 500; transition: all 0.3s ease; border: 2px solid #e2e8f0; background: white; color: #64748b; cursor: pointer;"
+               onmouseover="this.style.transform='translateY(-2px)'"
+               onmouseout="this.style.transform='translateY(0)'">
+                <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M3 5a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2h-2.22l.123.489.804.804A1 1 0 0113 18H7a1 1 0 01-.707-1.707l.804-.804L7.22 15H5a2 2 0 01-2-2V5zm5.771 7H5V5h10v7H8.771z" clip-rule="evenodd"/>
+                </svg>
+                Sandwiches
+            </button>
+
+            <!-- Beverages -->
+            <button class="filter-category" data-category="beverages"
+               style="display: flex; align-items: center; gap: 8px; padding: 12px 24px; border-radius: 50px; text-decoration: none; font-weight: 500; transition: all 0.3s ease; border: 2px solid #e2e8f0; background: white; color: #64748b; cursor: pointer;"
+               onmouseover="this.style.transform='translateY(-2px)'"
+               onmouseout="this.style.transform='translateY(0)'">
+                <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V4a2 2 0 00-2-2H6zm1 2a1 1 0 000 2h6a1 1 0 100-2H7zm6 7a1 1 0 011 1v3a1 1 0 11-2 0v-3a1 1 0 011-1zm-3 3a1 1 0 100 2h.01a1 1 0 100-2H10zm-4 1a1 1 0 011-1h.01a1 1 0 110 2H7a1 1 0 01-1-1z" clip-rule="evenodd"/>
+                </svg>
+                Beverages
+            </button>
+
+            <!-- Snacks -->
+            <button class="filter-category" data-category="snacks"
+               style="display: flex; align-items: center; gap: 8px; padding: 12px 24px; border-radius: 50px; text-decoration: none; font-weight: 500; transition: all 0.3s ease; border: 2px solid #e2e8f0; background: white; color: #64748b; cursor: pointer;"
+               onmouseover="this.style.transform='translateY(-2px)'"
+               onmouseout="this.style.transform='translateY(0)'">
+                <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M5 2a1 1 0 000 2h1.17l.313 1.249L8.58 10.52A1 1 0 009.553 11H16a1 1 0 00.894-1.447L18.618 6H16V4a2 2 0 00-2-2H5zM9 16a2 2 0 11-4 0 2 2 0 014 0zM19 16a2 2 0 11-4 0 2 2 0 014 0z"/>
+                </svg>
+                Snacks
+            </button>
+
+            <!-- Desserts -->
+            <button class="filter-category" data-category="desserts"
+               style="display: flex; align-items: center; gap: 8px; padding: 12px 24px; border-radius: 50px; text-decoration: none; font-weight: 500; transition: all 0.3s ease; border: 2px solid #e2e8f0; background: white; color: #64748b; cursor: pointer;"
+               onmouseover="this.style.transform='translateY(-2px)'"
+               onmouseout="this.style.transform='translateY(0)'">
+                <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V4a2 2 0 00-2-2H6zm4 14a4 4 0 100-8 4 4 0 000 8z" clip-rule="evenodd"/>
+                </svg>
+                Desserts
+            </button>
+        </div>
+
+        <!-- Mobile Category Dropdown -->
+        <div class="category-mobile" style="display: none; margin-bottom: 16px; text-align: center;">
+            <select id="category-dropdown" style="width: 100%; max-width: 300px; padding: 16px 20px; border: 2px solid #e2e8f0; border-radius: 16px; background: white; font-size: 16px; font-weight: 500; color: #1e293b; outline: none; cursor: pointer;">
+                <option value="all">🍽️ All Items</option>
+                <option value="fresh-meats">🥩 Fresh Meats</option>
+                <option value="sandwiches">🥪 Sandwiches</option>
+                <option value="beverages">🥤 Beverages</option>
+                <option value="snacks">🍟 Snacks</option>
+                <option value="desserts">🍰 Desserts</option>
+            </select>
+        </div>
+    </div>
+</section>
+
+<!-- Section Title - Moved outside sticky area -->
+<section style="padding: 16px 0 0; background: #fafbfc;">
+    <div class="container" style="max-width: 1200px; margin: 0 auto; padding: 0 20px;">
+        <div style="text-align: left; margin-bottom: 24px;">
+            <h2 style="color: #1e293b; font-size: 2rem; font-weight: 700; margin-bottom: 8px; font-family: system-ui, -apple-system, sans-serif;">
+                <span id="category-title">All Menu Items</span>
             </h2>
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <p style="color: #64748b; font-size: 14px; margin: 0;">{{ $products->total() }} items available</p>
-                
-                @if(session('user_type') === 'employee')
-                    <span style="background: #dcfce7; color: #166534; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;">
-                        🎉 Employee Discounts Active
-                    </span>
-                @endif
-            </div>
+            <p style="color: #64748b; font-size: 1.125rem; margin: 0;"><span id="items-count">{{ $products->total() }}</span> items available</p>
         </div>
     </div>
 </section>
 
 <!-- Products Grid -->
-<section style="padding: 20px 0 60px; background: #f8fafc;">
-    <div class="container">
+<section style="padding: 0 0 80px; background: #fafbfc;">
+    <div class="container" style="max-width: 1200px; margin: 0 auto; padding: 0 20px;">
         @if($products->count() > 0)
-            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px;" id="menuGrid">
                 @foreach($products as $product)
-                    @livewire('add-to-cart-button', [
-                        'product' => $product,
-                        'showPrice' => true,
-                        'showQuantitySelector' => false,
-                        'buttonText' => 'Add',
-                        'buttonSize' => 'medium'
-                    ], key('hero-menu-product-'.$product->id))
+                    <div class="menu-item" data-category="{{ strtolower(str_replace(' ', '-', $product->category->name ?? 'uncategorized')) }}" style="opacity: 1; transform: translateY(0); transition: all 0.3s ease;">
+                        @livewire('add-to-cart-button', [
+                            'product' => $product,
+                            'showPrice' => true,
+                            'showQuantitySelector' => false,
+                            'buttonText' => 'Add',
+                            'buttonSize' => 'medium'
+                        ], key('hero-menu-product-'.$product->id))
+                    </div>
                 @endforeach
             </div>
 
             <!-- Pagination -->
-            <div style="margin-top: 50px; display: flex; justify-content: center;">
-                <div style="background: white; padding: 12px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
+            <div style="margin-top: 60px; display: flex; justify-content: center;">
+                <div style="background: white; padding: 20px; border-radius: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.08);">
                     {{ $products->appends(request()->query())->links() }}
                 </div>
             </div>
         @else
             <!-- No Results -->
-            <div style="text-align: center; padding: 80px 20px; background: white; border-radius: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
-                <div style="font-size: 64px; margin-bottom: 24px; opacity: 0.3;">🔍</div>
-                <h3 style="color: #1e293b; margin-bottom: 16px; font-size: 20px; font-weight: 600;">No items found</h3>
-                <p style="color: #64748b; margin-bottom: 32px;">Try adjusting your search or browse all available items.</p>
-                <a href="{{ route('menu.index') }}" style="background: #2E5BBA; color: white; padding: 14px 28px; border-radius: 25px; text-decoration: none; font-weight: 600;">
+            <div style="text-align: center; padding: 80px 32px; background: white; border-radius: 24px; box-shadow: 0 8px 32px rgba(0,0,0,0.08);">
+                <div style="font-size: 4rem; margin-bottom: 24px; opacity: 0.3;">🍔</div>
+                <h3 style="color: #1e293b; margin-bottom: 16px; font-size: 1.5rem; font-weight: 600;">No items found</h3>
+                <p style="color: #64748b; margin-bottom: 32px; font-size: 1.125rem;">Try adjusting your search or browse all available items.</p>
+                <a href="{{ route('menu.index') }}" style="display: inline-block; background: #FF6B35; color: white; padding: 16px 32px; border-radius: 16px; text-decoration: none; font-weight: 600; box-shadow: 0 4px 14px rgba(255, 107, 53, 0.3); transition: all 0.3s ease;"
+                   onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(255, 107, 53, 0.4)'"
+                   onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 14px rgba(255, 107, 53, 0.3)'">
                     View All Items
                 </a>
             </div>
@@ -197,16 +241,346 @@
     </div>
 </section>
 
-<!-- Animations -->
+<!-- CSS Animations and JavaScript -->
 <style>
 @keyframes float {
     0%, 100% { transform: translateY(0px); }
     50% { transform: translateY(-10px); }
 }
 
-div::-webkit-scrollbar {
-    height: 0px;
-    background: transparent;
+/* Show/hide category elements based on screen size */
+@media (max-width: 767px) {
+    .category-desktop {
+        display: none !important;
+    }
+    
+    .category-mobile {
+        display: block !important;
+    }
+}
+
+@media (min-width: 768px) {
+    .category-desktop {
+        display: flex !important;
+    }
+    
+    .category-mobile {
+        display: none !important;
+    }
+}
+
+/* McDonald's-level Mobile Responsiveness */
+/* Small phones (320px - 480px) */
+@media (max-width: 480px) {
+    section:first-child {
+        padding: 40px 16px 80px !important;
+        border-radius: 0 0 24px 24px !important;
+    }
+    
+    section:first-child h1 {
+        font-size: 2rem !important;
+        margin-bottom: 16px !important;
+        text-align: center;
+    }
+    
+    section:first-child p {
+        font-size: 1rem !important;
+        margin-bottom: 24px !important;
+        text-align: center;
+    }
+    
+    section:first-child > div > div {
+        flex-direction: column !important;
+        text-align: center !important;
+        gap: 40px !important;
+    }
+    
+    /* Hide burger visual on very small screens */
+    section:first-child > div > div > div:last-child {
+        display: none !important;
+    }
+    
+    /* Make pills stack better */
+    section:first-child .hero-pills {
+        justify-content: center !important;
+        gap: 8px !important;
+    }
+    
+    /* Search card mobile optimization */
+    section:nth-child(2) {
+        margin-top: -40px !important;
+        padding: 0 16px 24px !important;
+    }
+    
+    section:nth-child(2) > div {
+        max-width: 100% !important;
+    }
+    
+    section:nth-child(2) form {
+        flex-direction: column !important;
+        gap: 16px !important;
+    }
+    
+    section:nth-child(2) form > div:first-child {
+        width: 100% !important;
+        min-width: unset !important;
+    }
+    
+    section:nth-child(2) select {
+        width: 100% !important;
+        min-width: unset !important;
+    }
+    
+    section:nth-child(2) button,
+    section:nth-child(2) a {
+        width: 100% !important;
+        min-height: 48px !important;
+        justify-content: center !important;
+    }
+    
+    /* Category section mobile */
+    section:nth-child(3) {
+        padding: 40px 0 24px !important;
+    }
+    
+    section:nth-child(3) > div {
+        padding: 0 16px !important;
+    }
+    
+    /* Products grid mobile */
+    section:last-child > div {
+        padding: 0 16px !important;
+    }
+    
+    section:last-child div[style*="grid"] {
+        grid-template-columns: 1fr !important;
+        gap: 16px !important;
+    }
+}
+
+/* Large phones (481px - 767px) */
+@media (min-width: 481px) and (max-width: 767px) {
+    section:first-child {
+        padding: 60px 20px 100px !important;
+        border-radius: 0 0 32px 32px !important;
+    }
+    
+    section:first-child h1 {
+        font-size: 2.5rem !important;
+    }
+    
+    section:first-child > div > div {
+        text-align: center !important;
+        gap: 50px !important;
+    }
+    
+    /* Show smaller burger on larger phones */
+    section:first-child > div > div > div:last-child {
+        display: flex !important;
+    }
+    
+    section:first-child > div > div > div:last-child > div {
+        width: 200px !important;
+        height: 200px !important;
+    }
+    
+    section:first-child > div > div > div:last-child > div > div {
+        font-size: 80px !important;
+    }
+    
+    /* Search optimizations */
+    section:nth-child(2) form {
+        flex-wrap: wrap !important;
+        justify-content: center !important;
+    }
+    
+    section:nth-child(2) form > div:first-child {
+        flex: 1 1 100% !important;
+        margin-bottom: 16px !important;
+    }
+    
+    section:nth-child(2) select {
+        flex: 1 !important;
+        min-width: 140px !important;
+    }
+    
+    /* Products grid */
+    section:last-child div[style*="grid"] {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 20px !important;
+    }
+}
+
+/* Tablets (768px - 1024px) */
+@media (min-width: 768px) and (max-width: 1024px) {
+    section:first-child {
+        padding: 70px 20px 110px !important;
+    }
+    
+    section:first-child h1 {
+        font-size: 3rem !important;
+    }
+    
+    /* Search form on tablets */
+    section:nth-child(2) > div {
+        max-width: 900px !important;
+    }
+    
+    /* Products grid */
+    section:last-child div[style*="grid"] {
+        grid-template-columns: repeat(3, 1fr) !important;
+    }
+}
+
+/* Large screens (1025px+) */
+@media (min-width: 1025px) {
+    section:first-child {
+        border-radius: 0 0 48px 48px !important;
+    }
+    
+    /* Products grid - 4 columns on desktop */
+    section:last-child div[style*="grid"] {
+        grid-template-columns: repeat(4, 1fr) !important;
+        gap: 24px !important;
+    }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+    button, a, select, input {
+        min-height: 44px !important;
+    }
+    
+    .filter-category {
+        min-height: 48px !important;
+        padding: 12px 20px !important;
+    }
+}
+
+/* Custom scrollbar */
+*::-webkit-scrollbar {
+    height: 6px;
+    width: 6px;
+}
+
+*::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 10px;
+}
+
+*::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* Smooth transitions */
+* {
+    box-sizing: border-box;
+}
+
+
+button:focus,
+input:focus,
+select:focus {
+    outline: 2px solid #FF6B35;
+    outline-offset: 2px;
 }
 </style>
+
+<!-- JavaScript for Category Filtering -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const categoryButtons = document.querySelectorAll('.filter-category');
+    const menuItems = document.querySelectorAll('.menu-item');
+    const categoryDropdown = document.getElementById('category-dropdown');
+    const categoryTitle = document.getElementById('category-title');
+    const itemsCount = document.getElementById('items-count');
+    
+    // Category name mapping
+    const categoryNames = {
+        'all': 'All Menu Items',
+        'fresh-meals': 'Fresh Meals',
+        'sandwiches': 'Sandwiches', 
+        'beverages': 'Beverages', 
+        'snacks': 'Snacks',
+        'desserts': 'Desserts'
+    };
+
+    // Function to filter items
+    function filterItems(selectedCategory) {
+        let visibleCount = 0;
+        
+        menuItems.forEach(item => {
+            if (selectedCategory === 'all' || item.dataset.category === selectedCategory) {
+                item.style.display = 'block';
+                item.style.opacity = '0';
+                item.style.transform = 'translateY(20px)';
+                
+                setTimeout(() => {
+                    item.style.opacity = '1';
+                    item.style.transform = 'translateY(0)';
+                }, 50);
+                
+                visibleCount++;
+            } else {
+                item.style.opacity = '0';
+                item.style.transform = 'translateY(-20px)';
+                
+                setTimeout(() => {
+                    item.style.display = 'none';
+                }, 300);
+            }
+        });
+        
+        // Update title and count
+        categoryTitle.textContent = categoryNames[selectedCategory] || 'All Menu Items';
+        itemsCount.textContent = visibleCount;
+    }
+
+    // Function to update button states
+    function updateButtonStates(selectedCategory) {
+        categoryButtons.forEach(btn => {
+            if (btn.dataset.category === selectedCategory) {
+                btn.style.background = '#1e293b';
+                btn.style.color = 'white';
+                btn.style.borderColor = '#1e293b';
+                btn.style.boxShadow = '0 4px 14px rgba(30, 41, 59, 0.3)';
+                btn.classList.add('active');
+            } else {
+                btn.style.background = 'white';
+                btn.style.color = '#64748b';
+                btn.style.borderColor = '#e2e8f0';
+                btn.style.boxShadow = 'none';
+                btn.classList.remove('active');
+            }
+        });
+    }
+
+    // Desktop category button clicks
+    categoryButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            const selectedCategory = this.dataset.category;
+            
+            updateButtonStates(selectedCategory);
+            filterItems(selectedCategory);
+            
+            // Update dropdown to match
+            categoryDropdown.value = selectedCategory;
+        });
+    });
+
+    // Mobile dropdown change
+    categoryDropdown.addEventListener('change', function() {
+        const selectedCategory = this.value;
+        
+        updateButtonStates(selectedCategory);
+        filterItems(selectedCategory);
+    });
+});
+</script>
 @endsection

@@ -32,17 +32,30 @@ return [
     | Content Security Policy (CSP) Settings
     |--------------------------------------------------------------------------
     */
-    'csp' => [
+    'csp' => env('APP_ENV') === 'production'
+    ? [   // Production rules
         'default-src' => "'self'",
-        'script-src' => "'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net",
-        'style-src' => "'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net",
-        'font-src' => "'self' https://fonts.gstatic.com",
-        'img-src' => "'self' data: https:",
-        'connect-src' => "'self'",
-        'frame-src' => "'none'",
+        'script-src' => "'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdn.tailwindcss.com",
+        'style-src'  => "'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.bunny.net https://cdn.jsdelivr.net",
+        'font-src'   => "'self' https://fonts.gstatic.com https://fonts.bunny.net",
+        'img-src'    => "'self' data: blob: https:",
+        'connect-src'=> "'self'",
+        'frame-src'  => "'none'",
         'object-src' => "'none'",
-        'base-uri' => "'self'",
-        'form-action' => "'self'",
+        'base-uri'   => "'self'",
+        'form-action'=> "'self'",
+    ]
+    : [   // Dev rules (with Vite + localhost)
+        'default-src' => "'self'",
+        'script-src' => "'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdn.tailwindcss.com http://localhost:5173 http://[::1]:5173",
+        'style-src'  => "'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.bunny.net https://cdn.jsdelivr.net http://localhost:5173 http://[::1]:5173",
+        'font-src'   => "'self' https://fonts.gstatic.com https://fonts.bunny.net",
+        'img-src'    => "'self' data: blob: http://localhost:8000 http://localhost:5173 http://[::1]:5173 https:",
+        'connect-src'=> "'self' ws://localhost:5173 ws://127.0.0.1:5173 ws://[::1]:5173 http://localhost:8000",
+        'frame-src'  => "'none'",
+        'object-src' => "'none'",
+        'base-uri'   => "'self'",
+        'form-action'=> "'self'",
     ],
 
     /*

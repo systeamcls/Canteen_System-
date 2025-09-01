@@ -262,4 +262,5 @@ class Stall extends Model
     
     return $currentPayment->status;
 }
+    
 }

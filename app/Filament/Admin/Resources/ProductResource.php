@@ -126,12 +126,11 @@ class ProductResource extends Resource
                     Forms\Components\FileUpload::make('image')
                         ->image()
                         ->directory('products')
-                        ->imageResizeMode('cover')
-                        ->imageCropAspectRatio('4:3')
-                        ->imageResizeTargetWidth('800')
-                        ->imageResizeTargetHeight('600')
-                        ->maxSize(2048)
-                        ->helperText('Recommended: 800x600px, max 2MB')
+                        ->disk('public')
+                        ->visibility('public')
+                        ->maxSize(2048)  // 2MB limit
+                        ->acceptedFileTypes(['image/jpeg', 'image/png'])
+                        ->helperText('Max 2MB. JPEG or PNG format.')
                         ->columnSpanFull(),
                 ])
                 ->collapsible()

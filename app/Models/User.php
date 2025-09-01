@@ -67,12 +67,92 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'is_active' => 'boolean',
+            'two_factor_confirmed_at' => 'datetime',
         ];
     }
 
     protected $appends = [
         'profile_photo_url',
     ];
+
+    /*
+    |--------------------------------------------------------------------------
+    | Two-Factor Authentication Methods
+    |--------------------------------------------------------------------------
+    */
+
+    /**
+     * Determine if two-factor authentication has been enabled.
+     */
+    public function hasEnabledTwoFactorAuthentication(): bool
+    {
+        return !is_null($this->two_factor_secret) && !is_null($this->two_factor_confirmed_at);
+    }
+
+    /**
+     * Get the QR code URL for two-factor authentication setup.
+     */
+    public function twoFactorQrCodeUrl(): ?string
+    {
+        if (!$this->two_factor_secret) {
+            return null;
+        }
+
+        try {
+            $secret = decrypt($this->two_factor_secret);
+            $appName = config('app.name', 'Laravel App');
+            $qrText = 'otpauth://totp/' . urlencode($appName) . ':' . urlencode($this->email) . '?secret=' . $secret . '&issuer=' . urlencode($appName);
+            
+            return 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' . urlencode($qrText);
+        } catch (\Exception $e) {
+            return null;
+        }
+    }
+
+    /**
+     * Get formatted secret key for manual entry.
+     */
+    public function twoFactorFormattedSecret(): ?string
+    {
+        if (!$this->two_factor_secret) {
+            return null;
+        }
+
+        try {
+            $secret = decrypt($this->two_factor_secret);
+            $chunks = str_split($secret, 4);
+            return strtoupper(implode(' ', $chunks));
+        } catch (\Exception $e) {
+            return null;
+        }
+    }
+
+    /**
+     * Get recovery codes as array.
+     */
+    public function getTwoFactorRecoveryCodes(): array
+    {
+        if (!$this->two_factor_recovery_codes) {
+            return [];
+        }
+
+        try {
+            $decrypted = decrypt($this->two_factor_recovery_codes);
+            $codes = json_decode($decrypted, true);
+            
+            return is_array($codes) ? array_filter($codes, 'is_string') : [];
+        } catch (\Exception $e) {
+            return [];
+        }
+    }
+
+    /**
+     * Check if user has any recovery codes left.
+     */
+    public function hasRecoveryCodes(): bool
+    {
+        return count($this->getTwoFactorRecoveryCodes()) > 0;
+    }
 
     /*
     |--------------------------------------------------------------------------
@@ -177,7 +257,7 @@ class User extends Authenticatable
 
     /*
     |--------------------------------------------------------------------------
-    | Your Existing Methods (preserved)
+    | Your Existing Methods (preserved and updated)
     |--------------------------------------------------------------------------
     */
 
@@ -186,10 +266,10 @@ class User extends Authenticatable
         // Check if user has any admin/tenant roles and has 2FA enabled
         try {
             $hasRequiredRole = $this->hasAnyRole(['admin', 'tenant']);
-            return $hasRequiredRole && !is_null($this->two_factor_secret);
+            return $hasRequiredRole && $this->hasEnabledTwoFactorAuthentication();
         } catch (\Exception $e) {
             // Fallback if roles aren't set up yet
-            return !is_null($this->two_factor_secret);
+            return $this->hasEnabledTwoFactorAuthentication();
         }
     }
 
@@ -200,6 +280,19 @@ class User extends Authenticatable
         } catch (\Exception $e) {
             // Fallback if roles aren't set up yet - allow all users
             return true;
+        }
+    }
+
+    /**
+     * Check if 2FA is required but not set up.
+     */
+    public function needsTwoFactorSetup(): bool
+    {
+        try {
+            $hasRequiredRole = $this->hasAnyRole(['admin', 'tenant']);
+            return $hasRequiredRole && !$this->hasEnabledTwoFactorAuthentication();
+        } catch (\Exception $e) {
+            return false;
         }
     }
 

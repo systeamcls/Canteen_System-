@@ -1,7 +1,16 @@
 <div class="modern-product-card">
     <!-- Product Image -->
     <div class="modern-product-image">
-        <div class="food-icon">🍽️</div>
+        <!-- FIXED: Use model accessor for image URL -->
+        <img src="{{ $product->image_url }}" 
+             alt="{{ $product->name }}" 
+             class="product-img">
+        
+        @if(!$product->image)
+            <div class="no-image-overlay">
+                <div class="food-icon">🍽️</div>
+            </div>
+        @endif
         
         <!-- Badges -->
         <div class="product-badges">
@@ -138,10 +147,36 @@
         display: flex;
         align-items: center;
         justify-content: center;
+        overflow: hidden;
+    }
+
+    /* ADDED: Product image styles */
+    .product-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s;
+    }
+
+    .no-image-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(239, 246, 255, 0.9);
     }
 
     .food-icon {
         font-size: 48px;
+        opacity: 0.5;
+    }
+
+    .modern-product-card:hover .product-img {
+        transform: scale(1.05);
     }
 
     .product-badges {
@@ -151,6 +186,7 @@
         display: flex;
         flex-direction: column;
         gap: 6px;
+        z-index: 2;
     }
 
     .discount-badge {

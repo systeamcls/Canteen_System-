@@ -195,7 +195,7 @@ class AddToCartButton extends Component
      */
     public function formatPrice(float $price): string
     {
-        return '₱' . number_format($price, 2);
+        return '₱' . number_format($price / 100, 2);    
     }
 
     /**
