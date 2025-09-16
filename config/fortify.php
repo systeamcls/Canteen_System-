@@ -52,7 +52,7 @@ return [
     /*
     |--------------------------------------------------------------------------
     | Lowercase Usernames
-    |--------------------------------------------------------------------------
+    |-------------------------------------------x-------------------------------
     |
     | This value defines whether usernames should be lowercased before saving
     | them in the database, as some database system string fields are case

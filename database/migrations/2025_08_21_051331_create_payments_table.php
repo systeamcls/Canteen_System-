@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('order_group_id')->constrained()->onDelete('cascade');
             $table->foreignId('user_id')->nullable()->constrained()->onDelete('set null');
-           $table->foreignId('stall_id')->nullable()->constrained('stalls')->onDelete('set null'); // Assuming vendors table is your stalls
+            $table->foreignId('stall_id')->nullable()->constrained('stalls')->onDelete('set null'); // Assuming vendors table is your stalls
             $table->enum('payment_method', ['gcash', 'paymaya', 'card', 'cash']);
             $table->decimal('amount', 10, 2);
             $table->enum('status', ['pending', 'succeeded', 'failed', 'refunded'])->default('pending');

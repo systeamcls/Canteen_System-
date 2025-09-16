@@ -17,9 +17,9 @@ class TenantProductResource extends Resource
 {
     protected static ?string $model = Product::class;
     protected static ?string $navigationIcon = 'heroicon-o-cube';
-    protected static ?string $navigationGroup = 'Products';
-    protected static ?string $navigationLabel = 'My Products';
-    protected static ?int $navigationSort = 1;
+    protected static ?string $navigationGroup = null; 
+    protected static ?string $navigationLabel = 'Products';
+    protected static ?int $navigationSort = 2;
 
     public static function getEloquentQuery(): Builder
     {

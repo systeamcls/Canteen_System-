@@ -13,45 +13,38 @@
         @endif
         
         <!-- Badges -->
-        <div class="product-badges">
-            @if(session('user_type') === 'employee')
-                <span class="discount-badge">20% OFF</span>
-            @endif
-            
-            @if($product->is_available)
-                <span class="available-badge">Available</span>
-            @else
-                <span class="unavailable-badge">Unavailable</span>
-            @endif
-        </div>
+<div class="product-badges">
+    @if($product->is_available)
+        <span class="available-badge">Available</span>
+    @else
+        <span class="unavailable-badge">Unavailable</span>
+    @endif
+</div>
+</div>
+
+<!-- Product Info -->
+<div class="modern-product-info">
+    <!-- Vendor Name -->
+    <div class="vendor-tag">
+        {{ $product->stall->name }}
     </div>
 
-    <!-- Product Info -->
-    <div class="modern-product-info">
-        <!-- Vendor Name -->
-        <div class="vendor-tag">
-            {{ $product->stall->name }}
+    <!-- Product Name -->
+    <h3 class="modern-product-name">{{ $product->name }}</h3>
+
+    <!-- Description -->
+    <p class="modern-product-description">
+        {{ Str::limit($product->description ?: 'Fresh and delicious', 50) }}
+    </p>
+
+    <!-- Price and Controls Row -->
+    <div class="price-controls-row">
+        <!-- Price Section -->
+        <div class="price-section">
+            @if($showPrice)
+                <div class="current-price">{{ $this->formatPrice($product->price) }}</div>
+            @endif
         </div>
-
-        <!-- Product Name -->
-        <h3 class="modern-product-name">{{ $product->name }}</h3>
-
-        <!-- Description -->
-        <p class="modern-product-description">
-            {{ Str::limit($product->description ?: 'Fresh and delicious', 50) }}
-        </p>
-
-        <!-- Price and Controls Row -->
-        <div class="price-controls-row">
-            <!-- Price Section -->
-            <div class="price-section">
-                @if($showPrice)
-                    <div class="current-price">{{ $this->formatPrice($product->price) }}</div>
-                    @if(session('user_type') === 'employee')
-                        <div class="original-price">{{ $this->formatPrice($product->price * 1.2) }}</div>
-                    @endif
-                @endif
-            </div>
 
             <!-- Add to Cart Controls -->
             <div class="add-to-cart-controls">

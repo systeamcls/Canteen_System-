@@ -1,7 +1,7 @@
 <?php
 
 // ========================================
-// IMPROVED RENTALPAYMENTRESOURCE.PHP
+// UPDATED RENTALPAYMENTRESOURCE.PHP - DAILY RATE SYSTEM
 // ========================================
 
 namespace App\Filament\Admin\Resources;
@@ -31,8 +31,8 @@ class RentalPaymentResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Section::make('Payment Information')
-                    ->description('Record rental payment details')
+                Forms\Components\Section::make('Rental Payment Information')
+                    ->description('Record daily rental payment details')
                     ->schema([
                         Forms\Components\Grid::make(2)
                             ->schema([
@@ -43,16 +43,27 @@ class RentalPaymentResource extends Resource
                                     ->preload()
                                     ->required()
                                     ->live()
-                                    ->afterStateUpdated(function ($state, Forms\Set $set) {
+                                    ->afterStateUpdated(function ($state, Forms\Set $set, Forms\Get $get) {
                                         if ($state) {
                                             $stall = Stall::find($state);
                                             if ($stall) {
                                                 $set('tenant_id', $stall->tenant_id);
-                                                $set('amount', $stall->rental_fee);
+                                                
+                                                // Calculate rental amount based on period and daily rate
+                                                $periodStart = $get('period_start');
+                                                $periodEnd = $get('period_end');
+                                                
+                                                if ($periodStart && $periodEnd) {
+                                                    $days = Carbon::parse($periodStart)->diffInDays(Carbon::parse($periodEnd)) + 1;
+                                                    $totalAmount = $stall->rental_fee * $days;
+                                                    $set('amount', $totalAmount);
+                                                } else {
+                                                    $set('amount', $stall->rental_fee);
+                                                }
                                             }
                                         }
                                     })
-                                    ->helperText('Select the stall for this payment'),
+                                    ->helperText('Select the stall for this rental payment'),
 
                                 Forms\Components\Select::make('tenant_id')
                                     ->label('Tenant')
@@ -60,55 +71,113 @@ class RentalPaymentResource extends Resource
                                     ->searchable()
                                     ->preload()
                                     ->required()
-                                    ->helperText('The tenant making this payment'),
+                                    ->helperText('The tenant making this rental payment'),
                             ]),
-
-                        Forms\Components\TextInput::make('amount')
-                            ->required()
-                            ->numeric()
-                            ->prefix('₱')
-                            ->step(0.01)
-                            ->minValue(0.01)
-                            ->maxValue(999999.99)
-                            ->placeholder('0.00'),
                     ]),
 
-                Forms\Components\Section::make('Payment Period')
-                    ->description('Define the rental period for this payment')
+                Forms\Components\Section::make('Rental Period')
+                    ->description('Define the rental period (daily rate system)')
                     ->schema([
                         Forms\Components\Grid::make(3)
                             ->schema([
                                 Forms\Components\DatePicker::make('period_start')
                                     ->label('Period Start')
                                     ->required()
-                                    ->default(now()->startOfMonth())
+                                    ->default(now()->startOfDay())
                                     ->live()
-                                    ->afterStateUpdated(function ($state, Forms\Set $set) {
+                                    ->afterStateUpdated(function ($state, Forms\Set $set, Forms\Get $get) {
                                         if ($state) {
-                                            $date = Carbon::parse($state);
-                                            $set('period_end', $date->endOfMonth()->toDateString());
-                                            $set('due_date', $date->addMonth()->day(5)->toDateString());
+                                            $startDate = Carbon::parse($state);
+                                            
+                                            // Auto-set period end if not already set
+                                            if (!$get('period_end')) {
+                                                $set('period_end', $startDate->toDateString());
+                                            }
+                                            
+                                            // Set due date to next day
+                                            $set('due_date', $startDate->addDay()->toDateString());
+                                            
+                                            // Recalculate amount if stall is selected
+                                            $stallId = $get('stall_id');
+                                            $periodEnd = $get('period_end');
+                                            if ($stallId && $periodEnd) {
+                                                $stall = Stall::find($stallId);
+                                                if ($stall) {
+                                                    $days = $startDate->diffInDays(Carbon::parse($periodEnd)) + 1;
+                                                    $totalAmount = $stall->rental_fee * $days;
+                                                    $set('amount', $totalAmount);
+                                                }
+                                            }
                                         }
                                     }),
 
                                 Forms\Components\DatePicker::make('period_end')
                                     ->label('Period End')
                                     ->required()
-                                    ->default(now()->endOfMonth()),
+                                    ->default(now())
+                                    ->live()
+                                    ->afterStateUpdated(function ($state, Forms\Set $set, Forms\Get $get) {
+                                        if ($state) {
+                                            // Recalculate amount based on days
+                                            $stallId = $get('stall_id');
+                                            $periodStart = $get('period_start');
+                                            if ($stallId && $periodStart) {
+                                                $stall = Stall::find($stallId);
+                                                if ($stall) {
+                                                    $days = Carbon::parse($periodStart)->diffInDays(Carbon::parse($state)) + 1;
+                                                    $totalAmount = $stall->rental_fee * $days;
+                                                    $set('amount', $totalAmount);
+                                                }
+                                            }
+                                        }
+                                    }),
 
                                 Forms\Components\DatePicker::make('due_date')
-                                    ->label('Due Date')
+                                    ->label('Payment Due Date')
                                     ->required()
-                                    ->default(now()->addMonth()->day(5))
-                                    ->helperText('When payment is due'),
+                                    ->default(now()->addDay())
+                                    ->helperText('When rental payment is due'),
                             ]),
                     ]),
 
-                Forms\Components\Section::make('Payment Status')
-                    ->description('Track payment completion and dates')
+                Forms\Components\Section::make('Payment Amount & Details')
+                    ->description('Rental amount calculation and payment tracking')
                     ->schema([
-                        Forms\Components\Grid::make(2)
+                        Forms\Components\Grid::make(3)
                             ->schema([
+                                Forms\Components\Placeholder::make('daily_rate_info')
+                                    ->label('Daily Rate Info')
+                                    ->content(function (Forms\Get $get) {
+                                        $stallId = $get('stall_id');
+                                        if (!$stallId) return 'Select a stall to see daily rate';
+                                        
+                                        $stall = Stall::find($stallId);
+                                        if (!$stall) return 'Stall not found';
+                                        
+                                        $periodStart = $get('period_start');
+                                        $periodEnd = $get('period_end');
+                                        
+                                        if ($periodStart && $periodEnd) {
+                                            $days = Carbon::parse($periodStart)->diffInDays(Carbon::parse($periodEnd)) + 1;
+                                            return "Daily Rate: ₱" . number_format($stall->rental_fee, 2) . 
+                                                   "\nDays: {$days}" .
+                                                   "\nTotal: ₱" . number_format($stall->rental_fee * $days, 2);
+                                        }
+                                        
+                                        return "Daily Rate: ₱" . number_format($stall->rental_fee, 2);
+                                    }),
+
+                                Forms\Components\TextInput::make('amount')
+                                    ->label('Total Rental Amount')
+                                    ->required()
+                                    ->numeric()
+                                    ->prefix('₱')
+                                    ->step(0.01)
+                                    ->minValue(0.01)
+                                    ->maxValue(999999.99)
+                                    ->placeholder('0.00')
+                                    ->helperText('Calculated from daily rate × number of days'),
+
                                 Forms\Components\Select::make('status')
                                     ->options([
                                         'pending' => 'Pending',
@@ -125,19 +194,21 @@ class RentalPaymentResource extends Resource
                                         }
                                     })
                                     ->helperText('Current payment status'),
+                            ]),
 
+                        Forms\Components\Grid::make(2)
+                            ->schema([
                                 Forms\Components\DatePicker::make('paid_date')
                                     ->label('Date Paid')
                                     ->visible(fn (Forms\Get $get) => in_array($get('status'), ['paid', 'partially_paid']))
-                                    ->helperText('When was this payment completed?'),
-                            ]),
+                                    ->helperText('When was this rental payment completed?'),
 
-                        Forms\Components\Textarea::make('notes')
-                            ->label('Payment Notes')
-                            ->placeholder('Add any additional notes about this payment...')
-                            ->maxLength(500)
-                            ->rows(2)
-                            ->columnSpanFull(),
+                                Forms\Components\Textarea::make('notes')
+                                    ->label('Payment Notes')
+                                    ->placeholder('Add any notes about this rental payment (e.g., partial payment amount, payment method, etc.)')
+                                    ->maxLength(500)
+                                    ->rows(2),
+                            ]),
                     ]),
             ]);
     }
@@ -151,29 +222,52 @@ class RentalPaymentResource extends Resource
                     ->searchable()
                     ->sortable()
                     ->weight('medium')
-                    ->description(fn ($record) => $record->tenant?->name),
+                    ->description(fn ($record) => $record->tenant?->name . ' • Daily: ₱' . number_format($record->stall?->rental_fee ?? 0, 2)),
+
+                Tables\Columns\TextColumn::make('rental_period')
+                    ->label('Rental Period')
+                    ->getStateUsing(function ($record) {
+                        $start = Carbon::parse($record->period_start);
+                        $end = Carbon::parse($record->period_end);
+                        $days = $start->diffInDays($end) + 1;
+                        
+                        if ($days === 1) {
+                            return $start->format('M j, Y');
+                        } else {
+                            return $start->format('M j') . ' - ' . $end->format('M j, Y') . " ({$days} days)";
+                        }
+                    })
+                    ->searchable(['period_start', 'period_end'])
+                    ->sortable('period_start'),
 
                 Tables\Columns\TextColumn::make('amount')
-                    ->label('Amount')
+                    ->label('Rental Amount')
                     ->money('PHP')
                     ->sortable()
                     ->weight('semibold')
-                    ->color('success'),
-
-                Tables\Columns\TextColumn::make('payment_period')
-                    ->label('Period')
-                    ->getStateUsing(function ($record) {
-                        return Carbon::parse($record->period_start)->format('M Y');
-                    })
-                    ->badge()
-                    ->color('primary'),
+                    ->color('success')
+                    ->description(function ($record) {
+                        $start = Carbon::parse($record->period_start);
+                        $end = Carbon::parse($record->period_end);
+                        $days = $start->diffInDays($end) + 1;
+                        $dailyRate = $record->stall?->rental_fee ?? 0;
+                        
+                        return "₱{$dailyRate}/day × {$days} day" . ($days > 1 ? 's' : '');
+                    }),
 
                 Tables\Columns\TextColumn::make('due_date')
                     ->label('Due Date')
                     ->date('M j, Y')
                     ->sortable()
                     ->color(fn ($record) => $record->is_overdue ? 'danger' : 'gray')
-                    ->icon(fn ($record) => $record->is_overdue ? 'heroicon-m-exclamation-triangle' : null),
+                    ->icon(fn ($record) => $record->is_overdue ? 'heroicon-m-exclamation-triangle' : null)
+                    ->description(function ($record) {
+                        if ($record->is_overdue && $record->status !== 'paid') {
+                            $days = $record->due_date->diffInDays(now());
+                            return "Overdue by {$days} day" . ($days > 1 ? 's' : '');
+                        }
+                        return null;
+                    }),
 
                 Tables\Columns\TextColumn::make('paid_date')
                     ->label('Paid Date')
@@ -197,15 +291,6 @@ class RentalPaymentResource extends Resource
                         'overdue' => 'heroicon-m-exclamation-triangle',
                         default => 'heroicon-m-question-mark-circle',
                     }),
-
-                Tables\Columns\TextColumn::make('days_overdue')
-                    ->label('Days Late')
-                    ->getStateUsing(function ($record) {
-                        if (!$record->is_overdue) return null;
-                        return $record->due_date->diffInDays(now()) . ' days';
-                    })
-                    ->color('danger')
-                    ->visible(fn () => request('tableFilters.status.value') === 'overdue'),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('status')
@@ -222,38 +307,42 @@ class RentalPaymentResource extends Resource
                     ->searchable()
                     ->preload(),
 
-                Tables\Filters\SelectFilter::make('month')
-                    ->label('Payment Month')
-                    ->options([
-                        '1' => 'January',
-                        '2' => 'February', 
-                        '3' => 'March',
-                        '4' => 'April',
-                        '5' => 'May',
-                        '6' => 'June',
-                        '7' => 'July',
-                        '8' => 'August',
-                        '9' => 'September',
-                        '10' => 'October',
-                        '11' => 'November',
-                        '12' => 'December',
-                    ])
-                    ->query(function (Builder $query, array $data) {
-                        if ($data['value']) {
-                            $query->whereMonth('period_start', $data['value']);
-                        }
-                    }),
+                Tables\Filters\SelectFilter::make('tenant')
+                    ->relationship('tenant', 'name')
+                    ->searchable()
+                    ->preload(),
 
-                Tables\Filters\Filter::make('this_month')
-                    ->label('This Month')
-                    ->query(fn (Builder $query) => $query->whereMonth('period_start', now()->month))
+                Tables\Filters\Filter::make('today')
+                    ->label('Today\'s Rentals')
+                    ->query(fn (Builder $query) => 
+                        $query->whereDate('period_start', '<=', now())
+                              ->whereDate('period_end', '>=', now())
+                    )
                     ->toggle(),
 
-                Tables\Filters\Filter::make('urgent')
-                    ->label('Urgent (Due Soon)')
+                Tables\Filters\Filter::make('this_week')
+                    ->label('This Week')
+                    ->query(fn (Builder $query) => 
+                        $query->whereBetween('period_start', [
+                            now()->startOfWeek(),
+                            now()->endOfWeek()
+                        ])
+                    )
+                    ->toggle(),
+
+                Tables\Filters\Filter::make('overdue_urgent')
+                    ->label('Urgent (Overdue)')
+                    ->query(fn (Builder $query) => 
+                        $query->where('status', '!=', 'paid')
+                              ->where('due_date', '<', now())
+                    )
+                    ->toggle(),
+
+                Tables\Filters\Filter::make('due_soon')
+                    ->label('Due Soon (Next 3 Days)')
                     ->query(fn (Builder $query) => 
                         $query->where('status', 'pending')
-                              ->where('due_date', '<=', now()->addDays(7))
+                              ->whereBetween('due_date', [now(), now()->addDays(3)])
                     )
                     ->toggle(),
             ])
@@ -274,7 +363,7 @@ class RentalPaymentResource extends Resource
                                 ->required(),
                             Forms\Components\Textarea::make('notes')
                                 ->label('Payment Notes')
-                                ->placeholder('Add any notes about this payment...')
+                                ->placeholder('Add any notes about this rental payment...')
                                 ->rows(2),
                         ])
                         ->action(function ($record, array $data) {
@@ -283,17 +372,54 @@ class RentalPaymentResource extends Resource
                                 'paid_date' => $data['paid_date'],
                                 'notes' => $data['notes'] ?? $record->notes,
                             ]);
-                            Notification::make()->title('Payment marked as paid')->success()->send();
+                            Notification::make()->title('Rental payment marked as paid')->success()->send();
+                        }),
+
+                    Tables\Actions\Action::make('partial_payment')
+                        ->label('Partial Payment')
+                        ->icon('heroicon-o-minus-circle')
+                        ->color('info')
+                        ->visible(fn ($record) => in_array($record->status, ['pending', 'overdue']))
+                        ->form([
+                            Forms\Components\TextInput::make('partial_amount')
+                                ->label('Amount Paid')
+                                ->numeric()
+                                ->prefix('₱')
+                                ->required()
+                                ->placeholder('Enter partial payment amount'),
+                            Forms\Components\DatePicker::make('paid_date')
+                                ->label('Payment Date')
+                                ->default(now())
+                                ->required(),
+                            Forms\Components\Textarea::make('notes')
+                                ->label('Payment Notes')
+                                ->placeholder('Add details about the partial payment...')
+                                ->rows(2),
+                        ])
+                        ->action(function ($record, array $data) {
+                            $notes = $record->notes ? $record->notes . "\n" : '';
+                            $notes .= "Partial payment: ₱" . number_format($data['partial_amount'], 2) . " on " . Carbon::parse($data['paid_date'])->format('M j, Y');
+                            if ($data['notes']) {
+                                $notes .= " - " . $data['notes'];
+                            }
+                            
+                            $record->update([
+                                'status' => 'partially_paid',
+                                'paid_date' => $data['paid_date'],
+                                'notes' => $notes,
+                            ]);
+                            
+                            Notification::make()->title('Partial rental payment recorded')->success()->send();
                         }),
 
                     Tables\Actions\Action::make('send_reminder')
                         ->label('Send Reminder')
                         ->icon('heroicon-o-bell')
                         ->color('warning')
-                        ->visible(fn ($record) => in_array($record->status, ['pending', 'overdue']))
+                        ->visible(fn ($record) => in_array($record->status, ['pending', 'overdue', 'partially_paid']))
                         ->action(function ($record) {
                             // Add your reminder email/SMS logic here
-                            Notification::make()->title('Reminder sent to tenant')->success()->send();
+                            Notification::make()->title('Rental payment reminder sent to tenant')->success()->send();
                         }),
 
                     Tables\Actions\DeleteAction::make(),
@@ -325,19 +451,34 @@ class RentalPaymentResource extends Resource
                                     $count++;
                                 }
                             }
-                            Notification::make()->title("Marked {$count} payments as paid")->success()->send();
+                            Notification::make()->title("Marked {$count} rental payments as paid")->success()->send();
                         })
                         ->requiresConfirmation(),
+
+                    Tables\Actions\BulkAction::make('send_reminders')
+                        ->label('Send Reminders')
+                        ->icon('heroicon-o-bell')
+                        ->color('warning')
+                        ->action(function ($records) {
+                            $count = 0;
+                            foreach ($records as $record) {
+                                if (in_array($record->status, ['pending', 'overdue', 'partially_paid'])) {
+                                    // Add your reminder logic here
+                                    $count++;
+                                }
+                            }
+                            Notification::make()->title("Sent reminders for {$count} rental payments")->success()->send();
+                        }),
 
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ])
             ->emptyStateHeading('No rental payments recorded')
-            ->emptyStateDescription('Start tracking rental payments from your tenants.')
+            ->emptyStateDescription('Start tracking daily rental payments from your tenants.')
             ->emptyStateIcon('heroicon-o-banknotes')
             ->emptyStateActions([
                 Tables\Actions\CreateAction::make()
-                    ->label('Record Payment')
+                    ->label('Record Rental Payment')
                     ->icon('heroicon-o-plus'),
             ])
             ->defaultSort('due_date', 'desc')
@@ -347,11 +488,11 @@ class RentalPaymentResource extends Resource
     public static function getNavigationBadge(): ?string
     {
         $overdueCount = static::getModel()::where('status', 'overdue')->count();
-        $pendingCount = static::getModel()::where('status', 'pending')
-            ->where('due_date', '<=', now()->addDays(7))
+        $dueSoonCount = static::getModel()::where('status', 'pending')
+            ->where('due_date', '<=', now()->addDays(3))
             ->count();
             
-        $total = $overdueCount + $pendingCount;
+        $total = $overdueCount + $dueSoonCount;
         return $total > 0 ? (string) $total : null;
     }
 
@@ -360,13 +501,14 @@ class RentalPaymentResource extends Resource
         $overdueCount = static::getModel()::where('status', 'overdue')->count();
         return $overdueCount > 0 ? 'danger' : 'warning';
     }
+
     public static function getPages(): array
-{
-    return [
-        'index' => Pages\ListRentalPayments::route('/'),
-        'create' => Pages\CreateRentalPayment::route('/create'),
-        'view' => Pages\ViewRentalPayment::route('/{record}'),
-        'edit' => Pages\EditRentalPayment::route('/{record}/edit'),
-    ];
-}
+    {
+        return [
+            'index' => Pages\ListRentalPayments::route('/'),
+            'create' => Pages\CreateRentalPayment::route('/create'),
+            'view' => Pages\ViewRentalPayment::route('/{record}'),
+            'edit' => Pages\EditRentalPayment::route('/{record}/edit'),
+        ];
+    }
 }

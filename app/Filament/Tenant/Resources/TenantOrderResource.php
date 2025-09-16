@@ -17,9 +17,9 @@ class TenantOrderResource extends Resource
 {
     protected static ?string $model = Order::class;
     protected static ?string $navigationIcon = 'heroicon-o-shopping-bag';
-    protected static ?string $navigationGroup = 'Orders & Sales';
-    protected static ?string $navigationLabel = 'My Orders';
-    protected static ?int $navigationSort = 1;
+    protected static ?string $navigationGroup = null; 
+    protected static ?string $navigationLabel = 'Orders';       
+    protected static ?int $navigationSort = 3;
 
     public static function getEloquentQuery(): Builder
     {

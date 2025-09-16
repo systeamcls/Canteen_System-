@@ -17,9 +17,6 @@ use App\Livewire\TestComponent;
 use App\Http\Controllers\WebhookController;
 
 
-
-
-
 // Welcome page - first entry point
 Route::get('/', function () {
     return view('welcome');

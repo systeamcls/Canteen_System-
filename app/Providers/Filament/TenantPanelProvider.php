@@ -36,14 +36,11 @@ class TenantPanelProvider extends PanelProvider
             ->discoverResources(in: app_path('Filament/Tenant/Resources'), for: 'App\\Filament\\Tenant\\Resources')
             ->discoverPages(in: app_path('Filament/Tenant/Pages'), for: 'App\\Filament\\Tenant\\Pages')
             ->pages([
-                
+                \App\Filament\Tenant\Pages\TwoFactorChallenge::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Tenant/Widgets'), for: 'App\\Filament\\Tenant\\Widgets')
             ->widgets([
                 Widgets\AccountWidget::class,
-            ])
-            ->pages([
-                \App\Filament\Tenant\Pages\TwoFactorChallenge::class, 
             ])
             ->middleware([
                 EncryptCookies::class,
@@ -62,13 +59,8 @@ class TenantPanelProvider extends PanelProvider
             ])
             ->authGuard('web')
             ->sidebarCollapsibleOnDesktop()
-            ->navigationGroups([
-                'Dashboard',
-                'Stall Management',
-                'Products',
-                'Orders & Sales',
-                'Reviews',
-                'Finance',
-            ]);
+            ->globalSearchKeyBindings(['command+k', 'ctrl+k'])
+            ->viteTheme('resources/css/filament/tenant/theme.css')
+            ->spa(); // Enable SPA mode for faster navigation
     }
 }

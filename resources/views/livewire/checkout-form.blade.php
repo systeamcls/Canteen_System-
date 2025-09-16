@@ -198,14 +198,10 @@
                                     <span>Subtotal</span>
                                     <span>₱{{ number_format($totalAmount, 0) }}</span>
                                 </div>
-                                <div class="breakdown-row">
-                                    <span>Delivery Fee</span>
-                                    <span>₱2,500</span>
-                                </div>
                                 <div class="breakdown-divider"></div>
                                 <div class="breakdown-row total">
                                     <span>Total</span>
-                                    <span class="total-price">₱{{ number_format($totalAmount + 2500, 0) }}</span>
+                                    <span class="total-price">₱{{ number_format($totalAmount, 0) }}</span>
                                 </div>
                             </div>
 
@@ -248,7 +244,7 @@
                                 wire:target="submitOrder"
                                 {{ $isProcessing ? 'disabled' : '' }}>
                                 <span wire:loading.remove wire:target="submitOrder">
-                                    Place Order • ₱{{ number_format($totalAmount + 2500, 0) }}
+                                    Place Order • ₱{{ number_format($totalAmount, 0) }}
                                 </span>
                                 <span wire:loading wire:target="submitOrder">
                                     <i class="loading-spinner"></i>

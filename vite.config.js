@@ -9,6 +9,7 @@ export default defineConfig({
           'resources/css/canteen2.css',
           'resources/js/app.jsx',
           'resources/js/app.js',
+          'resources/css/filament/tenant/theme.css',
           'resources/css/app.css',
           'resources/js/cart.js',
           'resources/js/canteen.js',

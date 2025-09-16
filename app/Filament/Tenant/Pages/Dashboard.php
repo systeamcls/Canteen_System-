@@ -12,20 +12,9 @@ use App\Filament\Tenant\Widgets\TenantRentalStatusWidget;
 class Dashboard extends BaseDashboard
 {
     protected static ?string $navigationIcon = 'heroicon-o-home';
-    protected static ?string $navigationGroup = 'Dashboard';
-    protected static ?string $title = 'Stall Dashboard';
+    protected static ?string $navigationGroup = null; // Remove group
+    protected static ?string $title = 'Dashboard';
     protected static ?int $navigationSort = 1;
-
-    protected function getHeaderWidgets(): array
-    {
-        return [
-            TenantStatsOverviewWidget::class,
-            TenantSalesChartWidget::class,
-            TenantRentalStatusWidget::class,
-            TenantRecentOrdersWidget::class,
-            TenantTopProductsWidget::class,
-        ];
-    }
 
     public function getColumns(): int | string | array
     {
@@ -33,8 +22,19 @@ class Dashboard extends BaseDashboard
             'sm' => 1,
             'md' => 2,
             'lg' => 3,
-            'xl' => 3,
+            'xl' => 4,
             '2xl' => 4,
+        ];
+    }
+
+    public function getWidgets(): array
+    {
+        return [
+            TenantStatsOverviewWidget::class,
+            TenantSalesChartWidget::class,
+            TenantRentalStatusWidget::class,
+            TenantRecentOrdersWidget::class,
+            TenantTopProductsWidget::class,
         ];
     }
 }

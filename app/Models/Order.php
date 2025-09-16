@@ -30,6 +30,7 @@ class Order extends Model
         'payment_method',
         'payment_status',
         'order_type',
+        'service_type',
         'special_instructions',
         'notes',
         'user_type',
@@ -54,7 +55,10 @@ class Order extends Model
         'vendor_id' => 'integer',
         'amount_subtotal' => 'integer', // in cents
         'amount_total' => 'integer',    // in cents
+        'service_type' => 'string',
+
     ];
+    
 
     /**
      * Status transition rules

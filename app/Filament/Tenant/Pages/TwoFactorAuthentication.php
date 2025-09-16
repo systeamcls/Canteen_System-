@@ -24,9 +24,9 @@ class TwoFactorAuthentication extends Page implements HasForms
     protected static ?string $navigationIcon = 'heroicon-o-shield-check';
     protected static string $view = 'filament.tenant.pages.two-factor-authentication';
     protected static ?string $title = '2FA Security';
+    protected static ?string $navigationGroup = null; 
     protected static ?string $navigationLabel = '2FA Security';
-    protected static ?string $navigationGroup = 'Dashboard';
-    protected static ?int $navigationSort = 100;
+    protected static ?int $navigationSort = 7;
 
     public ?string $code = null;
     public bool $showingQrCode = false;

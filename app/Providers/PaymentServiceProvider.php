@@ -6,6 +6,8 @@ use App\Contracts\PaymentGatewayInterface;
 use App\Services\PaymentGateways\PayMongoGateway;
 use App\Services\PaymentService;
 use Illuminate\Support\ServiceProvider;
+use App\Services\RevenueSplittingService;
+
 
 class PaymentServiceProvider extends ServiceProvider
 {
@@ -21,6 +23,9 @@ class PaymentServiceProvider extends ServiceProvider
         $this->app->singleton(PaymentService::class, function ($app) {
             return new PaymentService($app->make(PaymentGatewayInterface::class));
         });
+        
+         // Register RevenueSplittingService as well
+        $this->app->singleton(RevenueSplittingService::class);
     }
 
     /**
