@@ -1072,8 +1072,8 @@
                     <!-- Header with dotted lines -->
                     <div style="text-align: center; margin-bottom: 1rem;">
                         <div style="border-bottom: 1px dotted #000; margin-bottom: 0.5rem;"></div>
-                        <h2 style="font-size: 1rem; font-weight: bold; margin: 0.5rem 0; color: #000;">KAJA FOOD COURT</h2>
-                        <p style="font-size: 0.8rem; margin: 0; color: #000;">123 FOOD STREET, METRO MANILA</p>
+                        <h2 style="font-size: 1rem; font-weight: bold; margin: 0.5rem 0; color: #000;">LTO CANTEEN CENTRAL</h2>
+                        <p style="font-size: 0.8rem; margin: 0; color: #000;">Quezon, METRO MANILA</p>
                         <div style="border-bottom: 1px dotted #000; margin: 0.5rem 0;"></div>
                     </div>
 
@@ -1085,7 +1085,7 @@
                     <!-- Order details section -->
                     <div style="font-size: 0.8rem; margin: 1rem 0; color: #000;">
                         @if(!empty($lastOrder))
-                            <div>CASHIER #1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ $lastOrder['created_at'] ?? now()->format('d/m/Y H:i') }} PM</div>
+                            <div>CASHIER #1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ $lastOrder['created_at'] ?? now()->format('d/m/Y H:i') }} </div>
                             <div style="border-bottom: 1px dotted #000; margin: 0.5rem 0;"></div>
                             <div style="margin: 0.3rem 0;">ORDER #: {{ $lastOrder['order_number'] ?? 'POS-68C807FD29E0E' }}</div>
                             <div style="margin: 0.3rem 0;">CUSTOMER: {{ strtoupper($lastOrder['customer_name'] ?? 'WALK-IN CUSTOMER') }}</div>
@@ -1141,7 +1141,7 @@
 
                     <!-- Thank you message -->
                     <div style="text-align: center; margin: 1.5rem 0; font-size: 0.8rem; color: #000;">
-                        <div style="font-weight: bold;">THANK YOU FOR SHOPPING!</div>
+                        <div style="font-weight: bold;">THANK YOU FOR ORDERING!</div>
                     </div>
 
                     <div style="border-bottom: 1px dotted #000; margin: 1rem 0;"></div>

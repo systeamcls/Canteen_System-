@@ -127,7 +127,7 @@
                 <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"/>
                 </svg>
-                Fresh Meats
+                Fresh Meals
             </button>
 
             <!-- Sandwiches -->
@@ -179,7 +179,7 @@
         <div class="category-mobile" style="display: none; margin-bottom: 16px; text-align: center;">
             <select id="category-dropdown" style="width: 100%; max-width: 300px; padding: 16px 20px; border: 2px solid #e2e8f0; border-radius: 16px; background: white; font-size: 16px; font-weight: 500; color: #1e293b; outline: none; cursor: pointer;">
                 <option value="all">🍽️ All Items</option>
-                <option value="fresh-meats">🥩 Fresh Meats</option>
+                <option value="fresh-meals">🥩 Fresh Meals</option>
                 <option value="sandwiches">🥪 Sandwiches</option>
                 <option value="beverages">🥤 Beverages</option>
                 <option value="snacks">🍟 Snacks</option>
@@ -205,7 +205,7 @@
 <section style="padding: 0 0 80px; background: #fafbfc;">
     <div class="container" style="max-width: 1200px; margin: 0 auto; padding: 0 20px;">
         @if($products->count() > 0)
-            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px;" id="menuGrid">
+           <div id="menuGrid">
                 @foreach($products as $product)
                     <div class="menu-item" data-category="{{ strtolower(str_replace(' ', '-', $product->category->name ?? 'uncategorized')) }}" style="opacity: 1; transform: translateY(0); transition: all 0.3s ease;">
                         @livewire('add-to-cart-button', [
@@ -221,10 +221,28 @@
 
             <!-- Pagination -->
             <div style="margin-top: 60px; display: flex; justify-content: center;">
-                <div style="background: white; padding: 20px; border-radius: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.08);">
-                    {{ $products->appends(request()->query())->links() }}
-                </div>
-            </div>
+    <div style="background: white; padding: 12px 16px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.06); display: flex; align-items: center; gap: 4px;">
+        @if ($products->onFirstPage())
+            <span style="width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; color: #d1d5db; font-size: 13px; cursor: not-allowed;">‹</span>
+        @else
+            <a href="{{ $products->previousPageUrl() }}" style="width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border: 1px solid #e5e7eb; border-radius: 3px; color: #6b7280; text-decoration: none; font-size: 13px; background: white;">‹</a>
+        @endif
+
+        @foreach ($products->getUrlRange(1, $products->lastPage()) as $page => $url)
+            @if ($page == $products->currentPage())
+                <span style="width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; background: #FF6B35; color: white; border-radius: 3px; font-size: 13px; font-weight: 500;">{{ $page }}</span>
+            @else
+                <a href="{{ $url }}" style="width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border: 1px solid #e5e7eb; border-radius: 3px; color: #6b7280; text-decoration: none; font-size: 13px; background: white;">{{ $page }}</a>
+            @endif
+        @endforeach
+
+        @if ($products->hasMorePages())
+            <a href="{{ $products->nextPageUrl() }}" style="width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border: 1px solid #e5e7eb; border-radius: 3px; color: #6b7280; text-decoration: none; font-size: 13px; background: white;">›</a>
+        @else
+            <span style="width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; color: #d1d5db; font-size: 13px; cursor: not-allowed;">›</span>
+        @endif
+    </div>
+</div>
         @else
             <!-- No Results -->
             <div style="text-align: center; padding: 80px 32px; background: white; border-radius: 24px; box-shadow: 0 8px 32px rgba(0,0,0,0.08);">
@@ -353,7 +371,6 @@
     }
     
     section:last-child div[style*="grid"] {
-        grid-template-columns: 1fr !important;
         gap: 16px !important;
     }
 }
@@ -489,6 +506,117 @@ select:focus {
     outline: 2px solid #FF6B35;
     outline-offset: 2px;
 }
+
+#menuGrid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+}
+
+@media (min-width: 768px) {
+    #menuGrid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+    }
+}
+
+@media (min-width: 1025px) {
+    #menuGrid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 24px;
+    }
+}
+
+
+/* Compact Pagination Styles */
+
+.pagination * {
+    all: unset !important;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    margin: 0;
+    padding: 0;
+    
+}
+
+.pagination .page-item {
+    margin: 0;
+}
+
+.pagination .page-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    margin: 0 2px;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    color: #6b7280;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    background: white;
+}
+
+.pagination .page-link:hover {
+    background: #f9fafb;
+    border-color: #d1d5db;
+    color: #374151;
+}
+
+.pagination .page-item.active .page-link {
+    background: #FF6B35;
+    border-color: #FF6B35;
+    color: white;
+}
+
+.pagination .page-item.disabled .page-link {
+    color: #d1d5db;
+    cursor: not-allowed;
+    background: #f9fafb;
+}
+
+.pagination .page-item.disabled .page-link:hover {
+    background: #f9fafb;
+    border-color: #e5e7eb;
+}
+
+/* Arrow icons - make them smaller */
+.pagination .page-link svg {
+    width: 14px;
+    height: 14px;
+}
+
+/* Previous/Next text - hide on small screens */
+@media (max-width: 480px) {
+    .pagination .page-link {
+        width: 28px;
+        height: 28px;
+        font-size: 12px;
+    }
+    
+    .pagination .page-link svg {
+        width: 12px;
+        height: 12px;
+    }
+}
+
+/* Container styling */
+.pagination-container {
+    background: white;
+    padding: 16px 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    border: 1px solid #f1f5f9;
+}
 </style>
 
 <!-- JavaScript for Category Filtering -->
@@ -582,5 +710,17 @@ document.addEventListener('DOMContentLoaded', function() {
         filterItems(selectedCategory);
     });
 });
+
+function openLoginModal() {
+    console.log('=== LOGIN MODAL DEBUG ===');
+    const modal = document.querySelector('.modal-overlay');
+    const livewireElement = document.querySelector('[wire\\:id]');
+    console.log('Modal found:', !!modal);
+    console.log('Livewire element found:', !!livewireElement);
+}
+
 </script>
+
+@livewire('welcome-modal')
+
 @endsection

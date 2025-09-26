@@ -120,7 +120,8 @@ class WelcomeModal extends Component
                 $this->dispatch('userTypeUpdated', 'employee');
 
                 // Redirect to dashboard or menu
-                return redirect()->route('dashboard');
+                $this->redirectRoute('profile.show');
+
             } else {
                 $this->loginError = 'Invalid email or password. Please try again.';
             }
@@ -166,7 +167,7 @@ class WelcomeModal extends Component
         $this->close();
 
         // Redirect to dashboard
-        return redirect()->route('dashboard');
+        $this->redirectRoute('profile.show');
 
     } catch (ValidationException $e) {
         $this->registerError = 'Validation failed: ' . implode(', ', $e->validator->errors()->all());

@@ -209,6 +209,11 @@ class User extends Authenticatable
         return $this->belongsTo(Stall::class, 'admin_stall_id');
     }
 
+    public function orders()
+    {
+        return $this->hasMany(\App\Models\Order::class);
+    }
+
     /**
      * Relationship: Rental payments for tenant (your existing)
      */

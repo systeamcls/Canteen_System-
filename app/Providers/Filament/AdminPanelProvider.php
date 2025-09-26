@@ -44,6 +44,10 @@ class AdminPanelProvider extends PanelProvider
                 in: app_path('Filament/Admin/Widgets'),
                 for: 'App\\Filament\\Admin\\Widgets'
             )
+            ->widgets([
+                \App\Filament\Admin\Widgets\SalesAnalyticsWidget::class,
+                \App\Filament\Admin\Widgets\RentalAnalyticsWidget::class,
+            ])
             ->sidebarCollapsibleOnDesktop()
             ->navigationGroups([
                 NavigationGroup::make('Canteen Management'),

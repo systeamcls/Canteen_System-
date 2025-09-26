@@ -85,7 +85,7 @@ class ProductResource extends Resource
                                     }
                                 })
                                 ->dehydrateStateUsing(function ($state) {
-                                    return $state ? (int) $state : 0;
+                                    return $state ? (int)($state * 100) : 0;
                                 }),
 
                             Forms\Components\TextInput::make('preparation_time')

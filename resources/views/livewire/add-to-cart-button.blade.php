@@ -1,72 +1,65 @@
-<div class="modern-product-card">
+<div class="menu-product-card">
     <!-- Product Image -->
-    <div class="modern-product-image">
-        <!-- FIXED: Use model accessor for image URL -->
+    <div class="product-image-container">
         <img src="{{ $product->image_url }}" 
              alt="{{ $product->name }}" 
-             class="product-img">
+             class="product-image"
+             onerror="this.src='https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&h=300&fit=crop'">
         
-        @if(!$product->image)
-            <div class="no-image-overlay">
-                <div class="food-icon">🍽️</div>
-            </div>
-        @endif
-        
-        <!-- Badges -->
-<div class="product-badges">
-    @if($product->is_available)
-        <span class="available-badge">Available</span>
-    @else
-        <span class="unavailable-badge">Unavailable</span>
-    @endif
-</div>
-</div>
-
-<!-- Product Info -->
-<div class="modern-product-info">
-    <!-- Vendor Name -->
-    <div class="vendor-tag">
-        {{ $product->stall->name }}
-    </div>
-
-    <!-- Product Name -->
-    <h3 class="modern-product-name">{{ $product->name }}</h3>
-
-    <!-- Description -->
-    <p class="modern-product-description">
-        {{ Str::limit($product->description ?: 'Fresh and delicious', 50) }}
-    </p>
-
-    <!-- Price and Controls Row -->
-    <div class="price-controls-row">
-        <!-- Price Section -->
-        <div class="price-section">
-            @if($showPrice)
-                <div class="current-price">{{ $this->formatPrice($product->price) }}</div>
+        <!-- Status Badge -->
+        <div class="product-badges">
+            @if(!$product->is_available)
+                <span class="badge-unavailable">Unavailable</span>
+            @elseif($product->id % 2 == 0) {{-- Example logic for popular items --}}
+                <span class="badge-popular">Popular</span>
+            @else
+                <span class="badge-available">Available</span>
             @endif
         </div>
+    </div>
 
+    <!-- Product Content -->
+    <div class="product-content">
+        <!-- Stall Name -->
+        <div class="stall-name">{{ strtoupper($product->stall->name) }}</div>
+        
+        <!-- Product Name -->
+        <h3 class="product-name">{{ $product->name }}</h3>
+        
+        <!-- Product Description -->
+        <p class="product-description">
+            {{ Str::limit($product->description ?: 'Delicious and freshly prepared with quality ingredients.', 80) }}
+        </p>
+        
+        <!-- Price and Add Button Row -->
+        <div class="product-footer">
+            <div class="price-section">
+                @if($showPrice)
+                    <span class="product-price">{{ $this->formatPrice($product->price) }}</span>
+                @endif
+            </div>
+            
             <!-- Add to Cart Controls -->
-            <div class="add-to-cart-controls">
+            <div class="cart-controls">
                 @if($product->is_available)
                     @if($showQuantitySelector)
                         <!-- Quantity Selector Mode -->
-                        <div class="quantity-row">
-                            <div class="modern-quantity-selector">
+                        <div class="quantity-controls">
+                            <div class="quantity-selector">
                                 <button 
                                     wire:click="decrementQuantity"
-                                    class="qty-control-btn"
+                                    class="qty-btn qty-minus"
                                     {{ $quantity <= 1 ? 'disabled' : '' }}>
-                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
                                         <line x1="5" y1="12" x2="19" y2="12"></line>
                                     </svg>
                                 </button>
-                                <span class="qty-number">{{ $quantity }}</span>
+                                <span class="qty-display">{{ $quantity }}</span>
                                 <button 
                                     wire:click="incrementQuantity"
-                                    class="qty-control-btn"
+                                    class="qty-btn qty-plus"
                                     {{ $quantity >= 99 ? 'disabled' : '' }}>
-                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
                                         <line x1="12" y1="5" x2="12" y2="19"></line>
                                         <line x1="5" y1="12" x2="19" y2="12"></line>
                                     </svg>
@@ -74,9 +67,15 @@
                             </div>
                             <button 
                                 wire:click="addToCart"
-                                class="modern-add-button full-width"
+                                class="add-to-cart-btn full-width"
                                 wire:loading.attr="disabled">
-                                <span wire:loading.remove wire:target="addToCart">Add to Cart</span>
+                                <span wire:loading.remove wire:target="addToCart">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                                    </svg>
+                                    Add to Cart
+                                </span>
                                 <span wire:loading wire:target="addToCart">Adding...</span>
                             </button>
                         </div>
@@ -84,8 +83,8 @@
                         <!-- Simple Add Button -->
                         <button 
                             wire:click="toggleQuantitySelector"
-                            class="modern-add-button">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            class="add-to-cart-btn">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <line x1="12" y1="5" x2="12" y2="19"></line>
                                 <line x1="5" y1="12" x2="19" y2="12"></line>
                             </svg>
@@ -93,16 +92,16 @@
                         </button>
                     @endif
                 @else
-                    <button class="unavailable-button" disabled>
+                    <button class="unavailable-btn" disabled>
                         Unavailable
                     </button>
                 @endif
             </div>
         </div>
-
-        <!-- Success Message -->
+        
+        <!-- Success/Error Messages -->
         @if($message && $messageType === 'success')
-            <div class="success-message">
+            <div class="success-alert">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <polyline points="20,6 9,17 4,12"></polyline>
                 </svg>
@@ -111,285 +110,369 @@
         @endif
 
         @if($message && $messageType === 'error')
-            <div class="error-message">
+            <div class="error-alert">
                 {{ $message }}
             </div>
         @endif
     </div>
 
-    <!-- Modern Styles -->
+    <!-- Inline Styles for Component -->
     <style>
-    .modern-product-card {
-        background: white;
+    /* Menu Product Card Styles - Matching Reference Design */
+    .menu-product-card {
+        background: #ffffff;
         border-radius: 16px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-        transition: all 0.3s;
         overflow: hidden;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         position: relative;
-    }
-
-    .modern-product-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 8px 25px rgba(46,91,186,0.15);
-    }
-
-    .modern-product-image {
-        height: 160px;
-        background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-        position: relative;
+        height: 100%;
         display: flex;
-        align-items: center;
-        justify-content: center;
-        overflow: hidden;
+        flex-direction: column;
     }
 
-    /* ADDED: Product image styles */
-    .product-img {
+    .menu-product-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+    }
+
+    /* Product Image */
+    .product-image-container {
+        position: relative;
+        width: 100%;
+        height: 200px;
+        overflow: hidden;
+        background: #f8fafc;
+    }
+
+    .product-image {
         width: 100%;
         height: 100%;
         object-fit: cover;
-        transition: transform 0.3s;
+        transition: transform 0.3s ease;
     }
 
-    .no-image-overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: rgba(239, 246, 255, 0.9);
-    }
-
-    .food-icon {
-        font-size: 48px;
-        opacity: 0.5;
-    }
-
-    .modern-product-card:hover .product-img {
+    .menu-product-card:hover .product-image {
         transform: scale(1.05);
     }
 
+    /* Product Badges */
     .product-badges {
         position: absolute;
         top: 12px;
-        right: 12px;
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
-        z-index: 2;
+        left: 12px;
+        z-index: 10;
     }
 
-    .discount-badge {
-        background: #f59e0b;
+    .badge-popular {
+        background: #FF6B35;
         color: white;
-        padding: 4px 8px;
-        border-radius: 12px;
-        font-size: 10px;
-        font-weight: 700;
-        text-align: center;
-    }
-
-    .available-badge {
-        background: #10b981;
-        color: white;
-        padding: 4px 8px;
-        border-radius: 12px;
-        font-size: 10px;
-        font-weight: 600;
-        text-align: center;
-    }
-
-    .unavailable-badge {
-        background: #ef4444;
-        color: white;
-        padding: 4px 8px;
-        border-radius: 12px;
-        font-size: 10px;
-        font-weight: 600;
-        text-align: center;
-    }
-
-    .modern-product-info {
-        padding: 16px;
-    }
-
-    .vendor-tag {
-        color: #64748b;
-        font-size: 11px;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 12px;
         font-weight: 600;
         text-transform: uppercase;
-        margin-bottom: 6px;
         letter-spacing: 0.5px;
     }
 
-    .modern-product-name {
-        color: #1e293b;
-        font-size: 16px;
-        font-weight: 700;
-        margin: 0 0 8px 0;
-        line-height: 1.3;
+    .badge-available {
+        background: #10B981;
+        color: white;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
     }
 
-    .modern-product-description {
-        color: #64748b;
-        font-size: 13px;
-        line-height: 1.4;
-        margin: 0 0 16px 0;
+    .badge-unavailable {
+        background: #EF4444;
+        color: white;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
     }
 
-    .price-controls-row {
+    /* Product Content */
+    .product-content {
+        padding: 20px;
+        flex: 1;
         display: flex;
+        flex-direction: column;
+    }
+
+    .stall-name {
+        color: #9CA3AF;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.8px;
+        margin-bottom: 8px;
+        text-transform: uppercase;
+    }
+
+    .product-name {
+        color: #1F2937;
+        font-size: 18px;
+        font-weight: 700;
+        line-height: 1.3;
+        margin: 0 0 8px 0;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .product-description {
+        color: #6B7280;
+        font-size: 14px;
+        line-height: 1.5;
+        margin: 0 0 20px 0;
+        flex: 1;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    /* Product Footer */
+    .product-footer {
+        display: flex;
+        align-items: center;
         justify-content: space-between;
-        align-items: flex-end;
         gap: 12px;
+        margin-top: auto;
     }
 
     .price-section {
         flex: 1;
     }
 
-    .current-price {
-        color: #2E5BBA;
-        font-size: 18px;
+    .product-price {
+        color: #FF6B35;
+        font-size: 20px;
         font-weight: 800;
         line-height: 1;
     }
 
-    .original-price {
-        color: #94a3b8;
-        font-size: 12px;
-        text-decoration: line-through;
-        margin-top: 2px;
+    /* Cart Controls */
+    .cart-controls {
+        flex-shrink: 0;
     }
 
-    .add-to-cart-controls {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-        align-items: flex-end;
-    }
-
-    .quantity-row {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-        width: 100%;
-    }
-
-    .modern-quantity-selector {
-        display: flex;
-        align-items: center;
-        background: #f8fafc;
-        border-radius: 20px;
-        padding: 4px;
-        gap: 4px;
-        align-self: flex-end;
-    }
-
-    .qty-control-btn {
-        width: 24px;
-        height: 24px;
-        border: none;
-        background: white;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        transition: all 0.2s;
-        color: #64748b;
-    }
-
-    .qty-control-btn:hover {
-        background: #f1f5f9;
-        color: #374151;
-    }
-
-    .qty-control-btn:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-    }
-
-    .qty-number {
-        padding: 0 12px;
-        font-weight: 600;
-        color: #1e293b;
-        font-size: 14px;
-        min-width: 20px;
-        text-align: center;
-    }
-
-    .modern-add-button {
-        background: #2E5BBA;
+    .add-to-cart-btn {
+        background: #FF6B35;
         color: white;
-        padding: 8px 16px;
         border: none;
-        border-radius: 20px;
-        font-size: 12px;
+        border-radius: 12px;
+        padding: 10px 20px;
+        font-size: 14px;
         font-weight: 600;
         cursor: pointer;
-        transition: all 0.3s;
+        transition: all 0.2s ease;
         display: flex;
         align-items: center;
-        gap: 4px;
-        min-width: 70px;
-        justify-content: center;
+        gap: 6px;
+        white-space: nowrap;
     }
 
-    .modern-add-button:hover {
-        background: #1e40af;
+    .add-to-cart-btn:hover {
+        background: #E55B2B;
         transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(46,91,186,0.3);
+        box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
     }
 
-    .modern-add-button:disabled {
-        opacity: 0.7;
+    .add-to-cart-btn:active {
+        transform: translateY(0);
+    }
+
+    .add-to-cart-btn:disabled {
+        opacity: 0.6;
         cursor: not-allowed;
         transform: none;
     }
 
-    .modern-add-button.full-width {
+    .add-to-cart-btn.full-width {
         width: 100%;
+        justify-content: center;
+        margin-top: 8px;
         padding: 12px;
-        font-size: 14px;
-        min-width: auto;
     }
 
-    .unavailable-button {
-        background: #f1f5f9;
-        color: #94a3b8;
-        padding: 8px 16px;
-        border: 1px solid #e2e8f0;
-        border-radius: 20px;
-        font-size: 12px;
+    .unavailable-btn {
+        background: #F3F4F6;
+        color: #9CA3AF;
+        border: 1px solid #E5E7EB;
+        border-radius: 12px;
+        padding: 10px 20px;
+        font-size: 14px;
         font-weight: 600;
         cursor: not-allowed;
     }
 
-    .success-message {
-        margin-top: 12px;
-        padding: 8px 12px;
-        background: #d1fae5;
-        color: #065f46;
+    /* Quantity Controls */
+    .quantity-controls {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        width: 100%;
+    }
+
+    .quantity-selector {
+        display: flex;
+        align-items: center;
+        background: #F8FAFC;
+        border-radius: 12px;
+        padding: 4px;
+        align-self: flex-end;
+    }
+
+    .qty-btn {
+        width: 28px;
+        height: 28px;
+        border: none;
+        background: white;
+        color: #6B7280;
         border-radius: 8px;
-        font-size: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .qty-btn:hover:not(:disabled) {
+        background: #F1F5F9;
+        color: #374151;
+    }
+
+    .qty-btn:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+    }
+
+    .qty-display {
+        padding: 0 16px;
+        font-weight: 600;
+        color: #1F2937;
+        font-size: 14px;
+        min-width: 24px;
+        text-align: center;
+    }
+
+    /* Alert Messages */
+    .success-alert {
+        margin-top: 12px;
+        padding: 10px 12px;
+        background: #ECFDF5;
+        border: 1px solid #A7F3D0;
+        color: #065F46;
+        border-radius: 8px;
+        font-size: 13px;
         font-weight: 500;
         display: flex;
         align-items: center;
-        gap: 6px;
+        gap: 8px;
     }
 
-    .error-message {
+    .error-alert {
         margin-top: 12px;
-        padding: 8px 12px;
-        background: #fee2e2;
-        color: #991b1b;
+        padding: 10px 12px;
+        background: #FEF2F2;
+        border: 1px solid #FECACA;
+        color: #991B1B;
         border-radius: 8px;
-        font-size: 12px;
+        font-size: 13px;
         font-weight: 500;
+    }
+
+    /* Mobile Responsiveness */
+    @media (max-width: 640px) {
+        .product-image-container {
+            height: 160px;
+        }
+        
+        .product-content {
+            padding: 16px;
+        }
+        
+        .product-name {
+            font-size: 16px;
+            margin-bottom: 16px;
+        }
+        
+        .product-description {
+            display: none;
+        }
+        
+        .product-price {
+            font-size: 18px;
+        }
+        
+        .add-to-cart-btn {
+            padding: 8px 16px;
+            font-size: 13px;
+        }
+        
+        .add-to-cart-btn.full-width {
+            padding: 10px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .product-image-container {
+            height: 140px;
+        }
+        
+        .product-content {
+            padding: 14px;
+        }
+        
+        .product-footer {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 12px;
+        }
+        
+        .add-to-cart-btn {
+            width: 100%;
+            justify-content: center;
+        }
+        
+        .quantity-selector {
+            align-self: stretch;
+            justify-content: center;
+        }
+    }
+
+    /* Ultra-small screens */
+    @media (max-width: 360px) {
+        .product-image-container {
+            height: 120px;
+        }
+        
+        .product-content {
+            padding: 12px;
+        }
+        
+        .stall-name {
+            font-size: 11px;
+        }
+        
+        .product-name {
+            font-size: 15px;
+        }
+        
+        .product-description {
+            font-size: 12px;
+        }
+        
+        .product-price {
+            font-size: 16px;
+        }
     }
     </style>
 </div>

@@ -1244,4 +1244,7 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 });
 </script>
+
+@livewire('welcome-modal')
+
 @endsection

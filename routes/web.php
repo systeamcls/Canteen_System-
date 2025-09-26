@@ -15,6 +15,7 @@ use App\Livewire\CheckoutForm;
 use App\Http\Controllers\CheckoutController;
 use App\Livewire\TestComponent;
 use App\Http\Controllers\WebhookController;
+use App\Http\Controllers\ProfileController;
 
 
 // Welcome page - first entry point
@@ -83,15 +84,15 @@ Route::middleware(['web'])->group(function () {
 });
 
 // Employee-only routes (require authentication)
-Route::middleware([
-    'auth:sanctum',
-    config('jetstream.auth_session'),
-    'verified',
-])->group(function () {
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
-    // Additional employee-only routes can be added here
+Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified'])->group(function () {
+    // optional dashboard redirect to keep legacy links working
+    Route::get('/dashboard', fn() => redirect()->route('profile.show'))->name('dashboard');
+
+    Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
+    // Accept both PUT and PATCH so forms (PUT or PATCH) both work
+    Route::match(['put','patch'], '/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::match(['put','patch'], '/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
+    Route::match(['put','patch'], '/profile/settings', [ProfileController::class, 'updateSettings'])->name('profile.settings');
 });
 
 // Admin and Tenant routes (require specific roles)

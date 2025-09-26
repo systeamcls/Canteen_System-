@@ -30,7 +30,7 @@
                                 <div class="login-option-content">
                                     <div class="login-option-icon employee-icon">👨‍💼</div>
                                     <div class="login-option-text">
-                                        <h3>Employee Login</h3>
+                                        <h3>Regular Customer Login</h3>
                                         <p>Enjoy a lot of perks and Discounts!</p>
                                     </div>
                                     <div class="login-option-arrow">→</div>
@@ -45,7 +45,7 @@
                             <button class="back-btn" wire:click="showOptions">← Back to login options</button>
 
                             <div class="form-divider">
-                                <span>Employee Sign In</span>
+                                <span>Regular Customer Sign In</span>
                             </div>
 
                             <form wire:submit.prevent="loginAsEmployee">
@@ -80,7 +80,7 @@
                                     Don't have an account? 
                                     <button type="button" wire:click="showRegisterForm" 
                                             class="text-blue-600 hover:text-blue-800 font-medium">
-                                        Register as Employee
+                                        Register as Regular Customer
                                     </button>
                                 </p>
                             </div>

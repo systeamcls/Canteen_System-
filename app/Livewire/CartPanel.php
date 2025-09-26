@@ -58,6 +58,9 @@ class CartPanel extends Component
                 $this->showMessage($result['message'], 'success');
                 $this->broadcastCartUpdate();
                 $this->dispatch('cart-updated', $this->cartTotals);
+                
+                // Keep cart open after updating quantity
+                // $this->isOpen remains unchanged
             } else {
                 $this->showMessage($result['message'], 'error');
             }
@@ -83,6 +86,9 @@ class CartPanel extends Component
                 $this->showMessage($result['message'], 'success');
                 $this->broadcastCartUpdate();
                 $this->dispatch('cart-updated', $this->cartTotals);
+                
+                // Keep cart open after removing item
+                // $this->isOpen remains unchanged
             } else {
                 $this->showMessage($result['message'], 'error');
             }
@@ -107,6 +113,9 @@ class CartPanel extends Component
                 $this->loadCartData();
                 $this->showMessage($result['message'], 'success');
                 $this->broadcastCartUpdate();
+                
+                // Keep cart open after clearing cart
+                // $this->isOpen remains unchanged
             } else {
                 $this->showMessage($result['message'], 'error');
             }
@@ -118,15 +127,27 @@ class CartPanel extends Component
     }
 
     /**
+     * Open cart panel
+     */
+    public function openCart(): void
+    {
+        $this->isOpen = true;
+    }
+
+    /**
+     * Close cart panel
+     */
+    public function closeCart(): void
+    {
+        $this->isOpen = false;
+    }
+
+    /**
      * Toggle cart panel visibility
      */
     public function toggleCart(): void
     {
         $this->isOpen = !$this->isOpen;
-        
-        if ($this->isOpen) {
-            $this->loadCartData();
-        }
     }
 
     /**
@@ -146,6 +167,24 @@ class CartPanel extends Component
     public function handleRefreshCart(): void
     {
         $this->loadCartData();
+    }
+
+    /**
+     * Listen for open cart events
+     */
+    #[On('open-cart')]
+    public function handleOpenCart(): void
+    {
+        $this->openCart();
+    }
+
+    /**
+     * Listen for close cart events
+     */
+    #[On('close-cart')]
+    public function handleCloseCart(): void
+    {
+        $this->closeCart();
     }
 
     /**
@@ -220,7 +259,7 @@ class CartPanel extends Component
      */
     public function formatPrice(float $price): string
     {
-        return '₱' . number_format($price, 2);
+        return '₱' . number_format($price / 100, 2);
     }
 
     public function render()

@@ -20,15 +20,7 @@ class CheckoutForm extends Component
 {
     #[Validate('required|string|max:255')]
     public string $customerName = '';
-
-    #[Validate('required|email|max:255')]
-    public string $customerEmail = '';
-
-    #[Validate('required|string|max:20')]
-    public string $customerPhone = '';
-
-    #[Validate('required|string|in:gcash,paymaya,card,cash')]
-    public string $paymentMethod = 'gcash';
+    public string $paymentMethod = '';
 
     #[Validate('required|string|in:onsite,online')]
     public string $orderType = 'online';
@@ -36,12 +28,23 @@ class CheckoutForm extends Component
     #[Validate('nullable|string|max:500')]
     public string $notes = '';
 
+
+    public string $customerPhone = '';
+    public string $customerEmail = '';
+    public string $notificationPreference = '';
+
+    public bool $showPaymentMethods = false;
+    public ?string $selectedPaymentMethod = null;
+    public bool $showExpandedItems = false;
+
     // Component state
     public array $cartSnapshot = [];
     public float $totalAmount = 0.00;
     public bool $isProcessing = false;
     public string $successMessage = '';
     public string $errorMessage = '';
+
+
 
     // Customer type context (passed from controller)
     public string $initialCustomerType = 'guest';
@@ -51,6 +54,61 @@ class CheckoutForm extends Component
 
     protected CartService $cartService;
     protected PaymentService $paymentService;
+
+
+    protected function rules()
+{
+    $rules = [
+        'customerName' => 'required|string|max:255',
+        'customerEmail' => 'required|email|max:255',
+        'customerPhone' => 'required|string|regex:/^(09\\d{9}|63\\d{10}|\\+63\\d{10})$/',
+        'notificationPreference' => 'required|string|in:sms,email,both',
+        'paymentMethod' => 'required|string|in:gcash,paymaya,card,cash',
+        'notes' => 'nullable|string|max:500',
+    ];
+
+    if (in_array($this->notificationPreference, ['sms', 'both'])) {
+        $rules['customerPhone'] = [
+            'required',
+            'string',
+            'regex:/^(09\\d{9}|63\\d{10}|\\+63\\d{10})$/',
+            'min:11',
+            'max:13'
+        ];
+    }
+
+    if (in_array($this->notificationPreference, ['email', 'both'])) {
+        $rules['customerEmail'] = 'required|email|max:255';
+    }
+
+    return $rules;
+}
+
+    public function togglePaymentMethods()
+{
+    $this->showPaymentMethods = !$this->showPaymentMethods;
+}
+
+public function toggleExpandedItems()
+{
+    $this->showExpandedItems = !$this->showExpandedItems;
+}
+
+public function selectPaymentMethod($method)
+{
+    $this->selectedPaymentMethod = $method;
+    $this->paymentMethod = $method;
+    $this->showPaymentMethods = false;
+
+    $this->resetErrorBag('paymentMethod');
+}
+
+public function changePaymentMethod()
+{
+    $this->selectedPaymentMethod = null;
+    $this->paymentMethod = '';
+    $this->showPaymentMethods = true;
+}
 
     public function boot(CartService $cartService, PaymentService $paymentService): void
     {
@@ -78,6 +136,12 @@ class CheckoutForm extends Component
     public function submitOrder(): void
     {
         if ($this->isProcessing) {
+            return;
+        }
+
+        if (empty($this->paymentMethod)) {
+            $this->addError('paymentMethod', 'Please select a payment method to continue.');
+            $this->dispatch('checkout-error');
             return;
         }
 
@@ -245,6 +309,7 @@ class CheckoutForm extends Component
                     $this->cartSnapshot[] = [
                         'product_id' => $item->product_id,
                         'product_name' => $item->product->name ?? 'Unknown Product',
+                        'product_image' => $item->product->image ?? null,
                         'vendor_id' => $item->vendor_id,
                         'vendor_name' => $item->vendor->name ?? 'Unknown Vendor',
                         'quantity' => $item->quantity,
@@ -274,11 +339,6 @@ class CheckoutForm extends Component
 
     private function setDefaultOptions(): void
     {
-        // Set default payment method based on available options
-        $availableMethods = array_keys($this->availablePaymentMethods);
-        if (!empty($availableMethods)) {
-            $this->paymentMethod = $availableMethods[0];
-        }
 
         // Set default order type
         if ($this->initialUserType === 'employee') {
@@ -286,23 +346,34 @@ class CheckoutForm extends Component
         } else {
             $this->orderType = 'online';
         }
+        
+        $this->notificationPreference = 'sms';
+        $this->customerPhone = '09';
     }
 
     private function createOrderGroup(): OrderGroup
     {
+
+    $billingContact = ['name' => $this->customerName];
+    
+    // Only include email/phone if they were required and filled
+    if (in_array($this->notificationPreference, ['email', 'both'])) {
+        $billingContact['email'] = $this->customerEmail;
+    }
+    
+    if (in_array($this->notificationPreference, ['sms', 'both'])) {
+        $billingContact['phone'] = $this->customerPhone;
+    }
+
         return OrderGroup::create([
-             'payer_type' => session('user_type', 'guest'),
+            'payer_type' => session('user_type', 'guest'),
             'user_id' => Auth::id(),
             'guest_token' => $this->initialCustomerType === 'guest' ? Session::get('guest_cart_token') : null,
             'payment_method' => $this->paymentMethod === 'cash' ? 'onsite' : 'online',
             'payment_status' => 'pending',
-            'amount_total' => (int)($this->totalAmount * 100), // Convert to centavos
+            'amount_total' => (int)$this->totalAmount,
             'currency' => 'PHP',
-            'billing_contact' => [
-                'name' => $this->customerName,
-                'email' => $this->customerEmail,
-                'phone' => $this->customerPhone,
-            ],
+            'billing_contact' => $billingContact,
             'cart_snapshot' => $this->cartSnapshot,
         ]);
     }
@@ -430,5 +501,53 @@ class CheckoutForm extends Component
     {
         return view('livewire.checkout-form');
     }
+
+    public function updateQuantity($index, $newQuantity)
+{
+    if ($newQuantity < 1) {
+        return;
+    }
+    
+    if (isset($this->cartSnapshot[$index])) {
+        // Update quantity in cart snapshot
+        $this->cartSnapshot[$index]['quantity'] = $newQuantity;
+        $this->cartSnapshot[$index]['line_total'] = $this->cartSnapshot[$index]['unit_price'] * $newQuantity;
+        
+        // Recalculate total
+        $this->totalAmount = collect($this->cartSnapshot)->sum('line_total');
+        
+        // If you have a cart service, also update the actual cart
+        // $this->cartService->updateQuantity($cartItemId, $newQuantity);
+    }
+}
+
+public function removeItem($index)
+{
+    if (isset($this->cartSnapshot[$index])) {
+        // Remove item from snapshot
+        unset($this->cartSnapshot[$index]);
+        $this->cartSnapshot = array_values($this->cartSnapshot); // Re-index array
+        
+        // Recalculate total
+        $this->totalAmount = collect($this->cartSnapshot)->sum('line_total');
+        
+        // If you have a cart service, also remove from actual cart
+        // $this->cartService->removeFromCart($cartItemId);
+        
+        // Redirect to menu if cart is empty
+        if (empty($this->cartSnapshot)) {
+            return redirect()->route('menu.index')->with('info', 'Your cart is now empty.');
+        }
+    }
+}
+
+protected function messages()
+{
+    return [
+        'customerPhone.regex' => 'Please enter a valid Philippine phone number (e.g., 09123456789, 639123456789, or +639123456789)',
+        'customerPhone.required' => 'Phone number is required for SMS notifications',
+        'customerEmail.required' => 'Email address is required for email notifications',
+    ];
+}
 
 }
