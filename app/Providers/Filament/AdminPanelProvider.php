@@ -23,13 +23,14 @@ class AdminPanelProvider extends PanelProvider
     public function panel(Panel $panel): Panel
     {
         return $panel
-        ->id('admin')
-        ->path('dashboard')   // changed from admin → dashboard
-        ->login()
-        ->authGuard('web')    // make sure it's using web guard
-        ->colors([
-            'primary' => '#4f46e5',
-        ])
+            ->default()
+            ->id('admin')
+            ->path('admin')
+            ->login()
+            ->authGuard('web')
+            ->colors([
+                'primary' => Color::Red,
+            ])
             ->darkMode()
             ->brandName('Canteen Admin')
             ->discoverResources(
@@ -71,21 +72,6 @@ class AdminPanelProvider extends PanelProvider
             ])
             // CRITICAL: Redirect after login based on role
             ->loginRouteSlug('login')
-            ->homeUrl(function () {
-                /** @var \App\Models\User $user */
-                $user = Auth::user();
-
-                if (!$user) return '/login';
-                
-                if ($user->hasRole('admin') || $user->hasRole('cashier')) {
-                    return '/admin';
-                } elseif ($user->hasRole('tenant')) {
-                    return '/tenant';
-                } else {
-                    // Unauthorized users get logged out and redirected
-                    Auth::logout();
-                    return '/login';
-                }
-            });
+            ->homeUrl('/admin');
     }
 }
