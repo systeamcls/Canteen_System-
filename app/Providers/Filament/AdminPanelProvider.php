@@ -25,7 +25,7 @@ class AdminPanelProvider extends PanelProvider
         return $panel
             ->default()
             ->id('admin')
-            ->path('admin-panel')
+            ->path('admin')
             ->login()
             ->authGuard('web')
             ->colors([
@@ -72,6 +72,21 @@ class AdminPanelProvider extends PanelProvider
             ])
             // CRITICAL: Redirect after login based on role
             ->loginRouteSlug('login')
-            ->homeUrl('/admin');
+            ->homeUrl(function () {
+                /** @var \App\Models\User $user */
+                $user = Auth::user();
+
+                if (!$user) return '/login';
+                
+                if ($user->hasRole('admin') || $user->hasRole('cashier')) {
+                    return '/admin';
+                } elseif ($user->hasRole('tenant')) {
+                    return '/tenant';
+                } else {
+                    // Unauthorized users get logged out and redirected
+                    Auth::logout();
+                    return '/login';
+                }
+            });
     }
 }
