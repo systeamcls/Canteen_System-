@@ -35,11 +35,11 @@ return [
     'csp' => env('APP_ENV') === 'production'
     ? [   // Production rules
         'default-src' => "'self'",
-        'script-src' => "'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://cdn.tailwindcss.com",
+        'script-src' => "'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://cdn.tailwindcss.com http://king-prawn-app-8yjn3.ondigitalocean.app https://king-prawn-app-8yjn3.ondigitalocean.app",
         'style-src'  => "'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.bunny.net https://cdn.jsdelivr.net https://cdnjs.cloudflare.com",
         'font-src'   => "'self' https://fonts.gstatic.com https://fonts.bunny.net https://cdnjs.cloudflare.com data:",
         'img-src'    => "'self' data: blob: https: *.gravatar.com ui-avatars.com",
-        'connect-src'=> "'self'",
+        'connect-src'=> "'self' wss://king-prawn-app-8yjn3.ondigitalocean.app https://king-prawn-app-8yjn3.ondigitalocean.app",
         'worker-src' => "'self' blob:",
         'frame-src'  => "'none'",
         'object-src' => "'none'",
