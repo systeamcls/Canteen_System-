@@ -20,6 +20,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'check-admin-cashier' => \App\Http\Middleware\CheckAdminOrCashierAccess::class,
             'filament.2fa' => \App\Http\Middleware\EnsureTwoFactorAuthenticated::class,
             'webhook.security' => \App\Http\Middleware\WebhookSecurityMiddleware::class,
+            'verified' => \App\Http\Middleware\EnsureEmailIsVerified::class,
 
         ]);
 

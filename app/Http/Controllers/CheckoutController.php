@@ -21,6 +21,20 @@ class CheckoutController extends Controller
      */
     public function index()
     {
+        
+        /** @var \App\Models\User|null $user */
+    $user = Auth::user();
+
+    // Restrict unverified employees
+    if (
+        Auth::check() &&
+        session('user_type') === 'employee' &&
+        !$user->hasVerifiedEmail()
+    ) {
+        return redirect()->route('verification.notice')
+            ->with('error', 'Please verify your email address to proceed with checkout.');
+    }
+
         // Get cart data for pre-checkout validation
         $cartTotals = $this->cartService->getCartTotals();
         

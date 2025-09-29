@@ -85,4 +85,9 @@ class EditUser extends EditRecord
 
         return $data;
     }
+
+    protected function afterSave(): void
+{
+    UserResource::handleStallAssignment($this->record, $this->data);
+}
 }

@@ -16,6 +16,7 @@ use App\Http\Controllers\CheckoutController;
 use App\Livewire\TestComponent;
 use App\Http\Controllers\WebhookController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\EmailVerificationController;
 
 
 // Welcome page - first entry point
@@ -43,7 +44,7 @@ Route::middleware(['web'])->group(function () {
             return redirect()->route('checkout.index');
         })->name('cart');
 
-        Route::prefix('checkout')->name('checkout.')->group(function () {
+        Route::prefix('checkout')->name('checkout.')->middleware(['verified'])->group(function () {
         Route::get('/', [CheckoutController::class, 'index'])->name('index');
         Route::get('/success/{orderGroup}', [CheckoutController::class, 'success'])->name('success');
         Route::get('/track/{orderGroup}', [CheckoutController::class, 'track'])->name('track');
@@ -88,11 +89,37 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
     // optional dashboard redirect to keep legacy links working
     Route::get('/dashboard', fn() => redirect()->route('profile.show'))->name('dashboard');
 
-    Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
+    Route::get('/profile', [ProfileController::class, 'show'])->name('user.profile.show');
+
     // Accept both PUT and PATCH so forms (PUT or PATCH) both work
     Route::match(['put','patch'], '/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::post('/profile/picture', [ProfileController::class, 'uploadProfilePicture'])->name('profile.picture');
+    Route::get('/profile/orders/{order}', [ProfileController::class, 'showOrder'])->name('order.detail');
     Route::match(['put','patch'], '/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
     Route::match(['put','patch'], '/profile/settings', [ProfileController::class, 'updateSettings'])->name('profile.settings');
+    Route::post('/profile/orders/{order}/cancel', [ProfileController::class, 'cancelOrder'])->name('order.cancel');
+    Route::get('/profile/orders/{order}/status', [ProfileController::class, 'checkOrderStatus'])->name('order.status');
+
+});
+
+// Email verification routes
+Route::middleware(['auth'])->group(function () {
+    Route::get('/email/verify', [EmailVerificationController::class, 'notice'])
+        ->name('verification.notice');
+    
+    Route::get('/email/verify/{id}/{hash}', [EmailVerificationController::class, 'verify'])
+        ->middleware(['signed', 'throttle:6,1'])
+        ->name('verification.verify');
+    
+    Route::post('/email/verification-notification', [EmailVerificationController::class, 'resend'])
+        ->middleware('throttle:6,1')
+        ->name('verification.send');
+
+    Route::get('/email/verify-status', [EmailVerificationController::class, 'checkStatus'])
+        ->name('verification.status');
+
+    Route::get('/email/verified', [EmailVerificationController::class, 'success'])
+        ->name('verification.success');
 });
 
 // Admin and Tenant routes (require specific roles)

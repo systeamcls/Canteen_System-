@@ -19,6 +19,7 @@
         "vite": "^6.2.4"
     },
     "dependencies": {
+        "@fortawesome/fontawesome-free": "^7.0.1",
         "@vitejs/plugin-react": "^4.7.0",
         "chart.js": "^4.5.0",
         "chartjs-adapter-date-fns": "^3.0.0",

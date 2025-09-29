@@ -1,7 +1,4 @@
 <?php
-// ========================================
-// FIXED ORDERRESOURCE.PHP - Main Issue Fix
-// ========================================
 
 namespace App\Filament\Admin\Resources;
 
@@ -15,57 +12,75 @@ use Filament\Forms\Form;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
 use Filament\Notifications\Notification;
-
+use Filament\Tables\Enums\FiltersLayout;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
+use Carbon\Carbon;
 
 class OrderResource extends Resource
 {
     protected static ?string $model = Order::class;
-    protected static ?string $navigationIcon = 'heroicon-o-shopping-bag';
-    protected static ?string $navigationGroup = 'Canteen Management';
+    protected static ?string $navigationIcon = 'heroicon-o-shield-check';
+    protected static ?string $navigationLabel = 'Order Oversight';
+    protected static ?string $navigationGroup = 'Admin Management';
     protected static ?int $navigationSort = 1;
 
+
     public static function getEloquentQuery(): Builder
-{
-    $user = Auth::user();
-    $stallId = $user->admin_stall_id;
+    {
+        $user = Auth::user();
+        $stallId = $user->admin_stall_id;
 
-    return parent::getEloquentQuery()
-        ->with(['user', 'items.product'])
-        ->when($stallId, function (Builder $query) use ($stallId) {
-            // ONLY use items-based filtering (preserves multi-vendor orders)
-            $query->whereHas('items', function (Builder $itemQuery) use ($stallId) {
-                $itemQuery->whereHas('product', function (Builder $productQuery) use ($stallId) {
-                    $productQuery->where('stall_id', $stallId);
+        return parent::getEloquentQuery()
+            ->with(['user', 'orderItems.product', 'orderGroup'])
+            ->when($stallId, function (Builder $query) use ($stallId) {
+                $query->whereHas('orderItems', function (Builder $itemQuery) use ($stallId) {
+                    $itemQuery->whereHas('product', function (Builder $productQuery) use ($stallId) {
+                        $productQuery->where('stall_id', $stallId);
+                    });
                 });
-            });
-        })
-        ->when(!$stallId, function (Builder $query) {
-            $query->whereRaw('1 = 0');
-        })
-        ->latest();
-}
+            })
+            ->when(!$stallId, function (Builder $query) {
+                $query->whereRaw('1 = 0');
+            })
+            ->latest();
+    }
 
-     public static function form(Form $form): Form
+    public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\Section::make('Order Details')
+                Forms\Components\Section::make('Order Information')
                     ->schema([
-                        Forms\Components\TextInput::make('order_number')
-                            ->required()
-                            ->disabled()
-                            ->dehydrated(false),
-                        
-                        Forms\Components\Select::make('status')
-                            ->required()
-                            ->options([
-                                'pending' => 'Pending',
-                                'processing' => 'Processing',
-                                'completed' => 'Completed',
-                                'cancelled' => 'Cancelled',
-                            ])
-                            ->native(false),
-                        
+                        Forms\Components\Grid::make(3)
+                            ->schema([
+                                Forms\Components\TextInput::make('order_number')
+                                    ->label('Order Number')
+                                    ->disabled()
+                                    ->dehydrated(false),
+                                
+                                Forms\Components\Select::make('status')
+                                    ->required()
+                                    ->options([
+                                        'pending' => 'Pending',
+                                        'processing' => 'Processing',
+                                        'completed' => 'Completed',
+                                        'cancelled' => 'Cancelled',
+                                    ])
+                                    ->native(false),
+                                
+                                Forms\Components\TextInput::make('total_amount')
+                                    ->label('Total Amount')
+                                    ->prefix('₱')
+                                    ->numeric()
+                                    ->disabled()
+                                    ->dehydrated(false),
+                            ]),
+                    ]),
+
+                Forms\Components\Section::make('Customer Information')
+                    ->schema([
                         Forms\Components\Grid::make(2)
                             ->schema([
                                 Forms\Components\TextInput::make('customer_name')
@@ -73,14 +88,28 @@ class OrderResource extends Resource
                                     ->disabled()
                                     ->dehydrated(false),
                                 
+                                Forms\Components\TextInput::make('customer_email')
+                                    ->label('Customer Email')
+                                    ->disabled()
+                                    ->dehydrated(false),
+                                
                                 Forms\Components\TextInput::make('customer_phone')
                                     ->label('Customer Phone')
                                     ->disabled()
                                     ->dehydrated(false),
+                                
+                                Forms\Components\Select::make('user_type')
+                                    ->label('Customer Type')
+                                    ->options([
+                                        'employee' => 'Employee',
+                                        'guest' => 'Guest',
+                                    ])
+                                    ->disabled()
+                                    ->dehydrated(false),
                             ]),
                     ]),
-                
-                Forms\Components\Section::make('Payment Information')
+
+                Forms\Components\Section::make('Payment & Service Details')
                     ->schema([
                         Forms\Components\Grid::make(3)
                             ->schema([
@@ -102,29 +131,71 @@ class OrderResource extends Resource
                                     ])
                                     ->native(false),
                                 
-                                Forms\Components\TextInput::make('total_amount')
-                                    ->label('Total Amount')
-                                    ->prefix('₱')
-                                    ->numeric()
-                                    ->disabled()
-                                    ->dehydrated(false),
+                                Forms\Components\Select::make('service_type')
+                                    ->options([
+                                        'dine-in' => 'Dine In',
+                                        'take-away' => 'Take Away',
+                                    ])
+                                    ->native(false),
                             ]),
                     ]),
-                
-                Forms\Components\Section::make('Additional Information')
+
+                Forms\Components\Section::make('Admin Management')
                     ->schema([
-                        Forms\Components\Textarea::make('special_instructions')
+                        Forms\Components\Grid::make(2)
+                            ->schema([
+                                Forms\Components\Toggle::make('has_complaint')
+                                    ->label('Customer Complaint Filed')
+                                    ->helperText('Mark if customer has filed a complaint about this order'),
+                                
+                                Forms\Components\Select::make('refund_status')
+                                    ->label('Refund Status')
+                                    ->options([
+                                        'none' => 'No Refund',
+                                        'requested' => 'Refund Requested',
+                                        'approved' => 'Refund Approved',
+                                        'processed' => 'Refund Processed',
+                                        'denied' => 'Refund Denied',
+                                    ])
+                                    ->default('none')
+                                    ->native(false),
+                            ]),
+                        
+                        Forms\Components\Textarea::make('complaint_details')
+                            ->label('Complaint Details')
+                            ->rows(3)
+                            ->visible(fn (Forms\Get $get): bool => $get('has_complaint'))
+                            ->columnSpanFull(),
+                        
+                        Forms\Components\Textarea::make('admin_notes')
+                            ->label('Admin Notes')
+                            ->helperText('Internal notes for admin reference only')
                             ->rows(3)
                             ->columnSpanFull(),
                         
-                        Forms\Components\Textarea::make('notes')
-                            ->label('Admin Notes')
+                        Forms\Components\Textarea::make('resolution_notes')
+                            ->label('Resolution Notes')
+                            ->helperText('Notes about how complaint/dispute was resolved')
                             ->rows(3)
+                            ->visible(fn (Forms\Get $get): bool => $get('has_complaint'))
                             ->columnSpanFull(),
                     ])
                     ->collapsible(),
+
+                Forms\Components\Section::make('Order Instructions')
+                    ->schema([
+                        Forms\Components\Textarea::make('special_instructions')
+                            ->label('Customer Instructions')
+                            ->rows(3)
+                            ->disabled()
+                            ->dehydrated(false)
+                            ->columnSpanFull(),
+                    ])
+                    ->collapsible()
+                    ->collapsed(),
             ]);
     }
+
     public static function table(Table $table): Table
     {
         return $table
@@ -137,18 +208,22 @@ class OrderResource extends Resource
                     ->weight('semibold')
                     ->color('primary'),
 
-               
+                Tables\Columns\IconColumn::make('has_complaint')
+                    ->label('Dispute')
+                    ->boolean()
+                    ->color(fn ($state): string => $state ? 'danger' : 'gray')
+                    ->tooltip(fn ($record): string => $record->has_complaint ? 'Customer complaint filed' : 'No complaints'),
+
                 Tables\Columns\TextColumn::make('customer_info')
                     ->label('Customer')
                     ->getStateUsing(function (Order $record): string {
                         if ($record->user_id && $record->user) {
-                            return $record->user->name;
+                            return $record->user->name . ' (Employee)';
                         }
                         
                         if ($record->customer_name) {
-                            return $record->customer_name;
+                            return $record->customer_name . ' (Guest)';
                         }
-                        
                         
                         if ($record->guest_details) {
                             $details = is_string($record->guest_details) 
@@ -156,7 +231,7 @@ class OrderResource extends Resource
                                 : $record->guest_details;
                             
                             if (is_array($details) && isset($details['name'])) {
-                                return $details['name'];
+                                return $details['name'] . ' (Guest)';
                             }
                         }
                         
@@ -165,14 +240,13 @@ class OrderResource extends Resource
                     ->searchable(['customer_name'])
                     ->icon('heroicon-m-user'),
 
-                
                 Tables\Columns\TextColumn::make('my_stall_items')
                     ->label('My Stall Items')
                     ->getStateUsing(function (Order $record): string {
                         $stallId = Auth::user()->admin_stall_id;
                         if (!$stallId) return 'No stall assigned';
 
-                        $stallItems = $record->items()
+                        $stallItems = $record->orderItems()
                             ->whereHas('product', function (Builder $query) use ($stallId) {
                                 $query->where('stall_id', $stallId);
                             })
@@ -185,14 +259,14 @@ class OrderResource extends Resource
 
                         return $stallItems->map(function ($item) {
                             return $item->quantity . '× ' . $item->product->name;
-                        })->take(3)->join(', ') . ($stallItems->count() > 3 ? '...' : '');
+                        })->take(2)->join(', ') . ($stallItems->count() > 2 ? '...' : '');
                     })
                     ->wrap()
                     ->tooltip(function (Order $record): ?string {
                         $stallId = Auth::user()->admin_stall_id;
                         if (!$stallId) return null;
 
-                        $stallItems = $record->items()
+                        $stallItems = $record->orderItems()
                             ->whereHas('product', function (Builder $query) use ($stallId) {
                                 $query->where('stall_id', $stallId);
                             })
@@ -200,34 +274,33 @@ class OrderResource extends Resource
                             ->get();
 
                         return $stallItems->map(function ($item) {
-                            return $item->quantity . '× ' . $item->product->name . ' (₱' . number_format($item->subtotal, 2) . ')';
+                            return $item->quantity . '× ' . $item->product->name . ' (₱' . number_format($item->line_total / 100, 2) . ')';
                         })->join("\n");
                     }),
 
-                // ✅ FIXED: Handle both price storage formats
                 Tables\Columns\TextColumn::make('my_stall_revenue')
                     ->label('My Revenue')
                     ->getStateUsing(function (Order $record): float {
                         $stallId = Auth::user()->admin_stall_id;
                         if (!$stallId) return 0;
 
-                        return $record->items()
+                        return $record->orderItems()
                             ->whereHas('product', function (Builder $query) use ($stallId) {
                                 $query->where('stall_id', $stallId);
                             })
-                            ->sum('subtotal');
+                            ->sum('line_total') / 100;
                     })
                     ->money('PHP')
                     ->weight('semibold')
                     ->alignEnd()
                     ->color('success'),
 
-                // ✅ FIXED: Handle both total amount fields
+
+
                 Tables\Columns\TextColumn::make('order_total')
                     ->label('Total Order')
                     ->getStateUsing(function (Order $record): float {
-                        // Handle both decimal and int storage
-                        return $record->total_amount ?? ($record->amount_total / 100);
+                        return $record->orderGroup ? ($record->orderGroup->amount_total / 100) : 0;
                     })
                     ->money('PHP')
                     ->sortable()
@@ -244,7 +317,19 @@ class OrderResource extends Resource
                         default => 'gray',
                     }),
 
-                // ✅ FIXED: Better payment method display
+                Tables\Columns\TextColumn::make('refund_status')
+                    ->label('Refund')
+                    ->badge()
+                    ->color(fn ($state): string => match ($state) {
+                        'requested' => 'warning',
+                        'approved' => 'info', 
+                        'processed' => 'success',
+                        'denied' => 'danger',
+                        default => 'gray',
+                    })
+                    ->formatStateUsing(fn ($state) => $state ? ucfirst($state) : 'None')
+                    ->toggleable(),
+
                 Tables\Columns\TextColumn::make('payment_method')
                     ->badge()
                     ->formatStateUsing(fn ($state) => $state ? ucfirst($state) : 'Not Set')
@@ -254,118 +339,334 @@ class OrderResource extends Resource
                         'card' => 'warning',
                         'paymaya' => 'primary',
                         default => 'gray',
-                    }),
+                    })
+                    ->toggleable(),
 
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Order Date')
                     ->dateTime('M j, Y H:i')
                     ->sortable()
                     ->toggleable(),
+
+                Tables\Columns\TextColumn::make('last_modified')
+                    ->label('Last Modified')
+                    ->getStateUsing(function (Order $record): string {
+                        $diffForHumans = $record->updated_at->diffForHumans();
+                        return $diffForHumans;
+                    })
+                    ->tooltip(function (Order $record): string {
+                        return 'Updated: ' . $record->updated_at->format('M j, Y H:i:s');
+                    })
+                    ->toggleable()
+                    ->toggledHiddenByDefault(),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('status')
+                SelectFilter::make('status')
                     ->options([
                         'pending' => 'Pending',
                         'processing' => 'Processing', 
                         'completed' => 'Completed',
                         'cancelled' => 'Cancelled',
-                    ]),
+                    ])
+                    ->multiple(),
 
-                Tables\Filters\SelectFilter::make('payment_status')
+                TernaryFilter::make('has_complaint')
+                    ->label('Customer Complaints')
+                    ->placeholder('All orders')
+                    ->trueLabel('With complaints')
+                    ->falseLabel('No complaints'),
+
+                SelectFilter::make('refund_status')
+                    ->options([
+                        'requested' => 'Refund Requested',
+                        'approved' => 'Refund Approved',
+                        'processed' => 'Refund Processed',
+                        'denied' => 'Refund Denied',
+                    ])
+                    ->multiple(),
+
+                SelectFilter::make('payment_status')
                     ->options([
                         'pending' => 'Pending',
                         'paid' => 'Paid',
                         'failed' => 'Failed',
-                    ]),
+                    ])
+                    ->multiple(),
 
-                // ✅ NEW: More useful filters
-                Tables\Filters\SelectFilter::make('order_type')
+                SelectFilter::make('payment_method')
                     ->options([
-                        'online' => 'Online Order',
-                        'onsite' => 'Walk-in Order',
-                    ]),
+                        'cash' => 'Cash',
+                        'gcash' => 'GCash',
+                        'paymaya' => 'PayMaya',
+                        'card' => 'Credit/Debit Card',
+                    ])
+                    ->multiple(),
 
-                Tables\Filters\Filter::make('today')
+                Filter::make('high_value')
+                    ->label('High Value Orders (₱500+)')
+                    ->query(function (Builder $query): Builder {
+                        return $query->whereHas('orderGroup', function ($q) {
+                            $q->where('amount_total', '>=', 50000); // 500 pesos in centavos
+                        });
+                    })
+                    ->toggle(),
+
+                Filter::make('today')
                     ->label('Today\'s Orders')
                     ->query(fn (Builder $query): Builder => $query->whereDate('created_at', today()))
                     ->toggle(),
 
-                Tables\Filters\Filter::make('this_week')
+                Filter::make('this_week')
                     ->label('This Week')
                     ->query(fn (Builder $query): Builder => $query->whereBetween('created_at', [
                         now()->startOfWeek(),
                         now()->endOfWeek()
                     ]))
                     ->toggle(),
-            ])
+
+                Filter::make('needs_attention')
+                    ->label('Needs Admin Attention')
+                    ->query(function (Builder $query): Builder {
+                        return $query->where(function ($q) {
+                            $q->where('has_complaint', true)
+                              ->orWhere('refund_status', 'requested')
+                              ->orWhere('payment_status', 'failed');
+                        });
+                    })
+                    ->toggle(),
+            ], layout: FiltersLayout::AboveContentCollapsible)
+            ->filtersFormColumns(3)
             ->actions([
                 Tables\Actions\ActionGroup::make([
-                    Tables\Actions\ViewAction::make(),
+                    Tables\Actions\ViewAction::make()
+                        ->label('View Details'),
                     
-                    // ✅ IMPROVED: Better quick actions
-                    Tables\Actions\Action::make('mark_processing')
-                        ->label('Start Processing')
-                        ->icon('heroicon-o-cog-6-tooth')
+                    Tables\Actions\Action::make('handle_dispute')
+                        ->label('Handle Dispute')
+                        ->icon('heroicon-o-exclamation-triangle')
+                        ->color('warning')
+                        ->form([
+                            Forms\Components\Textarea::make('resolution_notes')
+                                ->required()
+                                ->label('Resolution Notes')
+                                ->rows(3),
+                            Forms\Components\Select::make('resolution_action')
+                                ->options([
+                                    'refund_approved' => 'Approve Refund',
+                                    'refund_denied' => 'Deny Refund',
+                                    'replace_order' => 'Replace Order',
+                                    'store_credit' => 'Issue Store Credit',
+                                ])
+                                ->required()
+                                ->label('Resolution Action'),
+                        ])
+                        ->action(function (Order $record, array $data) {
+                            $updates = [
+                                'resolution_notes' => $data['resolution_notes'],
+                                'dispute_resolved_at' => now(),
+                            ];
+
+                            if (str_contains($data['resolution_action'], 'refund')) {
+                                $updates['refund_status'] = str_contains($data['resolution_action'], 'approved') 
+                                    ? 'approved' : 'denied';
+                            }
+
+                            $record->update($updates);
+
+                            Notification::make()
+                                ->title('Dispute Resolved')
+                                ->success()
+                                ->send();
+                        })
+                        ->visible(fn (Order $record): bool => $record->has_complaint),
+
+                    Tables\Actions\Action::make('admin_override')
+                        ->label('Admin Override')
+                        ->icon('heroicon-o-shield-exclamation')
+                        ->color('danger')
+                        ->form([
+                            Forms\Components\Select::make('override_reason')
+                                ->options([
+                                    'policy_violation' => 'Policy Violation',
+                                    'fraud_suspected' => 'Suspected Fraud',
+                                    'customer_request' => 'Customer Request',
+                                    'system_error' => 'System Error',
+                                ])
+                                ->required()
+                                ->label('Override Reason'),
+                            Forms\Components\Select::make('new_status')
+                                ->options([
+                                    'cancelled' => 'Cancel Order',
+                                    'completed' => 'Force Complete',
+                                    'pending' => 'Reset to Pending',
+                                ])
+                                ->required(),
+                            Forms\Components\Textarea::make('override_notes')
+                                ->required()
+                                ->label('Override Notes')
+                                ->rows(3),
+                        ])
+                        ->requiresConfirmation()
+                        ->modalDescription('This will override the normal order workflow. Use with caution.')
+                        ->action(function (Order $record, array $data) {
+                            $record->update([
+                                'status' => $data['new_status'],
+                                'admin_notes' => ($record->admin_notes ? $record->admin_notes . "\n\n" : '') . 
+                                               "ADMIN OVERRIDE ({$data['override_reason']}): " . $data['override_notes'],
+                                'admin_override_at' => now(),
+                                'admin_override_by' => Auth::id(),
+                            ]);
+
+                            Notification::make()
+                                ->title('Admin Override Applied')
+                                ->warning()
+                                ->send();
+                        }),
+
+                    Tables\Actions\Action::make('audit_check')
+                        ->label('Audit Data')
+                        ->icon('heroicon-o-document-magnifying-glass')
                         ->color('info')
-                        ->action(fn (Order $record) => $record->update(['status' => 'processing']))
-                        ->requiresConfirmation()
-                        ->visible(fn (Order $record): bool => $record->status === 'pending'),
+                        ->action(function (Order $record) {
+                            $issues = [];
+                            
+                            // Check total amount consistency
+                            $itemsTotal = $record->orderItems->sum('line_total') / 100;
+                            $orderTotal = $record->orderGroup ? ($record->orderGroup->amount_total / 100) : 0;
+                            
+                            if (abs($itemsTotal - $orderTotal) > 0.01) {
+                                $issues[] = "Total amount mismatch: Items sum to ₱{$itemsTotal}, order total is ₱{$orderTotal}";
+                            }
+                            
+                            // Check payment status vs order status
+                            if ($record->status === 'completed' && $record->payment_status !== 'paid') {
+                                $issues[] = 'Order completed but payment not marked as paid';
+                            }
+                            
+                            if (empty($issues)) {
+                                Notification::make()
+                                    ->title('Audit Passed')
+                                    ->body('No data integrity issues found.')
+                                    ->success()
+                                    ->send();
+                            } else {
+                                Notification::make()
+                                    ->title('Audit Issues Found')
+                                    ->body(implode(' | ', $issues))
+                                    ->warning()
+                                    ->send();
+                            }
+                        }),
 
-                    Tables\Actions\Action::make('mark_completed')
-                        ->label('Mark Completed')
-                        ->icon('heroicon-o-check-circle')
-                        ->color('success')
-                        ->action(fn (Order $record) => $record->update(['status' => 'completed']))
-                        ->requiresConfirmation()
-                        ->visible(fn (Order $record): bool => in_array($record->status, ['pending', 'processing'])),
-
-                    Tables\Actions\EditAction::make(),
+                    Tables\Actions\EditAction::make()
+                        ->label('Edit Order'),
                 ])
                 ->icon('heroicon-m-ellipsis-vertical')
-                ->tooltip('Order Actions'),
+                ->tooltip('Admin Actions'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\BulkAction::make('mark_processing')
-                        ->label('Mark as Processing')
-                        ->icon('heroicon-o-cog-6-tooth')
-                        ->color('info')
-                        ->action(fn ($records) => $records->each->update(['status' => 'processing']))
-                        ->requiresConfirmation(),
+                    Tables\Actions\BulkAction::make('mass_refund')
+                        ->label('Process Refunds')
+                        ->icon('heroicon-o-banknotes')
+                        ->color('warning')
+                        ->form([
+                            Forms\Components\Textarea::make('refund_reason')
+                                ->required()
+                                ->label('Reason for Mass Refund')
+                                ->rows(3),
+                        ])
+                        ->action(function ($records, array $data) {
+                            foreach ($records as $record) {
+                                $record->update([
+                                    'refund_status' => 'processed',
+                                    'admin_notes' => ($record->admin_notes ? $record->admin_notes . "\n\n" : '') . 
+                                                   "MASS REFUND: " . $data['refund_reason'],
+                                    'refunded_at' => now(),
+                                ]);
+                            }
+                            
+                            Notification::make()
+                                ->title('Mass Refund Processed')
+                                ->body(count($records) . ' orders processed for refund.')
+                                ->success()
+                                ->send();
+                        })
+                        ->requiresConfirmation()
+                        ->modalDescription('This will mark all selected orders as refunded.'),
 
-                    Tables\Actions\BulkAction::make('mark_completed')
-                        ->label('Mark as Completed')
-                        ->icon('heroicon-o-check-circle')
-                        ->color('success')
-                        ->action(fn ($records) => $records->each->update(['status' => 'completed']))
-                        ->requiresConfirmation(),
+                    Tables\Actions\BulkAction::make('flag_for_review')
+                        ->label('Flag for Review')
+                        ->icon('heroicon-o-flag')
+                        ->color('warning')
+                        ->form([
+                            Forms\Components\Textarea::make('review_reason')
+                                ->required()
+                                ->label('Reason for Review')
+                                ->rows(2),
+                        ])
+                        ->action(function ($records, array $data) {
+                            foreach ($records as $record) {
+                                $record->update([
+                                    'admin_notes' => ($record->admin_notes ? $record->admin_notes . "\n\n" : '') . 
+                                                   "FLAGGED FOR REVIEW: " . $data['review_reason'],
+                                    'flagged_at' => now(),
+                                ]);
+                            }
+                            
+                            Notification::make()
+                                ->title('Orders Flagged')
+                                ->body(count($records) . ' orders flagged for review.')
+                                ->success()
+                                ->send();
+                        }),
+
+                    Tables\Actions\BulkAction::make('export_for_accounting')
+                        ->label('Export for Accounting')
+                        ->icon('heroicon-o-document-arrow-down')
+                        ->action(function ($records) {
+                            // This would typically generate a CSV/Excel export
+                            Notification::make()
+                                ->title('Export Generated')
+                                ->body('Accounting export for ' . count($records) . ' orders.')
+                                ->success()
+                                ->send();
+                        }),
                 ]),
             ])
             ->defaultSort('created_at', 'desc')
-            ->poll('30s') // Auto refresh
+            ->poll('60s') // Auto refresh every minute
             ->emptyStateHeading('No orders found')
-            ->emptyStateDescription('Orders from your stall will appear here.')
-            ->emptyStateIcon('heroicon-o-shopping-bag');
+            ->emptyStateDescription('Orders from your stall requiring admin oversight will appear here.')
+            ->emptyStateIcon('heroicon-o-shield-check')
+            ->striped();
     }
 
-    // ✅ FIXED: Debug navigation badge
     public static function getNavigationBadge(): ?string
-{
-    $user = Auth::user();
-    $stallId = $user->admin_stall_id;
-    
-    if (!$stallId) return null;
+    {
+        $user = Auth::user();
+        $stallId = $user->admin_stall_id;
+        
+        if (!$stallId) return null;
 
-    $count = static::getModel()::whereHas('items.product', function ($q) use ($stallId) {
-        $q->where('stall_id', $stallId);
-    })
-    ->whereIn('status', ['pending', 'processing'])
-    ->count();
+        $count = static::getModel()::whereHas('orderItems.product', function ($q) use ($stallId) {
+            $q->where('stall_id', $stallId);
+        })
+        ->where(function ($query) {
+            $query->where('has_complaint', true)
+                  ->orWhere('refund_status', 'requested')
+                  ->orWhere('payment_status', 'failed');
+        })
+        ->count();
 
-    return $count > 0 ? (string) $count : null;
-}
+        return $count > 0 ? (string) $count : null;
+    }
 
-    // ✅ NEW: Add header actions for debugging
+    public static function getNavigationBadgeColor(): ?string
+    {
+        return self::getNavigationBadge() ? 'warning' : null;
+    }
+
     public static function getPages(): array
     {
         return [

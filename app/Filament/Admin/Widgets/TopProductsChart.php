@@ -7,33 +7,39 @@ use Filament\Widgets\ChartWidget;
 
 class TopProductsChart extends ChartWidget
 {
-    protected static ?string $heading = 'Top 10 Best Sellers (Last 30 Days)';
+    protected static ?string $heading = 'Top 10 Best Selling Products';
     protected static ?int $sort = 3;
+    protected int | string | array $columnSpan = 'full';
 
     protected function getData(): array
     {
         $analytics = new AnalyticsService();
         $products = $analytics->getTopProducts(10);
 
-        $labels = array_map(fn($product) => $product->name, $products);
-        $data = array_map(fn($product) => $product->total_sold, $products);
-        
-        // Generate colors
         $colors = [
-            '#10B981', '#3B82F6', '#F59E0B', '#EF4444', '#8B5CF6',
-            '#06B6D4', '#84CC16', '#F97316', '#EC4899', '#6B7280'
+            'rgba(59, 130, 246, 0.8)',
+            'rgba(16, 185, 129, 0.8)',
+            'rgba(251, 146, 60, 0.8)',
+            'rgba(168, 85, 247, 0.8)',
+            'rgba(236, 72, 153, 0.8)',
+            'rgba(14, 165, 233, 0.8)',
+            'rgba(34, 197, 94, 0.8)',
+            'rgba(249, 115, 22, 0.8)',
+            'rgba(139, 92, 246, 0.8)',
+            'rgba(244, 63, 94, 0.8)',
         ];
 
         return [
             'datasets' => [
                 [
-                    'label' => 'Quantity Sold',
-                    'data' => $data,
-                    'backgroundColor' => array_slice($colors, 0, count($data)),
+                    'label' => 'Revenue (₱)',
+                    'data' => collect($products)->pluck('revenue')->toArray(),
+                    'backgroundColor' => $colors,
+                    'borderColor' => array_map(fn($color) => str_replace('0.8', '1', $color), $colors),
                     'borderWidth' => 1,
                 ],
             ],
-            'labels' => $labels,
+            'labels' => collect($products)->pluck('name')->toArray(),
         ];
     }
 
@@ -53,20 +59,12 @@ class TopProductsChart extends ChartWidget
             'scales' => [
                 'y' => [
                     'beginAtZero' => true,
-                    'title' => [
-                        'display' => true,
-                        'text' => 'Items Sold',
-                    ],
-                ],
-                'x' => [
                     'ticks' => [
-                        'maxRotation' => 45,
-                        'minRotation' => 45,
+                        'callback' => "function(value) { return '₱' + value.toLocaleString(); }",
                     ],
                 ],
             ],
-            'responsive' => true,
-            'maintainAspectRatio' => false,
+            'indexAxis' => 'y',
         ];
     }
 }

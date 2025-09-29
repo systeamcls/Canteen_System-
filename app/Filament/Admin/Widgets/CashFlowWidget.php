@@ -17,23 +17,23 @@ class CashFlowWidget extends BaseWidget
         $bestDay = $analytics->getBestPerformingDay();
 
         return [
-            Stat::make('Monthly Income', '₱' . number_format($cashFlow['income']['total'], 2))
-                ->description('Sales + Rentals')
+            Stat::make('Cash In', '₱' . number_format($cashFlow['cash_in'], 2))
+                ->description('Revenue this month')
                 ->descriptionIcon('heroicon-m-arrow-trending-up')
                 ->color('success'),
 
-            Stat::make('Monthly Expenses', '₱' . number_format($cashFlow['expenses']['total'], 2))
-                ->description('Operations + Payroll')
+            Stat::make('Cash Out', '₱' . number_format($cashFlow['cash_out'], 2))
+                ->description('Expenses this month')
                 ->descriptionIcon('heroicon-m-arrow-trending-down')
                 ->color('danger'),
 
             Stat::make('Net Cash Flow', '₱' . number_format($cashFlow['net_cash_flow'], 2))
-                ->description('This month')
-                ->descriptionIcon($cashFlow['net_cash_flow'] >= 0 ? 'heroicon-m-check-circle' : 'heroicon-m-x-circle')
-                ->color($cashFlow['net_cash_flow'] >= 0 ? 'success' : 'danger'),
+                ->description($cashFlow['is_positive'] ? 'Profitable' : 'Loss')
+                ->descriptionIcon($cashFlow['is_positive'] ? 'heroicon-m-check-circle' : 'heroicon-m-x-circle')
+                ->color($cashFlow['is_positive'] ? 'success' : 'danger'),
 
-            Stat::make('Best Day', !empty($bestDay) ? '₱' . number_format($bestDay['sales'], 2) : 'No data')
-                ->description(!empty($bestDay) ? $bestDay['date'] . ' (' . $bestDay['orders'] . ' orders)' : 'Last 30 days')
+            Stat::make('Best Day', !empty($bestDay['sales']) ? '₱' . number_format($bestDay['sales'], 2) : 'No data')
+                ->description(!empty($bestDay['date']) ? $bestDay['date'] : 'Last 30 days')
                 ->descriptionIcon('heroicon-m-trophy')
                 ->color('warning'),
         ];

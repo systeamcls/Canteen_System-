@@ -1,11 +1,10 @@
 <?php
-// app/Filament/Pages/AnalyticsDashboard.php
+
 namespace App\Filament\Admin\Pages;
 
 use App\Filament\Admin\Widgets\AnalyticsKPIWidget;
 use App\Filament\Admin\Widgets\SalesTrendChart;
 use App\Filament\Admin\Widgets\TopProductsChart;
-use App\Filament\Admin\Widgets\PaymentMethodChart;
 use App\Filament\Admin\Widgets\RentalInsightsWidget;
 use App\Filament\Admin\Widgets\CashFlowWidget;
 use App\Services\AnalyticsService;
@@ -34,7 +33,6 @@ class AnalyticsDashboard extends Page
         return [
             SalesTrendChart::class,
             TopProductsChart::class,
-            PaymentMethodChart::class,
             RentalInsightsWidget::class,
             CashFlowWidget::class,
         ];
@@ -49,11 +47,16 @@ class AnalyticsDashboard extends Page
                 ->color('gray')
                 ->action(function () {
                     $this->dispatch('refreshWidgets');
-                    $this->notify('success', 'Dashboard data refreshed successfully!');
+                    
+                    \Filament\Notifications\Notification::make()
+                        ->title('Dashboard Refreshed')
+                        ->body('All analytics data has been updated successfully.')
+                        ->success()
+                        ->send();
                 }),
 
             Action::make('export_report')
-                ->label('Export PDF Report')
+                ->label('Export Report')
                 ->icon('heroicon-o-document-arrow-down')
                 ->color('success')
                 ->modalWidth(MaxWidth::Medium)
@@ -64,18 +67,62 @@ class AnalyticsDashboard extends Page
                             'daily' => 'Daily Summary',
                             'weekly' => 'Weekly Overview', 
                             'monthly' => 'Monthly Report',
+                            'custom' => 'Custom Date Range',
                         ])
-                        ->default('daily')
-                        ->required(),
+                        ->default('monthly')
+                        ->required()
+                        ->live(),
                         
-                    \Filament\Forms\Components\DatePicker::make('date')
-                        ->label('Report Date')
+                    \Filament\Forms\Components\DatePicker::make('start_date')
+                        ->label('Start Date')
+                        ->default(now()->startOfMonth())
+                        ->required()
+                        ->visible(fn (\Filament\Forms\Get $get) => $get('report_type') === 'custom'),
+                        
+                    \Filament\Forms\Components\DatePicker::make('end_date')
+                        ->label('End Date')
                         ->default(now())
-                        ->required(),
+                        ->required()
+                        ->visible(fn (\Filament\Forms\Get $get) => $get('report_type') === 'custom'),
                 ])
                 ->action(function (array $data) {
-                    // We'll implement PDF generation later
-                    $this->notify('info', 'PDF export feature coming soon!');
+                    // Generate report based on type
+                    $analytics = new AnalyticsService();
+                    
+                    switch ($data['report_type']) {
+                        case 'daily':
+                            $report = $analytics->generateFinancialReport(
+                                now()->startOfDay(),
+                                now()
+                            );
+                            break;
+                        case 'weekly':
+                            $report = $analytics->generateFinancialReport(
+                                now()->startOfWeek(),
+                                now()
+                            );
+                            break;
+                        case 'monthly':
+                            $report = $analytics->generateFinancialReport(
+                                now()->startOfMonth(),
+                                now()
+                            );
+                            break;
+                        case 'custom':
+                            $report = $analytics->generateFinancialReport(
+                                \Carbon\Carbon::parse($data['start_date']),
+                                \Carbon\Carbon::parse($data['end_date'])
+                            );
+                            break;
+                    }
+                    
+                    // For now, just show the data
+                    // TODO: Implement PDF generation
+                    \Filament\Notifications\Notification::make()
+                        ->title('Report Generated')
+                        ->body('Financial report data prepared. PDF export coming soon!')
+                        ->info()
+                        ->send();
                 }),
         ];
     }
@@ -87,10 +134,10 @@ class AnalyticsDashboard extends Page
 
     public function getSubheading(): ?string
     {
-        return 'Real-time insights for your canteen management system';
+        return 'Financial insights for your stall and rental properties';
     }
 
-    // Add some helper methods for the view
+    // Helper methods for the view
     public function getQuickInsights(): array
     {
         $analytics = new AnalyticsService();

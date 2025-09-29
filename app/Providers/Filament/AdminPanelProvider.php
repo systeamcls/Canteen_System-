@@ -17,6 +17,7 @@ use Filament\Navigation\NavigationGroup;
 use Illuminate\Support\Facades\Auth;
 
 
+
 class AdminPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
@@ -40,6 +41,9 @@ class AdminPanelProvider extends PanelProvider
                 in: app_path('Filament/Admin/Pages'),
                 for: 'App\\Filament\\Admin\\Pages'
             )
+            ->pages([
+            \App\Filament\Admin\Pages\DailyAttendance::class,
+            ])
             ->discoverWidgets(
                 in: app_path('Filament/Admin/Widgets'),
                 for: 'App\\Filament\\Admin\\Widgets'

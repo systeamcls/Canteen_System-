@@ -120,7 +120,7 @@ class WelcomeModal extends Component
                 $this->dispatch('userTypeUpdated', 'employee');
 
                 // Redirect to dashboard or menu
-                $this->redirectRoute('profile.show');
+                $this->redirectRoute('user.profile.show');
 
             } else {
                 $this->loginError = 'Invalid email or password. Please try again.';
@@ -153,6 +153,7 @@ class WelcomeModal extends Component
             'phone' => $this->registerPhone,
             'type' => 'employee',
             'is_active' => true,
+             'verification_sent_at' => now(),
         ]);
 
         // Check if Spatie roles package is installed
@@ -160,14 +161,18 @@ class WelcomeModal extends Component
             $user->assignRole('customer');
         }
 
-        // Log the user in
-        Auth::login($user);
+        // Send verification email
+        $user->sendEmailVerificationNotification();
 
+        // Log the user in
+        
+        Auth::login($user);
         session(['user_type' => 'employee']);
+        
         $this->close();
 
         // Redirect to dashboard
-        $this->redirectRoute('profile.show');
+         $this->redirectRoute('verification.notice');
 
     } catch (ValidationException $e) {
         $this->registerError = 'Validation failed: ' . implode(', ', $e->validator->errors()->all());

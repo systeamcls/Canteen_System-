@@ -1,10 +1,11 @@
 <?php
-// app/Filament/Widgets/AnalyticsKPIWidget.php
+
 namespace App\Filament\Admin\Widgets;
 
 use App\Services\AnalyticsService;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
+use Carbon\Carbon;
 
 class AnalyticsKPIWidget extends BaseWidget
 {
@@ -14,43 +15,67 @@ class AnalyticsKPIWidget extends BaseWidget
     protected function getStats(): array
     {
         $analytics = new AnalyticsService();
-        $kpis = $analytics->getTodayKPIs();
+        
+        // Today's data
+        $today = $analytics->getAdminStallSales(now()->startOfDay(), now());
+        $todayRentals = $analytics->getRentalIncome(now()->startOfDay(), now());
+        
+        // This month data
+        $thisMonth = $analytics->getFinancialSummary(now()->startOfMonth(), now());
+        $lastMonth = $analytics->getFinancialSummary(
+            now()->subMonth()->startOfMonth(),
+            now()->subMonth()->endOfMonth()
+        );
+
+        // Calculate monthly growth
+        $revenueGrowth = $lastMonth['revenue']['total'] > 0
+            ? round((($thisMonth['revenue']['total'] - $lastMonth['revenue']['total']) / $lastMonth['revenue']['total']) * 100, 1)
+            : 0;
+
+        // Rental status
+        $rentalStatus = $analytics->getRentalPaymentStatus();
 
         return [
-            Stat::make('Today\'s Sales', '₱' . number_format($kpis['sales']['amount'], 2))
-                ->description(
-                    abs($kpis['sales']['change']) > 0 
-                        ? abs(round($kpis['sales']['change'], 1)) . '% ' . ($kpis['sales']['change'] >= 0 ? 'up' : 'down') . ' from yesterday'
-                        : 'No change from yesterday'
-                )
-                ->descriptionIcon($kpis['sales']['change'] >= 0 ? 'heroicon-m-arrow-trending-up' : 'heroicon-m-arrow-trending-down')
-                ->color($kpis['sales']['change'] >= 0 ? 'success' : 'danger')
-                ->chart([7, 12, 8, 15, 10, 18, $kpis['sales']['amount'] / 1000]), // Simple trend line
+            Stat::make('Your Stall Sales (Today)', '₱' . number_format($today['total_sales'], 2))
+                ->description($today['total_orders'] . ' orders completed')
+                ->descriptionIcon('heroicon-m-shopping-cart')
+                ->color('success')
+                ->chart($this->getWeekTrend()),
 
-            Stat::make('Net Revenue Today', '₱' . number_format($kpis['net_revenue'], 2))
-                ->description('Sales + Rentals - Expenses - Payroll')
-                ->descriptionIcon('heroicon-m-banknotes')
-                ->color($kpis['net_revenue'] >= 0 ? 'success' : 'danger'),
+            Stat::make('Rental Income (This Month)', '₱' . number_format($thisMonth['revenue']['rental_income'], 2))
+                ->description($rentalStatus['compliance_rate'] . '% compliance rate')
+                ->descriptionIcon('heroicon-m-building-office')
+                ->color('info')
+                ->extraAttributes([
+                    'title' => $rentalStatus['overdue'] . ' overdue payments'
+                ]),
 
-            Stat::make('Orders Today', $kpis['sales']['orders_count'])
-                ->description('Completed orders')
-                ->descriptionIcon('heroicon-m-shopping-bag')
-                ->color('info'),
+            Stat::make('Total Revenue (This Month)', '₱' . number_format($thisMonth['revenue']['total'], 2))
+                ->description(($revenueGrowth >= 0 ? '+' : '') . $revenueGrowth . '% vs last month')
+                ->descriptionIcon($revenueGrowth >= 0 ? 'heroicon-m-arrow-trending-up' : 'heroicon-m-arrow-trending-down')
+                ->color($revenueGrowth >= 0 ? 'success' : 'danger')
+                ->chart($this->getMonthTrend()),
 
-            Stat::make('Stalls Active', $kpis['active_stalls'])
-                ->description('Currently operating')
-                ->descriptionIcon('heroicon-m-building-storefront')
-                ->color('warning'),
-
-            Stat::make('Today\'s Expenses', '₱' . number_format($kpis['expenses']['amount'], 2))
-                ->description('Operational costs')
-                ->descriptionIcon('heroicon-m-arrow-trending-down')
-                ->color('danger'),
-
-            Stat::make('Rentals Collected', '₱' . number_format($kpis['rentals']['amount'], 2))
-                ->description('Today\'s rental payments')
-                ->descriptionIcon('heroicon-m-home')
-                ->color('success'),
+            Stat::make('Net Profit (This Month)', '₱' . number_format($thisMonth['net_profit'], 2))
+                ->description($thisMonth['profit_margin'] . '% profit margin')
+                ->descriptionIcon($thisMonth['is_profitable'] ? 'heroicon-m-arrow-trending-up' : 'heroicon-m-arrow-trending-down')
+                ->color($thisMonth['is_profitable'] ? 'success' : 'danger'),
         ];
+    }
+
+    private function getWeekTrend(): array
+    {
+        $analytics = new AnalyticsService();
+        return collect($analytics->getStallSalesTrend(7))
+            ->pluck('sales')
+            ->toArray();
+    }
+
+    private function getMonthTrend(): array
+    {
+        $analytics = new AnalyticsService();
+        return collect($analytics->getStallSalesTrend(30))
+            ->pluck('sales')
+            ->toArray();
     }
 }

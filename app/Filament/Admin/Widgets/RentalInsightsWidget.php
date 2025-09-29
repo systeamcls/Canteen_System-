@@ -8,33 +8,37 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 
 class RentalInsightsWidget extends BaseWidget
 {
-    protected static ?int $sort = 5;    
+    protected static ?int $sort = 4;
+    protected int | string | array $columnSpan = 'full';
 
     protected function getStats(): array
     {
         $analytics = new AnalyticsService();
-        $insights = $analytics->getRentalInsights();
+        
+        // This month rental data
+        $rental = $analytics->getRentalIncome(now()->startOfMonth(), now());
+        $status = $analytics->getRentalPaymentStatus();
 
         return [
-            Stat::make('Rentals Today', '₱' . number_format($insights['today_collected'], 2))
-                ->description('Collected today')
-                ->descriptionIcon('heroicon-m-home')
+            Stat::make('Collected This Month', '₱' . number_format($rental['collected'], 2))
+                ->description('From tenant rental payments')
+                ->descriptionIcon('heroicon-m-check-circle')
                 ->color('success'),
 
-            Stat::make('Monthly Rentals', '₱' . number_format($insights['monthly_collected'], 2))
-                ->description('This month total')
-                ->descriptionIcon('heroicon-m-calendar')
-                ->color('info'),
+            Stat::make('Pending Payments', '₱' . number_format($rental['pending'], 2))
+                ->description($status['pending'] . ' tenants haven\'t paid yet')
+                ->descriptionIcon('heroicon-m-clock')
+                ->color('warning'),
 
-            Stat::make('Payment Compliance', $insights['compliance_rate'] . '%')
-                ->description('This month')
-                ->descriptionIcon('heroicon-m-chart-pie')
-                ->color($insights['compliance_rate'] >= 80 ? 'success' : ($insights['compliance_rate'] >= 60 ? 'warning' : 'danger')),
-
-            Stat::make('Overdue Payments', $insights['overdue_count'])
-                ->description('Requires attention')
+            Stat::make('Overdue Payments', '₱' . number_format($rental['overdue_amount'], 2))
+                ->description($rental['overdue_count'] . ' late payments')
                 ->descriptionIcon('heroicon-m-exclamation-triangle')
-                ->color($insights['overdue_count'] > 0 ? 'danger' : 'success'),
+                ->color('danger'),
+
+            Stat::make('Compliance Rate', $status['compliance_rate'] . '%')
+                ->description('Tenants paid on time')
+                ->descriptionIcon('heroicon-m-chart-bar')
+                ->color($status['compliance_rate'] >= 80 ? 'success' : 'warning'),
         ];
     }
 }

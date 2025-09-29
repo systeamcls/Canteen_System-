@@ -1,4 +1,4 @@
-{{-- navbar.blade.php - Exact design match --}}
+{{-- navbar.blade.php - With Profile Picture Support --}}
 <style>
 :root {
     --primary-orange: #FF6B47;
@@ -23,11 +23,11 @@
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 24px;
-    display: flex;                /* switch to flexbox */
+    display: flex;
     justify-content: space-between;
     align-items: center;
     height: 64px;
-    position: relative;           /* allows absolute centering */
+    position: relative;
 }
 
 /* Logo Section */
@@ -390,6 +390,7 @@
     color: white;
     font-weight: 600;
     font-size: 12px;
+    object-fit: cover;
 }
 
 .user-info {
@@ -476,7 +477,7 @@
         <nav class="navbar-nav">
             <a href="{{ route('home.index') }}" class="navbar-link {{ request()->routeIs('home.*') ? 'active' : '' }}">
                 <svg class="navbar-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m3 12 2-2m0 0 7-7 7 7M5 10v10a1 1 0 0 0 1 1h3m10-11 2 2m-2-2v10a1 1 0 0 1-1 1h-3m-6 0a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1m-6 0h6"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m3 12 2-2m0 0 7-7 7 7M5 10v10a1 1 0 0 0 1 1h3m10-11 2 2m-2-2v10a1 1 0 0 1-1 1h-3m-6 0a1 1 0 0 0 1-1v-4a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1m-6 0h6"/>
                 </svg>
                 Home
             </a>
@@ -499,73 +500,81 @@
             <!-- Cart Component -->
             @livewire('cart-panel')
 
-            <!-- User -->
-            <!-- User Dropdown -->
-<div class="user-dropdown" id="userDropdown">
-    <div class="dropdown-trigger" onclick="toggleUserDropdown()">
-        <div class="user-avatar">
-            @if(session('user_type') === 'guest')
-                👤
-            @elseif(session('user_type') === 'employee')
-                {{ strtoupper(substr(Auth::user()->name ?? 'U', 0, 2)) }}
-            @else
-                👤
-            @endif
-        </div>
-        <div class="user-info">
-            <span class="user-name">
-                @if(session('user_type') === 'guest')
-                    Guest User
-                @elseif(session('user_type') === 'employee')
-                    {{ Auth::user()->name ?? 'User' }}
-                @else
-                    Guest User
-                @endif
-            </span>
-            <span class="user-type">
-                @if(session('user_type') === 'guest')
-                    Guest
-                @elseif(session('user_type') === 'employee')
-                    Employee
-                @else
-                    Guest
-                @endif
-            </span>
-        </div>
-        <svg class="dropdown-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polyline points="6,9 12,15 18,9"></polyline>
-        </svg>
-    </div>
-    
-    <div class="dropdown-menu" id="userDropdownMenu">
-        @if(session('user_type') === 'employee' && Auth::check())
-            <!-- Employee options -->
-            <a href="{{ route('profile.show') }}" class="dropdown-item">
-                <svg class="dropdown-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                </svg>
-                Profile
-            </a>
-            <form method="POST" action="{{ route('logout') }}" style="margin: 0;">
-                @csrf
-                <button type="submit" class="dropdown-item logout-btn" onclick="return confirm('Are you sure you want to sign out?')">
-                    <svg class="dropdown-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+            <!-- User Dropdown with Profile Picture Support -->
+            <div class="user-dropdown" id="userDropdown">
+                <div class="dropdown-trigger" onclick="toggleUserDropdown()">
+                    <!-- Updated Avatar with Profile Picture Support -->
+                    @if(session('user_type') === 'guest')
+                        <div class="user-avatar">👤</div>
+                    @elseif(session('user_type') === 'employee' && Auth::check())
+                        @if(Auth::user()->profile_photo_path)
+                            <img src="{{ Storage::url(Auth::user()->profile_photo_path) }}" 
+                                 alt="Profile Picture" 
+                                 id="navbar-user-avatar"
+                                 class="user-avatar">
+                        @else
+                            <div class="user-avatar" id="navbar-user-avatar-initials">
+                                {{ strtoupper(substr(Auth::user()->name ?? 'U', 0, 2)) }}
+                            </div>
+                        @endif
+                    @else
+                        <div class="user-avatar">👤</div>
+                    @endif
+                    
+                    <div class="user-info">
+                        <span class="user-name">
+                            @if(session('user_type') === 'guest')
+                                Guest User
+                            @elseif(session('user_type') === 'employee')
+                                {{ Auth::user()->name ?? 'User' }}
+                            @else
+                                Guest User
+                            @endif
+                        </span>
+                        <span class="user-type">
+                            @if(session('user_type') === 'guest')
+                                Guest
+                            @elseif(session('user_type') === 'employee')
+                                Employee
+                            @else
+                                Guest
+                            @endif
+                        </span>
+                    </div>
+                    <svg class="dropdown-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="6,9 12,15 18,9"></polyline>
                     </svg>
-                    Sign Out
-                </button>
-            </form>
-        @else
-            <!-- Guest options -->
-            <button class="dropdown-item" onclick="openLoginModal()">
-                <svg class="dropdown-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
-                </svg>
-                Log In
-            </button>
-        @endif
-    </div>
-</div>
+                </div>
+                
+                <div class="dropdown-menu" id="userDropdownMenu">
+                    @if(session('user_type') === 'employee' && Auth::check())
+                        <!-- Employee options -->
+                        <a href="{{ route('user.profile.show') }}" class="dropdown-item">
+                            <svg class="dropdown-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                            </svg>
+                            Profile
+                        </a>
+                        <form method="POST" action="{{ route('logout') }}" style="margin: 0;">
+                            @csrf
+                            <button type="submit" class="dropdown-item logout-btn" onclick="return confirm('Are you sure you want to sign out?')">
+                                <svg class="dropdown-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                                </svg>
+                                Sign Out
+                            </button>
+                        </form>
+                    @else
+                        <!-- Guest options -->
+                        <button class="dropdown-item" onclick="openLoginModal()">
+                            <svg class="dropdown-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
+                            </svg>
+                            Log In
+                        </button>
+                    @endif
+                </div>
+            </div>
 
             <!-- Mobile Menu Button -->
             <button class="navbar-mobile-toggle" onclick="toggleNavbarMobileMenu()">
@@ -582,7 +591,7 @@
             <nav class="navbar-mobile-nav">
                 <a href="{{ route('home.index') }}" class="navbar-mobile-link {{ request()->routeIs('home.*') ? 'active' : '' }}">
                     <svg class="navbar-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m3 12 2-2m0 0 7-7 7 7M5 10v10a1 1 0 0 0 1 1h3m10-11 2 2m-2-2v10a1 1 0 0 1-1 1h-3m-6 0a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1m-6 0h6"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m3 12 2-2m0 0 7-7 7 7M5 10v10a1 1 0 0 0 1 1h3m10-11 2 2m-2-2v10a1 1 0 0 1-1 1h-3m-6 0a1 1 0 0 0 1-1v-4a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1m-6 0h6"/>
                     </svg>
                     Home
                 </a>
@@ -602,17 +611,17 @@
 
             <div class="navbar-mobile-actions">
                 <div class="navbar-mobile-user" onclick="handleMobileUserClick()">
-    <svg class="navbar-user-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0ZM12 14a7 7 0 0 0-7 7h14a7 7 0 0 0-7-7Z"/>
-    </svg>
-    @if(session('user_type') === 'guest')
-        Guest
-    @elseif(session('user_type') === 'employee')
-        Employee
-    @else
-        Login
-    @endif
-</div>
+                    <svg class="navbar-user-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0ZM12 14a7 7 0 0 0-7 7h14a7 7 0 0 0-7-7Z"/>
+                    </svg>
+                    @if(session('user_type') === 'guest')
+                        Guest
+                    @elseif(session('user_type') === 'employee')
+                        Employee
+                    @else
+                        Login
+                    @endif
+                </div>
                 
                 @livewire('cart-panel')
             </div>
@@ -621,8 +630,6 @@
 </nav>
 
 <script>
-
-    
 function toggleUserDropdown() {
     console.log('toggleUserDropdown called');
     const menu = document.getElementById('userDropdownMenu');
@@ -696,6 +703,26 @@ document.addEventListener('click', function(event) {
         arrow.style.transform = 'rotate(0deg)';
     }
 });
+
+// Function to update navbar avatar - called from profile page
+function updateNavbarAvatar(imageUrl) {
+    const avatarElement = document.getElementById('navbar-user-avatar');
+    const initialsElement = document.getElementById('navbar-user-avatar-initials');
+    
+    if (initialsElement) {
+        // Replace initials with image
+        const imgElement = document.createElement('img');
+        imgElement.src = imageUrl;
+        imgElement.alt = 'Profile Picture';
+        imgElement.id = 'navbar-user-avatar';
+        imgElement.className = 'user-avatar';
+        
+        initialsElement.parentNode.replaceChild(imgElement, initialsElement);
+    } else if (avatarElement) {
+        // Update existing image
+        avatarElement.src = imageUrl;
+    }
+}
 
 // Test function to check if elements exist
 function debugElements() {

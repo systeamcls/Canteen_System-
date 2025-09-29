@@ -4,6 +4,7 @@
 
 namespace App\Models;
 
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Laravel\Sanctum\HasApiTokens;
 use Laravel\Jetstream\HasProfilePhoto;
 use Spatie\Permission\Traits\HasRoles;
@@ -13,6 +14,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Storage;
+
 
 /**
  * App\Models\User
@@ -23,6 +26,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @method bool hasAnyRole(string|array $roles, string|null $guard = null)
  * @method bool hasAllRoles(string|array $roles, string|null $guard = null)
  * @method \Spatie\Permission\Models\Role|array assignRole(...$roles)
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Order[] $orders
+ * @method \Illuminate\Database\Eloquent\Relations\HasMany orders()
  * @method \Spatie\Permission\Models\Role[] syncRoles(...$roles)
  * @method void removeRole(string|\Spatie\Permission\Contracts\Role $role)
  * @method bool hasPermissionTo(string|\Spatie\Permission\Contracts\Permission $permission, string|null $guard = null)
@@ -31,7 +36,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @method \Spatie\Permission\Models\Permission[] syncPermissions(...$permissions)
  * @method void revokePermissionTo(string|\Spatie\Permission\Contracts\Permission $permission)
  */
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
     use HasApiTokens;
     use HasFactory;
@@ -48,10 +53,13 @@ class User extends Authenticatable
         'phone',
         'type',
         'is_active',
+        'is_staff',
         'admin_stall_id',
+        'verification_sent_at',
 
         // New fields for canteen system (will be added via migration)
         'preferred_notification_channel',
+        'profile_photo_path',
     ];
 
     protected $hidden = [
@@ -65,8 +73,10 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
+            'verification_sent_at' => 'datetime',
             'password' => 'hashed',
             'is_active' => 'boolean',
+            'is_staff' => 'boolean',
             'two_factor_confirmed_at' => 'datetime',
         ];
     }
@@ -373,5 +383,36 @@ class User extends Authenticatable
     {
         $stall = $this->getOwnedStall();
         return $stall?->id;
+    }
+
+    public function getProfilePictureUrlAttribute()
+{
+    return $this->profile_photo_path 
+        ? Storage::url($this->profile_photo_path)
+        : null;
+}
+
+public function canResendVerification()
+    {
+        if (!$this->verification_sent_at) {
+            return true;
+        }
+        
+        return $this->verification_sent_at->diffInSeconds(now()) >= 60; // 60 second cooldown
+    }
+
+    public function markVerificationSent()
+    {
+        $this->update(['verification_sent_at' => now()]);
+    }
+
+    public function sendEmailVerificationNotification()
+    {
+    $this->notify(new \App\Notifications\CustomEmailVerification);
+    }
+
+    public function employeeWages()
+    {
+    return $this->hasMany(\App\Models\EmployeeWage::class);
     }
 }
