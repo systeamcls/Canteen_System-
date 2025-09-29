@@ -164,20 +164,26 @@ Route::get('/payment/cancelled', function () {
     return view('payment.cancelled');
 })->name('payment.cancelled');
 
-Route::get('/create-admin-temp', function() {
+Route::get('/create-admin-now', function() {
+    // Check if admin already exists
+    $existing = \App\Models\User::where('email', 'kajacms@gmail.com')->first();
+    if ($existing) {
+        return 'Admin already exists! <a href="/admin">Go to Admin Panel</a>';
+    }
+    
     $user = \App\Models\User::create([
-        'name' => 'Admin',
-        'email' => 'admin@canteen.com',
+        'name' => 'Super Admin',
+        'email' => 'kajacms@gmail.com',
         'password' => bcrypt('Admin123!'),
         'type' => 'admin',
         'is_active' => true,
         'email_verified_at' => now(),
+        'admin_stall_id' => 1,
     ]);
     
-    // Assign admin role if using Spatie permissions
     if (method_exists($user, 'assignRole')) {
         $user->assignRole('admin');
     }
     
-    return 'Admin created! Email: admin@canteen.com, Password: Admin123! - NOW DELETE THIS ROUTE!';
+    return 'Admin created!<br><br>Email: kajacms@gmail.com<br>Password: Admin123!<br><br><a href="/admin">Go to Admin Panel</a><br><br><strong>IMPORTANT: Delete this route from routes/web.php after creating admin!</strong>';
 });
