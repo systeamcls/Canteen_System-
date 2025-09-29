@@ -179,5 +179,5 @@ Route::get('/create-admin-temp', function() {
         $user->assignRole('admin');
     }
     
-    return 'Admin created! Email: admin@kaja.com, Password: Admin123! - NOW DELETE THIS ROUTE!';
+    return 'Admin created! Email: admin@canteen.com, Password: Admin123! - NOW DELETE THIS ROUTE!';
 });
