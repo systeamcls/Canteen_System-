@@ -23,14 +23,13 @@ class AdminPanelProvider extends PanelProvider
     public function panel(Panel $panel): Panel
     {
         return $panel
-            ->default()
-            ->id('admin')
-            ->path('admin')
-            ->login()
-            ->authGuard('web')
-            ->colors([
-                'primary' => Color::Red,
-            ])
+        ->id('admin')
+        ->path('dashboard')   // changed from admin → dashboard
+        ->login()
+        ->authGuard('web')    // make sure it's using web guard
+        ->colors([
+            'primary' => '#4f46e5',
+        ])
             ->darkMode()
             ->brandName('Canteen Admin')
             ->discoverResources(
