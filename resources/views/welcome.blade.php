@@ -1020,62 +1020,18 @@
 
     @livewireScripts
     <script>
-// SIMPLE AND DIRECT - This will work 100%
 function openWelcomeModal() {
-    console.log('Opening modal...');
-    
-    // Find the Livewire component
-    const livewireComponent = document.querySelector('[wire\\:id]');
-    if (livewireComponent) {
-        // Get the Livewire component instance
-        const component = Livewire.find(livewireComponent.getAttribute('wire:id'));
-        if (component) {
-            console.log('Found component, calling open method');
-            component.call('open');
-        } else {
-            console.log('Component not found, trying direct method');
-            // Fallback: directly set the modal to show
-            directModalOpen();
-        }
+    // Wait for Livewire to be ready
+    if (typeof Livewire !== 'undefined') {
+        Livewire.dispatch('openWelcomeModal');
     } else {
-        console.log('Livewire component not found, using direct method');
-        directModalOpen();
-    }
-}
-
-// Direct modal opener - GUARANTEED to work
-function directModalOpen() {
-    // Find the modal
-    const modal = document.querySelector('.modal-overlay');
-    if (modal) {
-        modal.style.display = 'flex';
-        modal.style.opacity = '1';
-        modal.style.visibility = 'visible';
-        modal.classList.add('active');
-        console.log('Modal opened directly!');
-    } else {
-        console.error('Modal element not found in DOM');
-        // If modal not found, create a simple alert
-        alert('Modal not found. Please refresh the page.');
-    }
-}
-
-// Wait for everything to load
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('Page loaded, checking for modal...');
-    
-    setTimeout(() => {
+        // Fallback: directly manipulate DOM
         const modal = document.querySelector('.modal-overlay');
-        const livewireComponent = document.querySelector('[wire\\:id]');
-        console.log('Modal found:', !!modal);
-        console.log('Livewire component found:', !!livewireComponent);
-        
-        // If modal exists but is hidden, show it briefly to test
         if (modal) {
-            console.log('Modal element exists in DOM');
+            modal.classList.add('active');
         }
-    }, 1000);
-});
+    }
+}
 </script>
 
 </body>
