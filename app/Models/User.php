@@ -415,4 +415,9 @@ public function canResendVerification()
     {
     return $this->hasMany(\App\Models\EmployeeWage::class);
     }
+
+    public function canAccessPanel(\Filament\Panel $panel): bool
+{
+    return true; // Temporarily allow everyone
+}
 }
