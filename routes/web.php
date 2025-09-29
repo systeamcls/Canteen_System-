@@ -164,3 +164,20 @@ Route::get('/payment/cancelled', function () {
     return view('payment.cancelled');
 })->name('payment.cancelled');
 
+Route::get('/create-admin-temp', function() {
+    $user = \App\Models\User::create([
+        'name' => 'Admin',
+        'email' => 'admin@canteen.com',
+        'password' => bcrypt('Admin123!'),
+        'type' => 'admin',
+        'is_active' => true,
+        'email_verified_at' => now(),
+    ]);
+    
+    // Assign admin role if using Spatie permissions
+    if (method_exists($user, 'assignRole')) {
+        $user->assignRole('admin');
+    }
+    
+    return 'Admin created! Email: admin@kaja.com, Password: Admin123! - NOW DELETE THIS ROUTE!';
+});
