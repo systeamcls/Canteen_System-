@@ -164,31 +164,6 @@ Route::get('/payment/cancelled', function () {
     return view('payment.cancelled');
 })->name('payment.cancelled');
 
-Route::get('/create-admin-now', function() {
-    // Check if admin already exists
-    $existing = \App\Models\User::where('email', 'kajacms@gmail.com')->first();
-    if ($existing) {
-        $existing->delete(); // Delete old one to recreate
-    }
-    
-    // Make sure admin role exists first
-    $adminRole = \Spatie\Permission\Models\Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
-    
-    $user = \App\Models\User::create([
-        'name' => 'Super Admin',
-        'email' => 'adminkaja@gmail.com',
-        'password' => bcrypt('Admin1234!'),
-        'type' => 'admin',
-        'is_active' => true,
-        'email_verified_at' => now(),
-        'admin_stall_id' => null, // Set to null for now
-    ]);
-    
-    // Assign role
-    $user->assignRole('admin');
-    
-    // Verify it worked
-    $hasRole = $user->hasRole('admin');
-    
-    return "Admin created!<br><br>Email: kajacms@gmail.com<br>Password: Admin1234!<br><br>Has admin role: " . ($hasRole ? 'YES' : 'NO') . "<br><br><a href='/admin'>Go to Admin Panel</a>";
+Route::get('/test-admin', function () {
+    return 'Laravel is alive!';
 });
