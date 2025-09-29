@@ -366,7 +366,7 @@ public function changePaymentMethod()
     }
 
         return OrderGroup::create([
-            'payer_type' => session('user_type', 'guest'),
+            'payer_type' => session('user_type') === 'employee' ? 'employee' : 'guest',
             'user_id' => Auth::id(),
             'guest_token' => $this->initialCustomerType === 'guest' ? Session::get('guest_cart_token') : null,
             'payment_method' => $this->paymentMethod === 'cash' ? 'onsite' : 'online',
