@@ -15,6 +15,8 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Storage;
+use Filament\Models\Contracts\FilamentUser;
+
 
 
 /**
@@ -36,7 +38,7 @@ use Illuminate\Support\Facades\Storage;
  * @method \Spatie\Permission\Models\Permission[] syncPermissions(...$permissions)
  * @method void revokePermissionTo(string|\Spatie\Permission\Contracts\Permission $permission)
  */
-class User extends Authenticatable implements MustVerifyEmail
+class User extends Authenticatable implements MustVerifyEmail, FilamentUser
 {
     use HasApiTokens;
     use HasFactory;
@@ -416,8 +418,8 @@ public function canResendVerification()
     return $this->hasMany(\App\Models\EmployeeWage::class);
     }
 
-    public function canAccessPanel(\Filament\Panel $panel): bool
+public function canAccessPanel(\Filament\Panel $panel): bool
 {
-    return true; // Temporarily allow everyone
+    return $this->hasRole('admin') || $this->hasRole('cashier') || $this->hasRole('tenant');
 }
 }
