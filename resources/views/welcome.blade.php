@@ -971,21 +971,6 @@
         </div>
     </section>
 
-    <!-- CTA Section -->
-    <section class="cta">
-        <div class="container">
-            <h2>Ready to Satisfy Your Cravings?</h2>
-            <p>Join LTO visitors and employees who've discovered the easiest way to order delicious food</p>
-            <div class="cta-buttons">
-                <a href="#" class="btn btn-secondary">Order Now</a>
-                <a href="#" class="btn btn-primary">View Menu</a>
-            </div>
-            <div style="margin-top: 30px; color: rgba(255,255,255,0.8); font-size: 0.9rem;">
-                ✓ No delivery fees within LTO ✓ Affordable pricing for all ✓ Quick 10-15 min pickup
-            </div>
-        </div>
-    </section>
-
     <!-- Footer -->
     <footer>
         <div class="container">
