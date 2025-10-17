@@ -896,78 +896,36 @@ body {
     </div>
   </section>
 
-  <!-- Categories -->
-  <section class="categories-section">
-    <div class="container">
-      <div class="section-header">
-        <h2 class="section-title">What are you craving for today?</h2>
-        <p class="section-subtitle">Choose from our diverse selection of food categories</p>
-      </div>
-
-      <div class="categories-grid">
-        <a href="{{ route('menu.index') }}" class="category-item active">
-          <div class="category-icon" style="background: var(--amber-500);">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M5 7h14l-1 7H6l-1-7Z"/>
-              <path d="M5 7l-1-3H2"/>
-              <path d="m5 17 1 3h8l1-3"/>
-              <circle cx="9" cy="21" r="1"/>
-              <circle cx="16" cy="21" r="1"/>
-            </svg>
-          </div>
-          <p class="category-name">All Items</p>
-        </a>
-        
-        <a href="{{ route('menu.index', ['category' => 'fresh-meats']) }}" class="category-item">
-          <div class="category-icon" style="background: var(--red-500);">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/>
-            </svg>
-          </div>
-          <p class="category-name">Fresh Meals</p>
-        </a>
-        
-        <a href="{{ route('menu.index', ['category' => 'sandwiches']) }}" class="category-item">
-          <div class="category-icon" style="background: var(--orange-500);">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <rect x="3" y="11" width="18" height="10" rx="2" ry="2"/>
-              <rect x="3" y="3" width="18" height="6" rx="2" ry="2"/>
-            </svg>
-          </div>
-          <p class="category-name">Sandwiches</p>
-        </a>
-        
-        <a href="{{ route('menu.index', ['category' => 'beverages']) }}" class="category-item">
-          <div class="category-icon" style="background: var(--blue-500);">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="10"/>
-              <polyline points="12,6 12,12 16,14"/>
-            </svg>
-          </div>
-          <p class="category-name">Beverages</p>
-        </a>
-        
-        <a href="{{ route('menu.index', ['category' => 'snacks']) }}" class="category-item">
-          <div class="category-icon" style="background: var(--pink-500);">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-            </svg>
-          </div>
-          <p class="category-name">Snacks</p>
-        </a>
-        
-        <a href="{{ route('menu.index', ['category' => 'desserts']) }}" class="category-item">
-          <div class="category-icon" style="background: var(--purple-500);">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-              <circle cx="12" cy="7" r="4"/>
-            </svg>
-          </div>
-          <p class="category-name">Desserts</p>
-        </a>
-      </div>
+ <!-- Categories -->
+<section class="categories-section">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="section-title">What are you craving for today?</h2>
+      <p class="section-subtitle">Choose from our diverse selection of food categories</p>
     </div>
-  </section>
+
+    <div class="categories-grid">
+      <!-- All Items -->
+      <a href="{{ route('menu.index') }}" class="category-item {{ !request('category_id') ? 'active' : '' }}">
+        <div class="category-icon" style="background: var(--amber-500);">
+          <span style="font-size: 32px;">🛒</span>
+        </div>
+        <p class="category-name">All Items</p>
+      </a>
+      
+      <!-- Dynamic Categories -->
+      @foreach($categories as $category)
+      <a href="{{ route('menu.index', ['category_id' => $category->id]) }}" 
+         class="category-item {{ request('category_id') == $category->id ? 'active' : '' }}">
+        <div class="category-icon" style="background: var(--amber-500);">
+          <span style="font-size: 32px;">{{ $category->icon ?? '🍽️' }}</span>
+        </div>
+        <p class="category-name">{{ $category->name }}</p>
+      </a>
+      @endforeach
+    </div>
+  </div>
+</section>
 
   <!-- Popular Items -->
   <section class="popular-section">

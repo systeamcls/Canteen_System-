@@ -4,21 +4,38 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use App\Models\Stall;
+use App\Models\Category;
 use Illuminate\Http\Request;
 
 class MenuController extends Controller
 {
     public function index(Request $request)
     {
-        $category = $request->get('category');
+        $categoryId = $request->get('category_id');
+        $categorySlug = $request->get('category'); // Keep for backward compatibility
         $search = $request->get('search');
         $stallId = $request->get('stall');
 
         $query = Product::with('stall')->where('is_available', true);
 
-        // Filter by category if provided
-        if ($category) {
-            $query->where('category', $category);
+        // Filter by category - support both new (ID) and old (slug) parameters
+        if ($categoryId) {
+            $query->where('category_id', $categoryId);
+        } elseif ($categorySlug) {
+            // Backward compatibility: map old slugs to category IDs
+            // TODO: Update these IDs after running CategorySeeder to match actual IDs
+            $categoryMap = [
+                'fresh-meals' => 1,
+                'sandwiches' => 2,
+                'beverages' => 3,
+                'snacks' => 4,
+                'desserts' => 5,
+            ];
+            
+            if (isset($categoryMap[$categorySlug])) {
+                $query->where('category_id', $categoryMap[$categorySlug]);
+                $categoryId = $categoryMap[$categorySlug]; // Set for view consistency
+            }
         }
 
         // Filter by search term
@@ -39,17 +56,13 @@ class MenuController extends Controller
         // Get all stalls for filter dropdown
         $stalls = Stall::where('is_active', true)->get();
 
-        // Get food categories (you might want to store these in database)
-        $categories = [
-            'fresh-meals' => 'Fresh Meals',
-            'sandwiches' => 'Sandwiches',
-            'beverages' => 'Beverages',
-            'snacks' => 'Snacks',
-            'desserts' => 'Desserts'
-        ];
+        // Get categories from database
+        $categories = Category::where('is_active', true)
+                             ->orderBy('sort_order')
+                             ->get();
 
-        // CHANGE THIS LINE: from 'menu' to 'menu.index'
-        return view('menu.index', compact('products', 'stalls', 'categories','category', 'search', 'stallId'));
+        // Pass both for backward compatibility
+        return view('menu.index', compact('products', 'stalls', 'categories', 'categoryId', 'categorySlug', 'search', 'stallId'));
     }
 
     public function show(Product $product)

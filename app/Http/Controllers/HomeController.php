@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Product;
 use App\Models\Stall;
 use Illuminate\Http\Request;
+use App\Models\Category;
 
 class HomeController extends Controller
 {
@@ -45,13 +46,23 @@ class HomeController extends Controller
             ->take(6)
             ->get();
 
+         // ADD THIS: Get categories for homepage
+        $categories = Category::where('is_active', true)
+                             ->orderBy('sort_order')
+                             ->get();
+
+
         return view('home.index', compact(
             'topFoods', 
             'popularStalls', 
             'featuredItems',
             'featuredStalls',
-            'trendingProducts'
+            'trendingProducts',
+            'categories'
+
+        
         ));
+        
     }
 
     public function search(Request $request)
