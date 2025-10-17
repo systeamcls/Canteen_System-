@@ -150,7 +150,44 @@ class ProductResource extends Resource
                         ->default(true),
                 ])
                 ->columns(2),
+
+        Forms\Components\Section::make('Stock Management')
+    ->description('Manage product inventory')
+    ->schema([
+        Forms\Components\Grid::make(2)
+            ->schema([
+                Forms\Components\TextInput::make('stock_quantity')
+                    ->label('Current Stock')
+                    ->numeric()
+                    ->required()
+                    ->default(100)
+                    ->minValue(0)
+                    ->suffix('units')
+                    ->helperText('Available quantity')
+                    ->reactive()
+                    ->afterStateUpdated(function ($state, callable $set) {
+                        // Auto-disable product if stock is 0
+                        if ($state <= 0) {
+                            $set('is_available', false);
+                        }
+                    }),
+                
+                Forms\Components\TextInput::make('low_stock_alert')
+                    ->label('Low Stock Alert')
+                    ->numeric()
+                    ->required()
+                    ->default(10)
+                    ->minValue(1)
+                    ->suffix('units')
+                    ->helperText('Get notified when stock reaches this level'),
+            ]),
+    ])
+    ->collapsible(),
+
+
         ]);
+
+
     
     }
     public static function table(Table $table): Table
@@ -194,6 +231,21 @@ class ProductResource extends Resource
                     ->suffix(' mins')
                     ->alignCenter()
                     ->color('gray'),
+
+                Tables\Columns\TextColumn::make('stock_quantity')
+                    ->label('Stock')
+                    ->badge()
+                    ->color(fn ($record) => match(true) {
+                    $record->stock_quantity <= 0 => 'danger',
+                    $record->stock_quantity <= $record->low_stock_alert => 'warning',
+                    default => 'success',
+                })
+                    ->formatStateUsing(fn ($record) => match(true) {
+                    $record->stock_quantity <= 0 => 'Out of Stock',
+                    $record->stock_quantity <= $record->low_stock_alert => "Low: {$record->stock_quantity}",
+                    default => $record->stock_quantity . ' units',
+                })
+                    ->sortable(),
 
                 Tables\Columns\ViewColumn::make('availability_status')
                     ->label('Status')
@@ -256,6 +308,27 @@ class ProductResource extends Resource
                         )
                     )
                     ->toggle(),
+
+                Tables\Filters\SelectFilter::make('stock_status')
+    ->label('Stock Status')
+    ->options([
+        'out_of_stock' => 'Out of Stock',
+        'low_stock' => 'Low Stock',
+        'in_stock' => 'In Stock',
+    ])
+    ->query(function (Builder $query, array $data) {
+        return $query->when(
+            $data['value'] === 'out_of_stock',
+            fn ($q) => $q->where('stock_quantity', '<=', 0)
+        )->when(
+            $data['value'] === 'low_stock',
+            fn ($q) => $q->whereColumn('stock_quantity', '<=', 'low_stock_alert')
+                        ->where('stock_quantity', '>', 0)
+        )->when(
+            $data['value'] === 'in_stock',
+            fn ($q) => $q->whereColumn('stock_quantity', '>', 'low_stock_alert')
+        );
+    }),
             ])
             ->actions([
                 Tables\Actions\ActionGroup::make([
@@ -320,6 +393,44 @@ class ProductResource extends Resource
                             $records->each->update(['category_id' => $data['category_id']]);
                             Notification::make()->title('Categories updated successfully')->success()->send();
                         }),
+
+                    Tables\Actions\BulkAction::make('restock')
+    ->label('Restock Products')
+    ->icon('heroicon-o-arrow-up-tray')
+    ->color('success')
+    ->form([
+        Forms\Components\TextInput::make('quantity')
+            ->label('Add Stock Quantity')
+            ->numeric()
+            ->required()
+            ->minValue(1)
+            ->suffix('units'),
+    ])
+    ->action(function ($records, array $data) {
+        $records->each->increment('stock_quantity', $data['quantity']);
+        Notification::make()
+            ->title('Stock updated successfully')
+            ->success()
+            ->send();
+    })
+    ->deselectRecordsAfterCompletion(),
+
+Tables\Actions\BulkAction::make('mark_out_of_stock')
+    ->label('Mark Out of Stock')
+    ->icon('heroicon-o-x-circle')
+    ->color('danger')
+    ->action(function ($records) {
+        $records->each->update([
+            'stock_quantity' => 0,
+            'is_available' => false
+        ]);
+        Notification::make()
+            ->title('Products marked out of stock')
+            ->warning()
+            ->send();
+    })
+    ->requiresConfirmation()
+    ->deselectRecordsAfterCompletion(),
 
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
