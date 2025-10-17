@@ -848,9 +848,9 @@
                 <h1>LTO Canteen Central</h1>
                 <p>Discover amazing food from multiple vendors in one place. Fresh meals, quick service, and delicious options for everyone - visitors and LTO employees alike.</p>
                 <div class="cta-buttons">
-                    <a href="#categories" class="btn btn-primary">🛒 Browse Menu</a>
-                    <a href="#features" class="btn btn-secondary">📲 Quick Order</a>
-                </div>
+    <button onclick="openWelcomeModal()" class="btn btn-primary">🛒 Browse Menu</button>
+    <a href="{{ route('menu') }}" class="btn btn-secondary">📲 Quick Order</a>
+</div>
                 
                 <div class="food-highlights">
                     <div class="highlight-card">
