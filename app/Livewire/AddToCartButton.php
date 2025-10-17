@@ -34,19 +34,21 @@ class AddToCartButton extends Component
 
     public function mount(
         Product $product,
-        int $quantity = 1,
-        bool $showQuantitySelector = false,
-        string $buttonText = 'Add to Cart',
-        string $buttonSize = 'medium',
-        bool $showPrice = true
-    ): void {
-        $this->product = $product;
-        $this->quantity = $quantity;
-        $this->showQuantitySelector = $showQuantitySelector;
-        $this->buttonText = $buttonText;
-        $this->buttonSize = $buttonSize;
-        $this->showPrice = $showPrice;
-        $this->disabled = !$product->is_available;
+    int $quantity = 1,
+    bool $showQuantitySelector = false,
+    string $buttonText = 'Add to Cart',
+    string $buttonSize = 'medium',
+    bool $showPrice = true
+): void {
+    $this->product = $product;
+    $this->quantity = $quantity;
+    $this->showQuantitySelector = $showQuantitySelector;
+    $this->buttonText = $buttonText;
+    $this->buttonSize = $buttonSize;
+    $this->showPrice = $showPrice;
+    
+    // Disable if product is unavailable OR out of stock
+    $this->disabled = !$product->is_available || $product->stock_quantity <= 0;
     }
 
     /**
@@ -54,12 +56,31 @@ class AddToCartButton extends Component
      */
     public function addToCart(): void
     {
-        if (!$this->product->is_available) {
-            $this->dispatch('show-notification', [
-                'message' => 'This product is currently unavailable',
-                'type' => 'error'
-            ]);
-            return;
+        // Check availability
+    if (!$this->product->is_available) {
+        $this->dispatch('show-notification', [
+            'message' => 'This product is currently unavailable',
+            'type' => 'error'
+        ]);
+        return;
+    }
+
+    // Check stock quantity
+    if ($this->product->stock_quantity <= 0) {
+        $this->dispatch('show-notification', [
+            'message' => 'This product is out of stock',
+            'type' => 'error'
+        ]);
+        return;
+    }
+
+    // Check if requested quantity exceeds stock
+    if ($this->quantity > $this->product->stock_quantity) {
+        $this->dispatch('show-notification', [
+            'message' => "Only {$this->product->stock_quantity} units available",
+            'type' => 'error'
+        ]);
+        return;
         }
 
         $this->validate();
@@ -202,9 +223,9 @@ class AddToCartButton extends Component
      * Check if product is in stock
      */
     public function getIsInStockProperty(): bool
-    {
-        return $this->product->is_available;
-    }
+{
+    return $this->product->is_available && $this->product->stock_quantity > 0;
+}
 
     /**
      * Get total price for current quantity
@@ -218,4 +239,32 @@ class AddToCartButton extends Component
     {
         return view('livewire.add-to-cart-button');
     }
+
+    public function getStockStatusProperty(): array
+{
+    $stock = $this->product->stock_quantity;
+    $lowStockAlert = $this->product->low_stock_alert;
+
+    if ($stock <= 0) {
+        return [
+            'text' => 'Out of Stock',
+            'class' => 'out-of-stock',
+            'color' => 'danger'
+        ];
+    }
+
+    if ($stock <= $lowStockAlert) {
+        return [
+            'text' => "Only {$stock} left!",
+            'class' => 'low-stock',
+            'color' => 'warning'
+        ];
+    }
+
+    return [
+        'text' => "{$stock} available",
+        'class' => 'in-stock',
+        'color' => 'success'
+    ];
+}
 }

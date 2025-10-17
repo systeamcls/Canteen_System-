@@ -8,14 +8,18 @@
         
         <!-- Status Badge -->
         <div class="product-badges">
-            @if(!$product->is_available)
-                <span class="badge-unavailable">Unavailable</span>
-            @elseif($product->id % 2 == 0) {{-- Example logic for popular items --}}
-                <span class="badge-popular">Popular</span>
-            @else
-                <span class="badge-available">Available</span>
-            @endif
-        </div>
+    @if(!$product->is_available)
+        <span class="badge-unavailable">Unavailable</span>
+    @elseif($product->stock_quantity <= 0)
+        <span class="badge-unavailable">Out of Stock</span>
+    @elseif($product->stock_quantity <= $product->low_stock_alert)
+        <span class="badge-warning">Only {{ $product->stock_quantity }} left!</span>
+    @elseif($product->id % 2 == 0)
+        <span class="badge-popular">Popular</span>
+    @else
+        <span class="badge-available">In Stock</span>
+    @endif
+</div>
     </div>
 
     <!-- Product Content -->
@@ -40,64 +44,64 @@
             </div>
             
             <!-- Add to Cart Controls -->
-            <div class="cart-controls">
-                @if($product->is_available)
-                    @if($showQuantitySelector)
-                        <!-- Quantity Selector Mode -->
-                        <div class="quantity-controls">
-                            <div class="quantity-selector">
-                                <button 
-                                    wire:click="decrementQuantity"
-                                    class="qty-btn qty-minus"
-                                    {{ $quantity <= 1 ? 'disabled' : '' }}>
-                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-                                        <line x1="5" y1="12" x2="19" y2="12"></line>
-                                    </svg>
-                                </button>
-                                <span class="qty-display">{{ $quantity }}</span>
-                                <button 
-                                    wire:click="incrementQuantity"
-                                    class="qty-btn qty-plus"
-                                    {{ $quantity >= 99 ? 'disabled' : '' }}>
-                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-                                        <line x1="12" y1="5" x2="12" y2="19"></line>
-                                        <line x1="5" y1="12" x2="19" y2="12"></line>
-                                    </svg>
-                                </button>
-                            </div>
-                            <button 
-                                wire:click="addToCart"
-                                class="add-to-cart-btn full-width"
-                                wire:loading.attr="disabled">
-                                <span wire:loading.remove wire:target="addToCart">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <line x1="12" y1="5" x2="12" y2="19"></line>
-                                        <line x1="5" y1="12" x2="19" y2="12"></line>
-                                    </svg>
-                                    Add to Cart
-                                </span>
-                                <span wire:loading wire:target="addToCart">Adding...</span>
-                            </button>
-                        </div>
-                    @else
-                        <!-- Simple Add Button -->
-                        <button 
-                            wire:click="toggleQuantitySelector"
-                            class="add-to-cart-btn">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <line x1="12" y1="5" x2="12" y2="19"></line>
-                                <line x1="5" y1="12" x2="19" y2="12"></line>
-                            </svg>
-                            Add
-                        </button>
-                    @endif
-                @else
-                    <button class="unavailable-btn" disabled>
-                        Unavailable
+<div class="cart-controls">
+    @if($product->is_available && $product->stock_quantity > 0)
+        @if($showQuantitySelector)
+            <!-- Quantity Selector Mode -->
+            <div class="quantity-controls">
+                <div class="quantity-selector">
+                    <button 
+                        wire:click="decrementQuantity"
+                        class="qty-btn qty-minus"
+                        {{ $quantity <= 1 ? 'disabled' : '' }}>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
                     </button>
-                @endif
+                    <span class="qty-display">{{ $quantity }}</span>
+                    <button 
+                        wire:click="incrementQuantity"
+                        class="qty-btn qty-plus"
+                        {{ $quantity >= min(99, $product->stock_quantity) ? 'disabled' : '' }}>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                    </button>
+                </div>
+                <button 
+                    wire:click="addToCart"
+                    class="add-to-cart-btn full-width"
+                    wire:loading.attr="disabled"
+                    {{ $quantity > $product->stock_quantity ? 'disabled' : '' }}>
+                    <span wire:loading.remove wire:target="addToCart">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        Add to Cart
+                    </span>
+                    <span wire:loading wire:target="addToCart">Adding...</span>
+                </button>
             </div>
-        </div>
+        @else
+            <!-- Simple Add Button -->
+            <button 
+                wire:click="toggleQuantitySelector"
+                class="add-to-cart-btn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                Add
+            </button>
+        @endif
+    @else
+        <button class="unavailable-btn" disabled>
+            {{ $product->stock_quantity <= 0 ? 'Out of Stock' : 'Unavailable' }}
+        </button>
+    @endif
+</div>
         
         <!-- Success/Error Messages -->
         @if($message && $messageType === 'success')
@@ -474,5 +478,22 @@
             font-size: 16px;
         }
     }
+
+    .badge-warning {
+    background: #F59E0B;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.8; }
+}
     </style>
 </div>
