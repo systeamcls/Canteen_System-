@@ -584,6 +584,18 @@ select:focus {
     box-shadow: 0 4px 12px rgba(0,0,0,0.06);
     border: 1px solid #f1f5f9;
 }
+
+/* FORCE GRID FIX */
+#menuGrid .menu-item {
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+#menuGrid .menu-product-card {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+}
 </style>
 
 <!-- JavaScript for Category Filtering -->
