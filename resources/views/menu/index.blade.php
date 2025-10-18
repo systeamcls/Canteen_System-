@@ -504,6 +504,35 @@ select:focus {
         font-size: 12px;
     }
 }
+
+/* FINAL OVERRIDE - DO NOT REMOVE */
+#menuGrid {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 12px !important;
+    width: 100% !important;
+}
+
+@media (min-width: 481px) and (max-width: 767px) {
+    #menuGrid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 16px !important;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 1024px) {
+    #menuGrid {
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 24px !important;
+    }
+}
+
+@media (min-width: 1025px) {
+    #menuGrid {
+        grid-template-columns: repeat(4, 1fr) !important;
+        gap: 28px !important;
+    }
+}
 </style>
 
 <!-- JavaScript for Category Filtering -->
