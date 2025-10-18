@@ -458,25 +458,42 @@ select:focus {
 
 #menuGrid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 24px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
     width: 100%;
 }
 
-@media (min-width: 768px) {
+/* Mobile - 2 columns */
+@media (max-width: 480px) {
     #menuGrid {
-        grid-template-columns: repeat(3, 1fr);
-        gap: 20px;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
     }
 }
 
+/* Small tablets - 2 columns */
+@media (min-width: 481px) and (max-width: 767px) {
+    #menuGrid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+    }
+}
+
+/* Tablets - 3 columns */
+@media (min-width: 768px) and (max-width: 1024px) {
+    #menuGrid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 24px;
+    }
+}
+
+/* Desktop - 4 columns */
 @media (min-width: 1025px) {
     #menuGrid {
         grid-template-columns: repeat(4, 1fr);
         gap: 28px;
     }
 }
-
 
 /* Compact Pagination Styles */
 
