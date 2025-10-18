@@ -246,16 +246,6 @@ select:focus {
     outline-offset: 2px;
 }
 
-/* ===== MENU GRID - MAIN STYLES ===== */
-#menuGrid {
-    display: grid !important;
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: 12px !important;
-    width: 100% !important;
-    grid-auto-rows: auto !important;
-    align-items: start !important;
-}
-
 #menuGrid .menu-item {
     width: 100% !important;
     max-width: 100% !important;
@@ -515,16 +505,21 @@ select:focus {
     }
 }
 
-/* FINAL OVERRIDE - DO NOT REMOVE */
+/* ===== FINAL GRID OVERRIDE - CRITICAL - DO NOT MODIFY ===== */
 #menuGrid {
     display: grid !important;
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: 12px !important;
     width: 100% !important;
     grid-auto-rows: auto !important;
     align-items: start !important;
 }
 
+/* Mobile - 2 columns (default and up to 480px) */
+#menuGrid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 12px !important;
+}
+
+/* Small tablets - 2 columns (481px to 767px) */
 @media (min-width: 481px) and (max-width: 767px) {
     #menuGrid {
         grid-template-columns: repeat(2, 1fr) !important;
@@ -532,6 +527,7 @@ select:focus {
     }
 }
 
+/* Tablets - 3 columns (768px to 1024px) */
 @media (min-width: 768px) and (max-width: 1024px) {
     #menuGrid {
         grid-template-columns: repeat(3, 1fr) !important;
@@ -539,6 +535,7 @@ select:focus {
     }
 }
 
+/* Desktop - 4 columns (1025px and up) */
 @media (min-width: 1025px) {
     #menuGrid {
         grid-template-columns: repeat(4, 1fr) !important;
