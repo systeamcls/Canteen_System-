@@ -215,7 +215,84 @@
     50% { transform: translateY(-10px); }
 }
 
-/* Show/hide category elements based on screen size */
+/* Custom scrollbar */
+*::-webkit-scrollbar {
+    height: 6px;
+    width: 6px;
+}
+
+*::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 10px;
+}
+
+*::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+button:focus,
+input:focus,
+select:focus {
+    outline: 2px solid #FF6B35;
+    outline-offset: 2px;
+}
+
+/* ===== MENU GRID - MAIN STYLES ===== */
+#menuGrid {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 12px !important;
+    width: 100% !important;
+}
+
+#menuGrid .menu-item {
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+/* ===== RESPONSIVE GRID ===== */
+/* Mobile - 2 columns */
+@media (max-width: 480px) {
+    #menuGrid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 12px !important;
+    }
+}
+
+/* Small tablets - 2 columns */
+@media (min-width: 481px) and (max-width: 767px) {
+    #menuGrid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 16px !important;
+    }
+}
+
+/* Tablets - 3 columns */
+@media (min-width: 768px) and (max-width: 1024px) {
+    #menuGrid {
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 24px !important;
+    }
+}
+
+/* Desktop - 4 columns */
+@media (min-width: 1025px) {
+    #menuGrid {
+        grid-template-columns: repeat(4, 1fr) !important;
+        gap: 28px !important;
+    }
+}
+
+/* ===== CATEGORY FILTERS ===== */
 @media (max-width: 767px) {
     .category-desktop {
         display: none !important;
@@ -236,8 +313,7 @@
     }
 }
 
-/* McDonald's-level Mobile Responsiveness */
-/* Small phones (320px - 480px) */
+/* ===== HERO SECTION RESPONSIVE ===== */
 @media (max-width: 480px) {
     section:first-child {
         padding: 40px 16px 80px !important;
@@ -262,18 +338,54 @@
         gap: 40px !important;
     }
     
-    /* Hide burger visual on very small screens */
     section:first-child > div > div > div:last-child {
         display: none !important;
     }
-    
-    /* Make pills stack better */
-    section:first-child .hero-pills {
-        justify-content: center !important;
-        gap: 8px !important;
+}
+
+@media (min-width: 481px) and (max-width: 767px) {
+    section:first-child {
+        padding: 60px 20px 100px !important;
+        border-radius: 0 0 32px 32px !important;
     }
     
-    /* Search card mobile optimization */
+    section:first-child h1 {
+        font-size: 2.5rem !important;
+    }
+    
+    section:first-child > div > div {
+        text-align: center !important;
+        gap: 50px !important;
+    }
+    
+    section:first-child > div > div > div:last-child {
+        display: flex !important;
+    }
+    
+    section:first-child > div > div > div:last-child > div {
+        width: 200px !important;
+        height: 200px !important;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 1024px) {
+    section:first-child {
+        padding: 70px 20px 110px !important;
+    }
+    
+    section:first-child h1 {
+        font-size: 3rem !important;
+    }
+}
+
+@media (min-width: 1025px) {
+    section:first-child {
+        border-radius: 0 0 48px 48px !important;
+    }
+}
+
+/* ===== SEARCH SECTION RESPONSIVE ===== */
+@media (max-width: 480px) {
     section:nth-child(2) {
         margin-top: -40px !important;
         padding: 0 16px 24px !important;
@@ -293,68 +405,15 @@
         min-width: unset !important;
     }
     
-    section:nth-child(2) select {
-        width: 100% !important;
-        min-width: unset !important;
-    }
-    
+    section:nth-child(2) select,
     section:nth-child(2) button,
     section:nth-child(2) a {
         width: 100% !important;
         min-height: 48px !important;
-        justify-content: center !important;
-    }
-    
-    /* Category section mobile */
-    section:nth-child(3) {
-        padding: 40px 0 24px !important;
-    }
-    
-    section:nth-child(3) > div {
-        padding: 0 16px !important;
-    }
-    
-    /* Products grid mobile */
-    section:last-child > div {
-        padding: 0 16px !important;
-    }
-    
-    section:last-child div[style*="grid"] {
-        gap: 16px !important;
     }
 }
 
-/* Large phones (481px - 767px) */
 @media (min-width: 481px) and (max-width: 767px) {
-    section:first-child {
-        padding: 60px 20px 100px !important;
-        border-radius: 0 0 32px 32px !important;
-    }
-    
-    section:first-child h1 {
-        font-size: 2.5rem !important;
-    }
-    
-    section:first-child > div > div {
-        text-align: center !important;
-        gap: 50px !important;
-    }
-    
-    /* Show smaller burger on larger phones */
-    section:first-child > div > div > div:last-child {
-        display: flex !important;
-    }
-    
-    section:first-child > div > div > div:last-child > div {
-        width: 200px !important;
-        height: 200px !important;
-    }
-    
-    section:first-child > div > div > div:last-child > div > div {
-        font-size: 80px !important;
-    }
-    
-    /* Search optimizations */
     section:nth-child(2) form {
         flex-wrap: wrap !important;
         justify-content: center !important;
@@ -364,54 +423,15 @@
         flex: 1 1 100% !important;
         margin-bottom: 16px !important;
     }
-    
-    section:nth-child(2) select {
-        flex: 1 !important;
-        min-width: 140px !important;
-    }
-    
-    /* Products grid */
-    section:last-child div[style*="grid"] {
-        grid-template-columns: repeat(2, 1fr) !important;
-        gap: 20px !important;
-    }
 }
 
-/* Tablets (768px - 1024px) */
 @media (min-width: 768px) and (max-width: 1024px) {
-    section:first-child {
-        padding: 70px 20px 110px !important;
-    }
-    
-    section:first-child h1 {
-        font-size: 3rem !important;
-    }
-    
-    /* Search form on tablets */
     section:nth-child(2) > div {
         max-width: 900px !important;
     }
-    
-    /* Products grid */
-    section:last-child div[style*="grid"] {
-        grid-template-columns: repeat(3, 1fr) !important;
-    }
 }
 
-/* Large screens (1025px+) */
-@media (min-width: 1025px) {
-    section:first-child {
-        border-radius: 0 0 48px 48px !important;
-    }
-    
-    /* Products grid - 4 columns on desktop */
-    section:last-child div[style*="grid"] {
-        grid-template-columns: repeat(4, 1fr) !important;
-        gap: 24px !important;
-    }
-}
-
-/* Touch device optimizations */
+/* ===== TOUCH DEVICES ===== */
 @media (hover: none) and (pointer: coarse) {
     button, a, select, input {
         min-height: 44px !important;
@@ -423,80 +443,7 @@
     }
 }
 
-/* Custom scrollbar */
-*::-webkit-scrollbar {
-    height: 6px;
-    width: 6px;
-}
-
-*::-webkit-scrollbar-track {
-    background: #f1f5f9;
-    border-radius: 10px;
-}
-
-*::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
-    border-radius: 10px;
-}
-
-*::-webkit-scrollbar-thumb:hover {
-    background: #94a3b8;
-}
-
-/* Smooth transitions */
-* {
-    box-sizing: border-box;
-}
-
-
-button:focus,
-input:focus,
-select:focus {
-    outline: 2px solid #FF6B35;
-    outline-offset: 2px;
-}
-
-#menuGrid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
-    width: 100%;
-}
-
-/* Mobile - 2 columns */
-@media (max-width: 480px) {
-    #menuGrid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 12px;
-    }
-}
-
-/* Small tablets - 2 columns */
-@media (min-width: 481px) and (max-width: 767px) {
-    #menuGrid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 16px;
-    }
-}
-
-/* Tablets - 3 columns */
-@media (min-width: 768px) and (max-width: 1024px) {
-    #menuGrid {
-        grid-template-columns: repeat(3, 1fr);
-        gap: 24px;
-    }
-}
-
-/* Desktop - 4 columns */
-@media (min-width: 1025px) {
-    #menuGrid {
-        grid-template-columns: repeat(4, 1fr);
-        gap: 28px;
-    }
-}
-
-/* Compact Pagination Styles */
-
+/* ===== PAGINATION ===== */
 .pagination * {
     all: unset !important;
 }
@@ -508,7 +455,6 @@ select:focus {
     gap: 4px;
     margin: 0;
     padding: 0;
-    
 }
 
 .pagination .page-item {
@@ -551,50 +497,12 @@ select:focus {
     background: #f9fafb;
 }
 
-.pagination .page-item.disabled .page-link:hover {
-    background: #f9fafb;
-    border-color: #e5e7eb;
-}
-
-/* Arrow icons - make them smaller */
-.pagination .page-link svg {
-    width: 14px;
-    height: 14px;
-}
-
-/* Previous/Next text - hide on small screens */
 @media (max-width: 480px) {
     .pagination .page-link {
         width: 28px;
         height: 28px;
         font-size: 12px;
     }
-    
-    .pagination .page-link svg {
-        width: 12px;
-        height: 12px;
-    }
-}
-
-/* Container styling */
-.pagination-container {
-    background: white;
-    padding: 16px 20px;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
-    border: 1px solid #f1f5f9;
-}
-
-/* FORCE GRID FIX */
-#menuGrid .menu-item {
-    width: 100% !important;
-    max-width: 100% !important;
-}
-
-#menuGrid .menu-product-card {
-    width: 100% !important;
-    max-width: 100% !important;
-    min-width: 0 !important;
 }
 </style>
 
