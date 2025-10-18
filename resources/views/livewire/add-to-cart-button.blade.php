@@ -130,7 +130,7 @@
         box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         position: relative;
-        height: 100%;
+        height: auto;
         display: flex;
         flex-direction: column;
     }
@@ -147,6 +147,7 @@
         height: 200px;
         overflow: hidden;
         background: #f8fafc;
+        flex-shrink: 0;
     }
 
     .product-image {
@@ -201,12 +202,30 @@
         letter-spacing: 0.5px;
     }
 
+    .badge-warning {
+        background: #F59E0B;
+        color: white;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.8; }
+    }
+
     /* Product Content */
     .product-content {
         padding: 20px;
         flex: 1;
         display: flex;
         flex-direction: column;
+        min-height: 0;
     }
 
     .stall-name {
@@ -478,22 +497,5 @@
             font-size: 16px;
         }
     }
-
-    .badge-warning {
-    background: #F59E0B;
-    color: white;
-    padding: 6px 12px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.8; }
-}
     </style>
 </div>

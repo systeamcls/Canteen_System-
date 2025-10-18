@@ -252,11 +252,21 @@ select:focus {
     grid-template-columns: repeat(2, 1fr) !important;
     gap: 12px !important;
     width: 100% !important;
+    grid-auto-rows: auto !important;
+    align-items: start !important;
 }
 
 #menuGrid .menu-item {
     width: 100% !important;
     max-width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    align-self: start !important;
+}
+
+#menuGrid .menu-item > * {
+    height: auto !important;
+    min-height: 0 !important;
 }
 
 /* ===== RESPONSIVE GRID ===== */
@@ -511,6 +521,8 @@ select:focus {
     grid-template-columns: repeat(2, 1fr) !important;
     gap: 12px !important;
     width: 100% !important;
+    grid-auto-rows: auto !important;
+    align-items: start !important;
 }
 
 @media (min-width: 481px) and (max-width: 767px) {
