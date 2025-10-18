@@ -4,7 +4,7 @@
 
 @section('content')
 <!-- Hero Section -->
-<section style="padding: 80px 20px 120px; background: linear-gradient(135deg, #FF6B35 0%, #FF4500 50%, #DC2626 100%); position: relative; overflow: hidden; border-radius: 0 0 48px 48px;">
+<section style="padding: 60px 20px 80px; background: linear-gradient(135deg, #FF6B35 0%, #FF4500 50%, #DC2626 100%); position: relative; overflow: hidden; border-radius: 0 0 48px 48px;">
     <div class="container" style="max-width: 1200px; margin: 0 auto; position: relative; z-index: 2;">
         <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 60px;">
             <!-- Left Content -->
@@ -50,7 +50,7 @@
 </section>
 
 <!-- Floating Search Card -->
-<section style="position: relative; z-index: 10; margin-top: -60px; padding: 0 20px 40px;">
+<section style="position: relative; z-index: 10; margin-top: -50px; padding: 0 20px 30px;">
     <div class="container" style="max-width: 1200px; margin: 0 auto;">
         <div style="background: white; border-radius: 24px; padding: 32px; box-shadow: 0 20px 60px rgba(0,0,0,0.1); border: 1px solid rgba(255,255,255,0.2);">
             <form action="{{ route('menu.index') }}" method="GET" style="display: flex; gap: 16px; align-items: center; flex-wrap: wrap;">
@@ -103,7 +103,7 @@
 </section>
 
 <!-- Categories Section -->
-<section style="padding: 24px 0 16px; background: #fafbfc; position: sticky; top: 60px; z-index: 50; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+<section style="padding: 20px 0 16px; background: #fafbfc; position: sticky; top: 60px; z-index: 50; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
     <div class="container" style="max-width: 1200px; margin: 0 auto; padding: 0 20px;">
         
         <!-- Desktop Category Pills -->
@@ -141,7 +141,7 @@
 <!-- Section Title - Moved outside sticky area -->
 <section style="padding: 16px 0 0; background: #fafbfc;">
     <div class="container" style="max-width: 1200px; margin: 0 auto; padding: 0 20px;">
-        <div style="text-align: left; margin-bottom: 24px;">
+        <div style="text-align: left; margin-bottom: 20px;">
             <h2 style="color: #1e293b; font-size: 2rem; font-weight: 700; margin-bottom: 8px; font-family: system-ui, -apple-system, sans-serif;">
                 <span id="category-title">All Menu Items</span>
             </h2>
@@ -151,7 +151,7 @@
 </section>
 
 <!-- Products Grid -->
-<section style="padding: 0 0 80px; background: #fafbfc;">
+<section style="padding: 0 0 40px; background: #fafbfc;">
     <div class="container" style="max-width: 1200px; margin: 0 auto; padding: 0 20px;">
         @if($products->count() > 0)
            <div id="menuGrid">
@@ -169,7 +169,7 @@
             </div>
 
             <!-- Pagination -->
-            <div style="margin-top: 60px; display: flex; justify-content: center;">
+            <div style="margin-top: 40px; display: flex; justify-content: center;">
     <div style="background: white; padding: 12px 16px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.06); display: flex; align-items: center; gap: 4px;">
         @if ($products->onFirstPage())
             <span style="width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; color: #d1d5db; font-size: 13px; cursor: not-allowed;">‹</span>
@@ -186,9 +186,9 @@
         @endforeach
 
         @if ($products->hasMorePages())
-            <a href="{{ $products->nextPageUrl() }}" style="width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border: 1px solid #e5e7eb; border-radius: 3px; color: #6b7280; text-decoration: none; font-size: 13px; background: white;">›</a>
+            <a href="{{ $products->nextPageUrl() }}" style="width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border: 1px solid #e5e7eb; border-radius: 3px; color: #6b7280; text-decoration: none; font-size: 13px; background: white;">›</a>
         @else
-            <span style="width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; color: #d1d5db; font-size: 13px; cursor: not-allowed;">›</span>
+            <span style="width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; color: #d1d5db; font-size: 13px; cursor: not-allowed;">›</span>
         @endif
     </div>
 </div>
