@@ -11,14 +11,26 @@ class HomeController extends Controller
 {
     public function index()
     {
-        // Get featured/popular products (keeping your existing logic)
+        // ✅ Get REAL popular items based on order count
         $topFoods = Product::with('stall')
             ->where('is_available', true)
-            ->inRandomOrder()
+            ->where('is_published', true)
+            ->withCount('orderItems') // Count how many times ordered
+            ->orderBy('order_items_count', 'desc') // Most ordered first!
             ->limit(4)
             ->get();
+        
+        // Fallback to newest if no orders yet
+        if ($topFoods->isEmpty() || $topFoods->sum('order_items_count') === 0) {
+            $topFoods = Product::with('stall')
+                ->where('is_available', true)
+                ->where('is_published', true)
+                ->latest()
+                ->limit(4)
+                ->get();
+        }
 
-        // Get popular stalls (keeping your existing logic)
+        // ✅ Get popular stalls (by total orders of their products)
         $popularStalls = Stall::where('is_active', true)
             ->with('products')
             ->withCount('products')
@@ -26,14 +38,26 @@ class HomeController extends Controller
             ->limit(3)
             ->get();
 
-        // Get featured items (keeping your existing logic)
+        // ✅ Get featured items (also by popularity)
         $featuredItems = Product::with('stall')
             ->where('is_available', true)
-            ->inRandomOrder()
+            ->where('is_published', true)
+            ->withCount('orderItems')
+            ->orderBy('order_items_count', 'desc')
             ->limit(6)
             ->get();
+        
+        // Fallback for featured items
+        if ($featuredItems->isEmpty() || $featuredItems->sum('order_items_count') === 0) {
+            $featuredItems = Product::with('stall')
+                ->where('is_available', true)
+                ->where('is_published', true)
+                ->latest()
+                ->limit(6)
+                ->get();
+        }
 
-        // Additional data for the new home page design
+        // Featured stalls with available products count
         $featuredStalls = Stall::where('is_active', true)
             ->withCount(['products' => function ($query) {
                 $query->where('is_available', true);
@@ -41,16 +65,35 @@ class HomeController extends Controller
             ->take(3)
             ->get();
 
+        // ✅ Trending products (last 7 days orders)
         $trendingProducts = Product::where('is_available', true)
+            ->where('is_published', true)
             ->with('stall')
+            ->withCount([
+                'orderItems' => function ($query) {
+                    $query->whereHas('order', function ($q) {
+                        $q->where('created_at', '>=', now()->subDays(7));
+                    });
+                }
+            ])
+            ->orderBy('order_items_count', 'desc')
             ->take(6)
             ->get();
+        
+        // Fallback for trending
+        if ($trendingProducts->isEmpty() || $trendingProducts->sum('order_items_count') === 0) {
+            $trendingProducts = Product::where('is_available', true)
+                ->where('is_published', true)
+                ->with('stall')
+                ->latest()
+                ->take(6)
+                ->get();
+        }
 
-         // ADD THIS: Get categories for homepage
+        // Get categories for homepage
         $categories = Category::where('is_active', true)
-                             ->orderBy('sort_order')
-                             ->get();
-
+            ->orderBy('sort_order')
+            ->get();
 
         return view('home.index', compact(
             'topFoods', 
@@ -59,10 +102,7 @@ class HomeController extends Controller
             'featuredStalls',
             'trendingProducts',
             'categories'
-
-        
         ));
-        
     }
 
     public function search(Request $request)
@@ -73,7 +113,7 @@ class HomeController extends Controller
             return redirect()->route('menu.index');
         }
 
-        // Search in products (keeping your existing logic)
+        // Search in products
         $products = Product::with('stall')
             ->where('is_available', true)
             ->where(function($q) use ($query) {
@@ -82,7 +122,7 @@ class HomeController extends Controller
             })
             ->paginate(12);
 
-        // Add stalls search
+        // Search in stalls
         $stalls = Stall::where('is_active', true)
             ->where(function($q) use ($query) {
                 $q->where('name', 'like', "%{$query}%")

@@ -3,6 +3,7 @@
 @section('title', 'Home - LTO Canteen Central')
 
 @section('content')
+<!-- ============ MARKER A - START (Line ~5) ============ -->
 <style>
 :root {
   --amber-50: #fffbeb;
@@ -139,27 +140,118 @@ body {
   gap: 0.5rem;
 }
 
-/* Hero Section */
+/* ========================================
+   IMPROVED HERO SECTION - Replace in your index.blade.php
+   ======================================== */
+
+/* Hero Section with Curved Wave Shape */
 .hero-section {
   position: relative;
-  background: linear-gradient(to right, var(--red-500), var(--amber-500), var(--orange-500));
+  background: linear-gradient(135deg, var(--red-500) 0%, var(--amber-500) 50%, var(--orange-500) 100%);
   color: white;
-  padding: 4rem 0 6rem;
+  padding: 5rem 0 10rem;
   text-align: center;
+  overflow: hidden;
+  /* ✅ Curved wave bottom - removes rectangular look */
+  clip-path: polygon(
+    0 0,
+    100% 0,
+    100% 85%,
+    75% 90%,
+    50% 95%,
+    25% 90%,
+    0 85%
+  );
 }
 
+/* ✅ Animated floating circles for visual interest */
 .hero-section::before {
   content: '';
   position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.1);
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
+  border-radius: 50%;
+  top: -200px;
+  right: -150px;
+  animation: float 8s ease-in-out infinite;
+  z-index: 0;
 }
 
-@media (min-width: 768px) {
-  .hero-section {
-    padding: 6rem 0 8rem;
+.hero-section::after {
+  content: '';
+  position: absolute;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+  border-radius: 50%;
+  bottom: -100px;
+  left: -100px;
+  animation: float 6s ease-in-out infinite reverse;
+  z-index: 0;
+}
+
+/* ✅ Floating animation */
+@keyframes float {
+  0%, 100% { 
+    transform: translate(0, 0) scale(1); 
+  }
+  50% { 
+    transform: translate(-30px, -30px) scale(1.1); 
   }
 }
+
+/* ✅ Desktop responsive curve */
+@media (min-width: 768px) {
+  .hero-section {
+    padding: 6rem 0 12rem;
+    clip-path: polygon(
+  0 0, 100% 0, 100% 85%,
+  87.5% 88%, 75% 90%, 62.5% 92%,
+  50% 95%, 37.5% 92%, 25% 90%,
+  12.5% 88%, 0 85%
+);
+
+  }
+}
+
+/* ✅ Mobile responsive - simpler curve */
+@media (max-width: 480px) {
+  .hero-section {
+    padding: 4rem 0 7rem;
+    clip-path: polygon(0 0, 100% 0, 100% 85%, 75% 90%, 50% 95%, 25% 90%, 0 85%);
+
+  }
+}
+
+/* Hero Content - ensure it's above decorative elements */
+.hero-content {
+  position: relative;
+  z-index: 1;
+}
+
+/* Optional: Add more decorative elements */
+.hero-section .hero-decoration {
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.1), transparent);
+  border-radius: 50%;
+  filter: blur(40px);
+}
+
+.hero-section .hero-decoration:nth-child(1) {
+  top: 10%;
+  left: 10%;
+  animation: float 7s ease-in-out infinite;
+}
+
+.hero-section .hero-decoration:nth-child(2) {
+  top: 60%;
+  right: 15%;
+  animation: float 9s ease-in-out infinite reverse;
+}
+
 
 .hero-content {
   position: relative;
@@ -273,6 +365,9 @@ body {
 
 /* Categories Section */
 .categories-section {
+  margin-top: -60px; /* Pull it up */
+  position: relative;
+  z-index: 2;
   padding: 2rem 0;
   background: white;
 }
@@ -362,11 +457,10 @@ body {
   text-align: center;
 }
 
-/* Popular Items Section */
-.popular-section {
-  padding: 3rem 0;
-  background: var(--amber-50);
-}
+
+/* ========================================
+   POPULAR ITEMS GRID - THIS WAS MISSING!
+   ======================================== */
 
 .popular-grid {
   display: grid;
@@ -380,117 +474,305 @@ body {
   }
 }
 
-.popular-item {
-  background: white;
-  border-radius: 0.75rem;
-  overflow: hidden;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s;
-  border: none;
-}
-
-.popular-item:hover {
-  box-shadow: 0 20px 25px rgba(0, 0, 0, 0.15);
-  transform: translateY(-4px);
-}
-
-.item-image {
-  position: relative;
-  width: 100%;
-  height: 8rem;
-}
-
-@media (min-width: 768px) {
-  .item-image {
-    height: 10rem;
+@media (min-width: 1024px) {
+  .popular-grid {
+    grid-template-columns: repeat(3, 1fr);
   }
 }
 
-.item-image img {
+@media (min-width: 1280px) {
+  .popular-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* ========================================
+   IMPROVED PRODUCT CARD STYLES - HOMEPAGE
+   ======================================== */
+
+.product-card-improved {
+  background: white;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 2px solid transparent;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.product-card-improved:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 32px rgba(234, 88, 12, 0.15);
+  border-color: var(--amber-500);
+}
+
+/* Image Container */
+.product-image-container {
+  position: relative;
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+  background: linear-gradient(135deg, #fff7ed 0%, #fed7aa 100%);
+}
+
+@media (min-width: 768px) {
+  .product-image-container {
+    height: 220px;
+  }
+}
+
+.image-link {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.product-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border-radius: 0.75rem 0.75rem 0 0;
+  transition: transform 0.4s ease;
 }
 
-.item-badge {
-  position: absolute;
-  top: 0.5rem;
-  left: 0.5rem;
-  background: var(--red-500);
-  color: white;
-  padding: 0.25rem 0.5rem;
-  border-radius: 0.25rem;
-  font-size: 0.75rem;
-  font-weight: 500;
+.product-card-improved:hover .product-image {
+  transform: scale(1.08);
 }
 
-.item-rating {
+/* Product Badges */
+.product-badges {
   position: absolute;
-  top: 0.5rem;
-  right: 0.5rem;
-  background: rgba(255, 255, 255, 0.9);
-  border-radius: 9999px;
-  padding: 0.25rem;
+  top: 12px;
+  left: 12px;
   display: flex;
-  align-items: center;
-  gap: 0.25rem;
+  flex-direction: column;
+  gap: 6px;
+  z-index: 2;
 }
 
-.star {
-  width: 0.75rem;
-  height: 0.75rem;
-  color: var(--amber-500);
-  fill: var(--amber-500);
-}
-
-.item-content {
-  padding: 1rem;
-}
-
-.item-title {
+.product-badge {
+  display: inline-block;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
   font-weight: 600;
-  color: var(--gray-900);
-  margin-bottom: 0.25rem;
-  font-size: 0.875rem;
+  color: white;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  white-space: nowrap;
 }
 
-@media (min-width: 768px) {
-  .item-title {
-    font-size: 1rem;
-  }
+.badge-bestseller {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
 }
 
-.item-stall {
-  font-size: 0.75rem;
-  color: var(--gray-500);
-  margin-bottom: 0.5rem;
+.badge-popular {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
 }
 
-.item-footer {
+.badge-new {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.badge-featured {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+}
+
+/* Quick View Overlay */
+.quick-view-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.65);
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 1;
 }
 
-.item-price {
-  font-size: 1.125rem;
+.product-card-improved:hover .quick-view-overlay {
+  opacity: 1;
+}
+
+.quick-view-button {
+  background: white;
+  color: var(--gray-900);
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.quick-view-button:hover {
+  background: var(--amber-500);
+  color: white;
+  transform: scale(1.05);
+}
+
+/* Product Details */
+.product-details {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+}
+
+.stall-link {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--gray-500);
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.stall-link:hover {
+  color: var(--amber-600);
+}
+
+.stall-icon {
+  font-size: 1rem;
+}
+
+.stall-name-text {
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.product-title {
+  margin: 0;
+  font-size: 1.1rem;
   font-weight: 700;
+  line-height: 1.3;
+}
+
+.product-title a {
+  color: var(--gray-900);
+  text-decoration: none;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  transition: color 0.2s;
+}
+
+.product-title a:hover {
   color: var(--red-600);
 }
 
-.add-btn {
-  background: var(--amber-500);
-  color: white;
-  padding: 0.5rem;
-  border-radius: 0.25rem;
-  border: none;
-  cursor: pointer;
-  transition: background-color 0.2s;
+@media (min-width: 768px) {
+  .product-title {
+    font-size: 1.2rem;
+  }
 }
 
-.add-btn:hover {
-  background: var(--amber-600);
+.product-desc {
+  color: var(--gray-600);
+  font-size: 0.85rem;
+  line-height: 1.5;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Product Meta */
+.product-meta {
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid var(--gray-100);
+}
+
+.price-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.product-price {
+  font-size: 1.5rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--red-600) 0%, var(--amber-600) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.sales-count {
+  font-size: 0.75rem;
+  color: var(--gray-500);
+  background: var(--gray-50);
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-weight: 500;
+}
+
+/* Add to Cart Wrapper */
+.add-to-cart-wrapper {
+  margin-top: 8px;
+}
+
+/* Override Livewire button styles if needed */
+.add-to-cart-wrapper button {
+  width: 100%;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+/* Mobile Responsive */
+@media (max-width: 480px) {
+  .product-card-improved {
+    border-radius: 12px;
+  }
+
+  .product-image-container {
+    height: 180px;
+  }
+
+  .product-details {
+    padding: 16px;
+    gap: 8px;
+  }
+
+  .product-title {
+    font-size: 1rem;
+  }
+
+  .product-price {
+    font-size: 1.3rem;
+  }
+
+  .product-badge {
+    font-size: 0.7rem;
+    padding: 4px 10px;
+  }
+
+  .quick-view-button {
+    padding: 8px 16px;
+    font-size: 0.85rem;
+  }
+}
+
+/* Loading State */
+.add-to-cart-wrapper .loading {
+  opacity: 0.7;
+  cursor: wait;
 }
 
 /* Featurede STalls Section */
@@ -770,44 +1052,7 @@ body {
   }
 }
 
-/* Footer */
-.footer {
-  background: var(--gray-900);
-  color: white;
-  padding: 2rem 0;
-  text-align: center;
-}
 
-.footer-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1rem;
-}
-
-.footer-logo {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.footer-logo-icon {
-  width: 2rem;
-  height: 2rem;
-  background: linear-gradient(to right, var(--red-500), var(--amber-500));
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-weight: 700;
-  font-size: 0.875rem;
-}
-
-.footer-text {
-  color: var(--gray-400);
-  font-size: 0.875rem;
-}
 
 /* Responsive adjustments */
 @media (max-width: 480px) {
@@ -896,7 +1141,7 @@ body {
     </div>
   </section>
 
- <!-- Categories -->
+ <!-- Categories on Homepage -->
 <section class="categories-section">
   <div class="container">
     <div class="section-header">
@@ -906,19 +1151,30 @@ body {
 
     <div class="categories-grid">
       <!-- All Items -->
-      <a href="{{ route('menu.index') }}" class="category-item {{ !request('category_id') ? 'active' : '' }}">
+      <a href="{{ route('menu.index') }}" class="category-item">
         <div class="category-icon" style="background: var(--amber-500);">
           <span style="font-size: 32px;">🛒</span>
         </div>
         <p class="category-name">All Items</p>
       </a>
       
-      <!-- Dynamic Categories -->
+      <!-- Dynamic Categories with Emojis -->
       @foreach($categories as $category)
-      <a href="{{ route('menu.index', ['category_id' => $category->id]) }}" 
-         class="category-item {{ request('category_id') == $category->id ? 'active' : '' }}">
+      <a href="{{ route('menu.index', ['category_id' => $category->id]) }}" class="category-item">
         <div class="category-icon" style="background: var(--amber-500);">
-          <span style="font-size: 32px;">{{ $category->icon ?? '🍽️' }}</span>
+          @if($category->name === 'Fresh Meals')
+            <span style="font-size: 32px;">🍱</span>
+          @elseif($category->name === 'Sandwiches')
+            <span style="font-size: 32px;">🥪</span>
+          @elseif($category->name === 'Beverages')
+            <span style="font-size: 32px;">🥤</span>
+          @elseif($category->name === 'Snacks')
+            <span style="font-size: 32px;">🍿</span>
+          @elseif($category->name === 'Desserts')
+            <span style="font-size: 32px;">🍰</span>
+          @else
+            <span style="font-size: 32px;">🍽️</span>
+          @endif
         </div>
         <p class="category-name">{{ $category->name }}</p>
       </a>
@@ -927,67 +1183,41 @@ body {
   </div>
 </section>
 
+<!-- ============ MARKER B - POPULAR SECTION START ============ -->
   <!-- Popular Items -->
-  <section class="popular-section">
-    <div class="container">
-      <div class="section-header">
-        <h2 class="section-title">Today's Favorites</h2>
-        <p class="section-subtitle">Most loved dishes by our community</p>
-      </div>
-
-      <div class="popular-grid">
-        @php
-          $popularItems = App\Models\Product::where('is_available', true)
-              ->where('is_published', true)
-              ->with('stall')
-              ->take(4)
-              ->get();
-          
-          if($popularItems->isEmpty()) {
-              $popularItems = collect([
-                  (object)['name' => 'Chicken Adobo Bowl', 'price' => 8500, 'stall' => (object)['name' => "Tita's Kitchen"], 'badge' => 'Bestseller'],
-                  (object)['name' => 'Beef Chowpan', 'price' => 12000, 'stall' => (object)['name' => 'Chowpan sa Binondo'], 'badge' => 'Spicy'],
-                  (object)['name' => 'Grilled Liempo Set', 'price' => 9500, 'stall' => (object)['name' => 'Grill Master'], 'badge' => 'New'],
-                  (object)['name' => 'Fresh Lumpia', 'price' => 4500, 'stall' => (object)['name' => "Tita's Kitchen"], 'badge' => 'Healthy']
-              ]);
-          }
-        @endphp
-        
-        @foreach($popularItems as $item)
-        <div class="popular-item">
-          <div class="item-image">
-            @if(isset($item->image) && $item->image)
-              <img src="{{ Storage::url($item->image) }}" alt="{{ $item->name }}">
-            @else
-              <img src="https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&h=300&fit=crop" alt="{{ $item->name }}">
-            @endif
-            
-            <div class="item-badge">{{ $item->badge ?? 'Popular' }}</div>
-            <div class="item-rating">
-              <svg class="star" viewBox="0 0 24 24" fill="currentColor">
-                <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/>
-              </svg>
-              <span style="font-size: 0.75rem; font-weight: 500;">4.8</span>
-            </div>
-          </div>
-          
-          <div class="item-content">
-            <h3 class="item-title">{{ $item->name }}</h3>
-            <p class="item-stall">{{ $item->stall->name }}</p>
-            <div class="item-footer">
-              <span class="item-price">₱{{ number_format($item->price / 100, 2) }}</span>
-              <button class="add-btn">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
-                </svg>
-              </button>
-            </div>
-          </div>
-        </div>
-        @endforeach
-      </div>
+<section class="popular-section">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="section-title">Today's Favorites</h2>
+      <p class="section-subtitle">Most loved dishes by our community</p>
     </div>
-  </section>
+
+    <div class="popular-grid">
+      @php
+        $popularItems = $topFoods ?? App\Models\Product::where('is_available', true)
+            ->where('is_published', true)
+            ->with('stall')
+            ->withCount('orderItems')
+            ->orderBy('order_items_count', 'desc')
+            ->take(4)
+            ->get();
+      @endphp
+      
+      @foreach($popularItems as $item)
+      <!-- Use the SAME structure as your menu page - just the Livewire component -->
+      @livewire('add-to-cart-button', [
+        'product' => $item,
+        'showPrice' => true,
+        'showQuantitySelector' => false,
+        'buttonText' => 'Add',
+        'buttonSize' => 'medium'
+      ], key('home-product-'.$item->id))
+      @endforeach
+    </div>
+  </div>
+</section>
+
+
 
   <!-- Featured Stalls -->
   <section class="stalls-section">

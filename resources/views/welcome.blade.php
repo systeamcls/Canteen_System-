@@ -1429,7 +1429,7 @@
                 <div class="footer-column">
                     <h3>Contact</h3>
                     <ul>
-                        <li><a href="mailto:info@ltocanteen.com">📧 Email Us</a></li>
+                        <li><a href="kajacms@gmail.com">📧 Email Us</a></li>
                         <li><a href="#">📞 Customer Support</a></li>
                         <li><a href="#">💬 Feedback</a></li>
                         <li><a href="#">❓ FAQs</a></li>
@@ -1444,14 +1444,9 @@
             <div class="footer-bottom">
                 <div class="footer-bottom-content">
                     <div class="copyright">
-                        &copy; 2023 LTO Canteen Central. All rights reserved.
+                        &copy; 2025 Canteen Central. All rights reserved.
                     </div>
-                    <div class="footer-social">
-                        <a href="#" class="social-link" title="Facebook">📘</a>
-                        <a href="#" class="social-link" title="Instagram">📷</a>
-                        <a href="#" class="social-link" title="Twitter">🐦</a>
-                        <a href="#" class="social-link" title="Email">✉️</a>
-                    </div>
+                    
                 </div>
             </div>
         </div>
