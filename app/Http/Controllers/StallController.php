@@ -36,14 +36,20 @@ class StallController extends Controller
     }
 
     public function show(Stall $stall)
-    {
-        $stall->load(['products' => function($q) {
-            $q->where('is_available', true);
-        }]);
+{
+    // Load products WITH their categories
+    $stall->load(['products' => function($q) {
+        $q->where('is_available', true)
+          ->with('category');  // ← ADD THIS to eager load categories
+    }]);
 
-        // Get categories of products in this stall
-        $categories = $stall->products->pluck('category')->unique()->filter();
+    // Get categories of products in this stall
+    $categories = $stall->products
+        ->pluck('category')
+        ->whereNotNull()  // ← Filter out null categories first
+        ->unique('id')    // ← Use unique by ID to avoid duplicates
+        ->filter();
 
-        return view('stalls.show', compact('stall', 'categories'));
-    }
+    return view('stalls.show', compact('stall', 'categories'));
+}
 }
