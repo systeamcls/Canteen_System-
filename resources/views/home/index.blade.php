@@ -422,21 +422,23 @@ body {
   cursor: pointer;
   text-decoration: none;
   color: var(--gray-900);
-  background: var(--white);
+  background: transparent; /* Changed from var(--white) */
 }
 
 .category-item:hover {
   transform: scale(1.05);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  /* Removed box-shadow */
 }
 
-.category-item.active {
-  box-shadow: 0 0 0 2px var(--amber-500);
+.category-item:hover .category-icon {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); /* Shadow on icon only */
 }
+
 
 .category-icon {
-  width: 4rem;
-  height: 4rem;
+  width: 6rem;
+  height: 6rem;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -1432,7 +1434,5 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 });
 </script>
-
-@livewire('welcome-modal')
 
 @endsection

@@ -564,5 +564,7 @@
     
     {{-- Additional scripts from individual pages --}}
     @stack('scripts')
+
+    @livewire('welcome-modal')
 </body>
 </html>

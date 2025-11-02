@@ -141,8 +141,7 @@
             @forelse($stall->products->unique('id') as $product)
             <div style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.08); transition: all 0.3s; position: relative;" 
                  class="menu-item" 
-                 data-category="{{ $product->category ? strtolower(str_replace(' ', '-', $product->category->name)) : 'uncategorized' }}"
-                 onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 30px rgba(0,0,0,0.12)'"
+                 data-category="{{ is_object($product->category) ? strtolower(str_replace(' ', '-', $product->category->name ?? 'uncategorized')) : strtolower(str_replace(' ', '-', $product->category ?? 'uncategorized')) }}"
                  onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(0,0,0,0.08)'">
                 
                 <!-- Product Image -->
@@ -152,8 +151,8 @@
                          style="width: 100%; height: 100%; object-fit: cover;">
                     
                     @if($product->category)
-                    <span style="position: absolute; top: 12px; right: 12px; background: rgba(249, 115, 22, 0.9); backdrop-filter: blur(10px); color: white; padding: 6px 12px; border-radius: 15px; font-size: 12px; font-weight: 600; border: 1px solid rgba(255,255,255,0.2);">
-                        {{ $product->category->name }}
+                    <span style="position: absolute; top: 12px; right: 12px; background: rgba(249, 115, 22, 0.9); backdrop-filter: blur(10px); color: white; padding: 6px 12px; border-radius: 15px; font-size: 12px; font-weight: 600;">
+                        {{ is_object($product->category) ? $product->category->name : $product->category }}
                     </span>
                     @endif
 

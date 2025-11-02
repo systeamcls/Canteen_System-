@@ -460,6 +460,329 @@
     width: 16px;
     height: 16px;
 }
+
+/* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .modal-container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 25px -5px rgba(234, 88, 12, 0.2), 0 10px 10px -5px rgba(234, 88, 12, 0.1);
+            max-width: 420px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            transform: scale(0.9) translateY(20px);
+            transition: all 0.3s ease;
+        }
+        
+        .modal-overlay.active .modal-container {
+            transform: scale(1) translateY(0);
+        }
+        
+        .modal-header {
+            padding: 24px 24px 0 24px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .modal-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #9ca3af;
+            cursor: pointer;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+        }
+        
+        .modal-close:hover {
+            background-color: #fff7ed;
+            color: var(--primary);
+        }
+        
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+        }
+        
+        .modal-subtitle {
+            color: var(--gray);
+            font-size: 0.95rem;
+            margin-bottom: 32px;
+        }
+        
+        .modal-body {
+            padding: 0 24px 24px 24px;
+        }
+        
+        /* Login Options */
+        .login-option {
+            display: block;
+            width: 100%;
+            padding: 16px;
+            margin-bottom: 16px;
+            background: white;
+            border: 2px solid #fed7aa;
+            border-radius: 12px;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .login-option:hover {
+            border-color: var(--primary);
+            background-color: var(--light);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(234, 88, 12, 0.15);
+        }
+        
+        .login-option-content {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .login-option-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+        
+        .guest-icon {
+            background: linear-gradient(135deg, var(--accent), var(--primary-light));
+            color: white;
+        }
+        
+        .employee-icon {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+        }
+        
+        .login-option-text h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 4px;
+        }
+        
+        .login-option-text p {
+            font-size: 0.9rem;
+            color: var(--gray);
+            line-height: 1.4;
+        }
+        
+        .login-option-arrow {
+            margin-left: auto;
+            color: #d1d5db;
+            font-size: 1.2rem;
+            transition: all 0.2s ease;
+        }
+        
+        .login-option:hover .login-option-arrow {
+            color: var(--primary);
+            transform: translateX(4px);
+        }
+        
+        /* Employee Login Form */
+        .employee-form {
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+        
+        .employee-form.active {
+            display: block;
+        }
+        
+        .form-divider {
+            display: flex;
+            align-items: center;
+            margin: 24px 0;
+            gap: 16px;
+        }
+        
+        .form-divider::before,
+        .form-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: #fed7aa;
+        }
+        
+        .form-divider span {
+            color: var(--gray);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 8px;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #fed7aa;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+            background: white;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.1);
+        }
+        
+        .form-input.error {
+            border-color: var(--error);
+        }
+        
+        .error-message {
+            color: var(--error);
+            font-size: 0.85rem;
+            margin-top: 8px;
+            display: none;
+            padding: 8px 12px;
+            background: #fef2f2;
+            border-radius: 6px;
+            border-left: 3px solid var(--error);
+        }
+        
+        .error-message.show {
+            display: block;
+        }
+        
+        .submit-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .submit-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(234, 88, 12, 0.3);
+        }
+        
+        .submit-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+        
+        .submit-btn.loading {
+            color: transparent;
+        }
+        
+        .submit-btn.loading::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 20px;
+            height: 20px;
+            border: 2px solid transparent;
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        .back-btn {
+            background: none;
+            border: none;
+            color: var(--primary);
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            padding: 8px 0;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: color 0.2s ease;
+        }
+        
+        .back-btn:hover {
+            color: var(--secondary);
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes spin {
+            to {
+                transform: translate(-50%, -50%) rotate(360deg);
+            }
+        }
 </style>
 
 <nav class="navbar-component">
@@ -499,6 +822,7 @@
         <div class="navbar-actions">
             <!-- Cart Component -->
             @livewire('cart-panel')
+            
 
             <!-- User Dropdown with Profile Picture Support -->
             <div class="user-dropdown" id="userDropdown">
@@ -566,7 +890,7 @@
                         </form>
                     @else
                         <!-- Guest options -->
-                        <button class="dropdown-item" onclick="openLoginModal()">
+                        <button class="dropdown-item" onclick="openWelcomeModal()">
                             <svg class="dropdown-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
                             </svg>
@@ -653,31 +977,16 @@ function toggleUserDropdown() {
     }
 }
 
-function openLoginModal() {
-    console.log('Direct modal control...');
-    
-    // Find the modal element
-    const modal = document.querySelector('.modal-overlay');
-    
-    if (modal) {
-        // Force the modal to show
-        modal.style.display = 'flex';
-        modal.style.opacity = '1'; 
-        modal.style.visibility = 'visible';
-        modal.style.zIndex = '10000';
-        modal.classList.add('active');
-        
-        console.log('Modal opened via direct DOM manipulation');
-        
-        // Also trigger the Livewire state change
-        setTimeout(() => {
-            if (window.Livewire) {
-                window.Livewire.dispatch('openWelcomeModal');
-            }
-        }, 50);
-        
+function openWelcomeModal() {
+    // Wait for Livewire to be ready
+    if (typeof Livewire !== 'undefined') {
+        Livewire.dispatch('openWelcomeModal');
     } else {
-        console.error('Modal element not found in DOM');
+        // Fallback: directly manipulate DOM
+        const modal = document.querySelector('.modal-overlay');
+        if (modal) {
+            modal.classList.add('active');
+        }
     }
 }
 

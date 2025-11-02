@@ -37,18 +37,24 @@ class StallController extends Controller
 
     public function show(Stall $stall)
 {
-    // Load products WITH their categories
     $stall->load(['products' => function($q) {
         $q->where('is_available', true)
-          ->with('category');  // ← ADD THIS to eager load categories
+          ->with('category');
     }]);
 
-    // Get categories of products in this stall
+    // Handle both string and object categories
     $categories = $stall->products
-        ->pluck('category')
-        ->whereNotNull()  // ← Filter out null categories first
-        ->unique('id')    // ← Use unique by ID to avoid duplicates
-        ->filter();
+        ->map(function($product) {
+            // If category is a string (old data)
+            if (isset($product->category) && is_string($product->category)) {
+                return $product->category;
+            }
+            // If category is a relationship (new data)
+            return $product->category?->name;
+        })
+        ->filter()
+        ->unique()
+        ->values();
 
     return view('stalls.show', compact('stall', 'categories'));
 }

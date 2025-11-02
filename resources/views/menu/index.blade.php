@@ -711,16 +711,8 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-function openLoginModal() {
-    console.log('=== LOGIN MODAL DEBUG ===');
-    const modal = document.querySelector('.modal-overlay');
-    const livewireElement = document.querySelector('[wire\\:id]');
-    console.log('Modal found:', !!modal);
-    console.log('Livewire element found:', !!livewireElement);
-}
 
 </script>
 
-@livewire('welcome-modal')
 
 @endsection
