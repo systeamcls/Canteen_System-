@@ -2,13 +2,16 @@
 
     <!-- Modern Cart Button -->
     <button @click="open = true" class="modern-cart-button">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2E5BBA" stroke-width="2">
-            <path d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.5 7M7 13l1.5 7m0 0h8m-8 0h.01M19 20h.01"/>
-        </svg>
-        @if(($cartTotals['item_count'] ?? 0) > 0)
-            <span class="modern-cart-badge">{{ $cartTotals['item_count'] }}</span>
-        @endif
-    </button>
+    <!-- Changed width and height from 24 to 32 -->
+    <svg width="32" height="32" viewBox="0 0 24 24" fill="#FF6B47" stroke="none">
+        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+        <line x1="3" y1="6" x2="21" y2="6" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+        <path d="M16 10a4 4 0 0 1-8 0" stroke="white" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+    </svg>
+    @if(($cartTotals['item_count'] ?? 0) > 0)
+        <span class="modern-cart-badge">{{ $cartTotals['item_count'] }}</span>
+    @endif
+</button>
 
     <!-- Modern Cart Overlay -->
     <div class="modern-cart-overlay" 
@@ -180,20 +183,26 @@
     }
 
     .modern-cart-button {
-        position: relative;
-        background: white;
-        border: 2px solid #e2e8f0;
-        padding: 12px;
-        border-radius: 12px;
-        cursor: pointer;
-        transition: all 0.3s;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.04);
-    }
+    position: relative;
+    background: transparent;
+    border: none;
+    padding: 6px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
 
     .modern-cart-button:hover {
-        border-color: #2E5BBA;
-        box-shadow: 0 4px 12px rgba(46,91,186,0.15);
-    }
+    background: rgba(255, 107, 71, 0.1);
+    transform: scale(1.1);
+}
+.modern-cart-button:active {
+    transform: scale(0.95);
+}
+
 
     .modern-cart-badge {
         position: absolute;
@@ -202,8 +211,8 @@
         background: #ef4444;
         color: white;
         border-radius: 50%;
-        width: 22px;
-        height: 22px;
+        width: 24px;
+        height: 24px;
         font-size: 11px;
         font-weight: 700;
         display: flex;
@@ -533,5 +542,81 @@
         background: #f8fafc;
         border-color: #cbd5e1;
     }
+
+    .cart-icon-svg {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.modern-cart-button:hover .cart-icon-svg {
+    transform: translateY(-2px) scale(1.05);
+    stroke: #ea580c;
+}
+
+.modern-cart-button:active .cart-icon-svg {
+    transform: scale(0.95);
+}
+
+@media (max-width: 480px) {
+    .navbar-container {
+        padding: 0 12px;
+    }
+    
+    .navbar-logo-icon {
+        width: 36px;
+        height: 36px;
+        font-size: 14px;
+    }
+    
+    .navbar-brand-name {
+        font-size: 16px;
+    }
+    
+    .navbar-brand-tagline {
+        display: none;
+    }
+    
+    /* HIDE user info text on mobile */
+    .user-info {
+        display: none !important;
+    }
+    
+    /* HIDE dropdown arrow on mobile */
+    .dropdown-arrow {
+        display: none !important;
+    }
+    
+    /* Make dropdown trigger just show the avatar */
+    .dropdown-trigger {
+        padding: 0;
+        gap: 0;
+        min-width: auto;
+        border: none;
+        background: transparent;
+    }
+    
+    .user-avatar {
+        width: 36px;
+        height: 36px;
+        font-size: 16px;
+    }
+    
+    .navbar-actions {
+        gap: 12px;
+    }
+    
+    .navbar-mobile-content {
+        padding: 12px 16px 20px;
+    }
+}
+
+@keyframes swingBag {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(-5deg); }
+    75% { transform: rotate(5deg); }
+}
+
+.modern-cart-button:hover .animated-cart {
+    animation: swingBag 0.5s ease;
+}
     </style>
 </div>

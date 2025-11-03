@@ -94,16 +94,18 @@
 
     /* Main content spacing - adjusted for your navbar component */
     main {
-        margin-top: 64px; /* Match your navbar height */
-        padding-top: 0rem;
-    }
+    margin-top: 64px;
+    padding-top: 0;
+    min-height: calc(100vh - 64px);
+}
 
-    @media (max-width: 640px) {
-        main {
-            margin-top: 64px;
-            padding-top: 1.5rem;
-        }
+
+@media (max-width: 640px) {
+    main {
+        margin-top: 64px;
+        padding-top: 0; /* ← Remove the padding */
     }
+}
 
      /* Modern Footer Styles */
     footer {

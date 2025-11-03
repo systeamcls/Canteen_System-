@@ -39,6 +39,17 @@ Route::middleware(['web'])->group(function () {
         Route::get('/stalls', [StallController::class, 'index'])->name('stalls.index');
         Route::get('/stalls/{stall}', [StallController::class, 'show'])->name('stalls.show');
 
+        // 👇 ADD THIS EMPLOYEE LOGOUT ROUTE HERE
+    Route::post('/employee/logout', function () {
+        Auth::logout();
+        session()->forget('user_type');
+        session()->invalidate();
+        session()->regenerateToken();
+        
+        return redirect()->route('home.index')->with('success', 'Logged out successfully!');
+    })->name('employee.logout');
+    // 👆 END OF NEW ROUTE
+
 
         Route::get('/cart', function() {
             return redirect()->route('checkout.index');
@@ -164,6 +175,3 @@ Route::get('/payment/cancelled', function () {
     return view('payment.cancelled');
 })->name('payment.cancelled');
 
-Route::get('/test-admin', function () {
-    return 'Laravel is alive!';
-});

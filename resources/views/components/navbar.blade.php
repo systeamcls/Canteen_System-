@@ -231,7 +231,10 @@
     background: white;
     border-bottom: 1px solid var(--border);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    max-height: calc(100vh - 64px);
+    overflow-y: auto;
 }
+
 
 .navbar-mobile-menu.show {
     display: block;
@@ -300,7 +303,19 @@
     background: #F9FAFB;
 }
 
-/* Responsive Design */
+.navbar-mobile-logout {
+    color: #dc2626 !important;
+    background: none;
+    border: none;
+    width: 100%;
+    font-family: inherit;
+}
+
+.navbar-mobile-logout:hover {
+    background: #fef2f2 !important;
+}
+
+/* Better Mobile Responsiveness */
 @media (max-width: 768px) {
     .navbar-container {
         display: flex;
@@ -314,6 +329,10 @@
     
     .navbar-search {
         display: none;
+    }
+    /* Hide user dropdown on mobile ONLY */
+    .user-dropdown {
+        display: none !important;
     }
     
     .navbar-mobile-toggle {
@@ -338,11 +357,32 @@
     }
     
     .navbar-brand-name {
-        font-size: 18px;
+        font-size: 16px; /* Smaller on mobile */
     }
     
     .navbar-brand-tagline {
-        font-size: 12px;
+        display: none; /* Hide tagline */
+    }
+    
+    /* Hide user name and type on mobile */
+    .user-info {
+        display: none !important;
+    }
+    
+    /* Make dropdown trigger compact */
+    .dropdown-trigger {
+        padding: 6px;
+        gap: 0;
+        min-width: auto;
+    }
+    
+    .user-avatar {
+        width: 32px;
+        height: 32px;
+    }
+    
+    .navbar-actions {
+        gap: 6px;
     }
     
     .navbar-mobile-content {
@@ -350,11 +390,6 @@
     }
 }
 
-@media (max-width: 360px) {
-    .navbar-brand-tagline {
-        display: none;
-    }
-}
 
 /* User Dropdown Styles */
 .user-dropdown {
@@ -783,6 +818,7 @@
                 transform: translate(-50%, -50%) rotate(360deg);
             }
         }
+
 </style>
 
 <nav class="navbar-component">
@@ -879,9 +915,7 @@
                             </svg>
                             Profile
                         </a>
-                        <form method="POST" action="{{ route('logout') }}" style="margin: 0;">
-                            @csrf
-                            <button type="submit" class="dropdown-item logout-btn" onclick="return confirm('Are you sure you want to sign out?')">
+                        <form method="POST" action="{{ route('employee.logout') }}" style="margin: 0;">
                                 <svg class="dropdown-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
                                 </svg>
@@ -901,11 +935,11 @@
             </div>
 
             <!-- Mobile Menu Button -->
-            <button class="navbar-mobile-toggle" onclick="toggleNavbarMobileMenu()">
-                <svg class="navbar-hamburger" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-                </svg>
-            </button>
+    <button class="navbar-mobile-toggle" onclick="toggleNavbarMobileMenu()">
+        <svg class="navbar-hamburger" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+        </svg>
+    </button>
         </div>
     </div>
 
@@ -933,22 +967,31 @@
                 </a>
             </nav>
 
-            <div class="navbar-mobile-actions">
-                <div class="navbar-mobile-user" onclick="handleMobileUserClick()">
-                    <svg class="navbar-user-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0ZM12 14a7 7 0 0 0-7 7h14a7 7 0 0 0-7-7Z"/>
-                    </svg>
-                    @if(session('user_type') === 'guest')
-                        Guest
-                    @elseif(session('user_type') === 'employee')
-                        Employee
-                    @else
-                        Login
-                    @endif
-                </div>
-                
-                @livewire('cart-panel')
-            </div>
+            <!-- Profile link added to mobile menu -->
+@if(session('user_type') === 'employee' && Auth::check())
+    <a href="{{ route('user.profile.show') }}" class="navbar-mobile-link {{ request()->routeIs('user.profile.*') ? 'active' : '' }}">
+        <svg class="navbar-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0ZM12 14a7 7 0 0 0-7 7h14a7 7 0 0 0-7-7Z"/>
+        </svg>
+        Profile
+    </a>
+    <form method="POST" action="{{ route('employee.logout') }}" style="margin: 0;">
+        @csrf
+        <button type="submit" class="navbar-mobile-link navbar-mobile-logout" onclick="return confirm('Are you sure you want to sign out?')">
+            <svg class="navbar-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+            </svg>
+            Sign Out
+        </button>
+    </form>
+@else
+    <a href="javascript:void(0)" onclick="openWelcomeModal()" class="navbar-mobile-link">
+        <svg class="navbar-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0ZM12 14a7 7 0 0 0-7 7h14a7 7 0 0 0-7-7Z"/>
+        </svg>
+        Login
+    </a>
+@endif
         </div>
     </div>
 </nav>
