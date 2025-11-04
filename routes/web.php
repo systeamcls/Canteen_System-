@@ -174,4 +174,3 @@ Route::get('/payment/failed', function () {
 Route::get('/payment/cancelled', function () {
     return view('payment.cancelled');
 })->name('payment.cancelled');
-
