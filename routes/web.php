@@ -174,3 +174,17 @@ Route::get('/payment/failed', function () {
 Route::get('/payment/cancelled', function () {
     return view('payment.cancelled');
 })->name('payment.cancelled');
+
+
+// Temporary test route
+Route::get('/test-recaptcha', function() {
+    $siteKey = config('services.recaptcha.site_key');
+    $secretKey = config('services.recaptcha.secret_key');
+    
+    return view('test-recaptcha', [
+        'siteKey' => $siteKey,
+        'secretKey' => $secretKey ? 'SET (hidden)' : 'NOT SET',
+        'siteKeyExists' => !empty($siteKey),
+        'secretKeyExists' => !empty($secretKey),
+    ]);
+});

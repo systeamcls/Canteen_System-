@@ -35,26 +35,26 @@ return [
     'csp' => env('APP_ENV') === 'production'
     ? [   // Production rules
         'default-src' => "'self'",
-        'script-src' => "'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://cdn.tailwindcss.com http://king-prawn-app-8yjn3.ondigitalocean.app https://king-prawn-app-8yjn3.ondigitalocean.app",
+        'script-src' => "'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://cdn.tailwindcss.com https://www.google.com https://www.gstatic.com http://king-prawn-app-8yjn3.ondigitalocean.app https://king-prawn-app-8yjn3.ondigitalocean.app:8080",
         'style-src'  => "'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.bunny.net https://cdn.jsdelivr.net https://cdnjs.cloudflare.com",
         'font-src'   => "'self' https://fonts.gstatic.com https://fonts.bunny.net https://cdnjs.cloudflare.com data:",
         'img-src'    => "'self' data: blob: https: *.gravatar.com ui-avatars.com",
-        'connect-src'=> "'self' wss://king-prawn-app-8yjn3.ondigitalocean.app https://king-prawn-app-8yjn3.ondigitalocean.app",
+        'connect-src'=> "'self' https://www.google.com wss://king-prawn-app-8yjn3.ondigitalocean.app https://king-prawn-app-8yjn3.ondigitalocean.app",
         'worker-src' => "'self' blob:",
-        'frame-src'  => "'none'",
+        'frame-src'  => "'self' https://www.google.com https://www.gstatic.com https://recaptcha.google.com https://www.recaptcha.net",
         'object-src' => "'none'",
         'base-uri'   => "'self'",
         'form-action'=> "'self'",
     ]
-    : [   // Dev rules (with Vite + localhost + Filament requirements)
+    : [   // Dev rules (with Vite + localhost + Filament requirements + reCAPTCHA)
         'default-src' => "'self'",
-        'script-src' => "'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://cdn.tailwindcss.com http://localhost:5173 http://127.0.0.1:5173 http://[::1]:5173 ws://localhost:5173",
+        'script-src' => "'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://cdn.tailwindcss.com https://www.google.com https://www.gstatic.com http://localhost:5173 http://127.0.0.1:5173 http://[::1]:5173",
         'style-src'  => "'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.bunny.net https://cdn.jsdelivr.net https://cdnjs.cloudflare.com http://localhost:5173 http://127.0.0.1:5173 http://[::1]:5173",
         'font-src'   => "'self' https://fonts.gstatic.com https://fonts.bunny.net https://cdnjs.cloudflare.com data:",
         'img-src'    => "'self' data: blob: http://localhost:8000 http://localhost:5173 http://127.0.0.1:5173 http://[::1]:5173 https: *.gravatar.com ui-avatars.com",
-        'connect-src'=> "'self' ws://localhost:5173 ws://127.0.0.1:5173 ws://[::1]:5173 http://localhost:8000 http://localhost:5173",
+        'connect-src'=> "'self' https://www.google.com ws://localhost:5173 ws://127.0.0.1:5173 ws://[::1]:5173 http://localhost:8000 http://localhost:5173",
         'worker-src' => "'self' blob:",
-        'frame-src'  => "'none'",
+        'frame-src'  => "'self' https://www.google.com https://www.gstatic.com https://recaptcha.google.com https://www.recaptcha.net",
         'object-src' => "'none'",
         'base-uri'   => "'self'",
         'form-action'=> "'self'",

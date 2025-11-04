@@ -13,6 +13,9 @@
 
     <title>@yield('title', 'LTO Canteen Central')</title>
 
+    <!-- ✅ ADD: reCAPTCHA v3 Script -->
+    <script src="https://www.google.com/recaptcha/api.js?render={{ config('services.recaptcha.site_key') }}"></script>
+
     <!-- ADD THIS: Welcome Modal CSS -->
     <link rel="stylesheet" href="{{ asset('css/welcome-modal.css') }}">
     {{-- Livewire Styles --}}
