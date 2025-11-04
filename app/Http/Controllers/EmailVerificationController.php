@@ -57,4 +57,28 @@ class EmailVerificationController extends Controller
 {
     return view('auth.verification-success');
 }
+
+    /**
+     * Check verification status (for AJAX polling)
+     */
+    public function checkStatus(Request $request)
+    {
+        if (!Auth::check()) {
+            return response()->json([
+                'authenticated' => false,
+                'verified' => false,
+                'message' => 'Not authenticated'
+            ], 401);
+        }
+
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        
+        return response()->json([
+            'authenticated' => true,
+            'verified' => $user->hasVerifiedEmail(),
+            'email' => $user->email,
+            'needs_verification' => !$user->hasVerifiedEmail(),
+        ]);
+    }
 }
