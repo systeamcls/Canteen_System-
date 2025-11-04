@@ -22,16 +22,36 @@ class EmailVerificationController extends Controller
         return view('auth.verify-email');
     }
 
-    public function verify(EmailVerificationRequest $request)
+    public function verify(Request $request)
 {
-    $request->fulfill();
+    // Get user ID from URL
+    $userId = $request->route('id');
+    $user = \App\Models\User::findOrFail($userId);
     
-    // Re-authenticate the user and redirect to profile
-    Auth::login($request->user());
+    // Validate hash (security check)
+    if (! hash_equals(
+        sha1($user->getEmailForVerification()),
+        (string) $request->route('hash')
+    )) {
+        abort(403, 'Invalid verification link');
+    }
+    
+    // If already verified, just log them in
+    if ($user->hasVerifiedEmail()) {
+        Auth::login($user);
+        session(['user_type' => 'employee']);
+        return redirect()->route('verification.success');
+    }
+    
+    // Mark email as verified
+    $user->markEmailAsVerified();
+    
+    // Log user in
+    Auth::login($user);
     session(['user_type' => 'employee']);
     
-        return redirect()->route('verification.success');
-
+    // Redirect to success page
+    return redirect()->route('verification.success');
 }
 
     public function resend(Request $request)
