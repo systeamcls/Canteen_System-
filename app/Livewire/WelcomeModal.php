@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use App\Models\User;
+use App\Helpers\RecaptchaHelper;
+
 
 class WelcomeModal extends Component
 {
@@ -17,6 +19,11 @@ class WelcomeModal extends Component
     public $email = '';
     public $password = '';
     public $loginError = '';
+
+    // ✅ ADD: reCAPTCHA tokens
+    public $recaptcha_token_guest = '';
+    public $recaptcha_token_login = '';
+    public $recaptcha_token_register = '';
 
     // Registration form properties
     public $registerName = '';
@@ -72,6 +79,12 @@ class WelcomeModal extends Component
         $this->resetForm();
     }
 
+    public function showGuestVerification()
+{
+    $this->currentView = 'guest-verification';
+    $this->resetForm();
+}
+
     public function showOptions()
     {
         $this->currentView = 'options';
@@ -79,25 +92,39 @@ class WelcomeModal extends Component
     }
 
     public function loginAsGuest()
-    {
-        // Set guest session
-        session([
-            'user_type' => 'guest',
-            'guest_session_id' => uniqid('guest_', true)
-        ]);
-
-        $this->close();
-
-        // Emit event for other components
-        $this->dispatch('userTypeUpdated', 'guest');
-
-        // Redirect to menu
-        return redirect()->route('home.index');
+{
+    // ✅ Verify reCAPTCHA v2 Checkbox
+    if (!RecaptchaHelper::verifyV2($this->recaptcha_token_guest, 'checkbox')) {
+        $this->loginError = 'Security verification failed. Please complete the reCAPTCHA and try again.';
+        $this->recaptcha_token_guest = ''; // Reset token
+        return;
     }
 
+    // Set guest session
+    session([
+        'user_type' => 'guest',
+        'guest_session_id' => uniqid('guest_', true)
+    ]);
+
+    $this->close();
+
+    // Emit event for other components
+    $this->dispatch('userTypeUpdated', 'guest');
+
+    // Redirect to menu
+    return redirect()->route('home.index');
+}
+
     public function loginAsEmployee()
-    {
-        $this->loginError = '';
+{
+    $this->loginError = '';
+
+    // ✅ Verify reCAPTCHA v2 Checkbox
+    if (!RecaptchaHelper::verifyV2($this->recaptcha_token_login, 'checkbox')) {
+        $this->loginError = 'Security verification failed. Please complete the reCAPTCHA and try again.';
+        $this->recaptcha_token_login = ''; // Reset token
+        return;
+    }
 
         try {
             $this->validate([
@@ -135,6 +162,13 @@ class WelcomeModal extends Component
     public function registerEmployee()
 {
     $this->registerError = '';
+
+    // ✅ Verify reCAPTCHA v2 Checkbox FIRST
+    if (!RecaptchaHelper::verifyV2($this->recaptcha_token_register, 'checkbox')) {
+        $this->registerError = 'Security verification failed. Please complete the reCAPTCHA and try again.';
+        $this->recaptcha_token_register = ''; // Reset token
+        return;
+    }
 
     try {
         $validated = $this->validate([

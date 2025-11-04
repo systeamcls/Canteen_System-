@@ -8,17 +8,16 @@ use Illuminate\Support\Facades\Log;
 class RecaptchaHelper
 {
     /**
-     * Verify reCAPTCHA v3 token
-     * 
-     * @param string $token The reCAPTCHA token from frontend
-     * @param string|null $action Expected action name (optional)
-     * @param float $minScore Minimum acceptable score (0.0 to 1.0)
-     * @return bool
+     * Verify reCAPTCHA v3 token (score-based)
      */
-    public static function verify($token, $action = null, $minScore = 0.5)
+    public static function verify(string $token, string $action = 'submit', float $minScore = 0.5): bool
     {
+        if (empty($token)) {
+            Log::warning('reCAPTCHA v3 verification failed: Empty token');
+            return false;
+        }
+
         try {
-            // Call Google's API
             $response = Http::asForm()->post('https://www.google.com/recaptcha/api/siteverify', [
                 'secret' => config('services.recaptcha.secret_key'),
                 'response' => $token,
@@ -26,34 +25,37 @@ class RecaptchaHelper
 
             $result = $response->json();
 
-            // Log for debugging
-            Log::info('reCAPTCHA verification', [
+            Log::info('reCAPTCHA v3 verification', [
                 'success' => $result['success'] ?? false,
                 'score' => $result['score'] ?? 0,
-                'action' => $result['action'] ?? null,
-                'hostname' => $result['hostname'] ?? null,
+                'action' => $result['action'] ?? 'unknown',
+                'expected_action' => $action,
+                'min_score' => $minScore,
             ]);
 
-            // Check if request was successful
+            // Check if verification was successful
             if (!isset($result['success']) || !$result['success']) {
-                Log::warning('reCAPTCHA failed', ['errors' => $result['error-codes'] ?? []]);
-                return false;
-            }
-
-            // Check score
-            if (!isset($result['score']) || $result['score'] < $minScore) {
-                Log::warning('reCAPTCHA score too low', [
-                    'score' => $result['score'] ?? 0,
-                    'required' => $minScore,
+                Log::warning('reCAPTCHA v3 verification failed', [
+                    'error_codes' => $result['error-codes'] ?? []
                 ]);
                 return false;
             }
 
-            // Optional: Verify action matches
-            if ($action && isset($result['action']) && $result['action'] !== $action) {
-                Log::warning('reCAPTCHA action mismatch', [
+            // Check if action matches
+            if (isset($result['action']) && $result['action'] !== $action) {
+                Log::warning('reCAPTCHA v3 action mismatch', [
                     'expected' => $action,
-                    'received' => $result['action'],
+                    'received' => $result['action']
+                ]);
+                return false;
+            }
+
+            // Check if score meets threshold
+            $score = $result['score'] ?? 0;
+            if ($score < $minScore) {
+                Log::warning('reCAPTCHA v3 score too low', [
+                    'score' => $score,
+                    'min_score' => $minScore
                 ]);
                 return false;
             }
@@ -61,27 +63,90 @@ class RecaptchaHelper
             return true;
 
         } catch (\Exception $e) {
-            Log::error('reCAPTCHA verification error', [
-                'error' => $e->getMessage(),
+            Log::error('reCAPTCHA v3 verification exception', [
+                'message' => $e->getMessage()
             ]);
-            // In production, you might want to allow the action if reCAPTCHA is down
-            // return true; // Fail open
-            return false; // Fail closed (more secure)
+            return false;
         }
     }
 
     /**
-     * Get score threshold for different actions
+     * Verify reCAPTCHA v2 token (checkbox or invisible)
      */
-    public static function getScoreThreshold($action)
-{
-    return match($action) {
-        'register' => 0.5,
-        'login' => 0.3,
-        'checkout' => 0.5,
-        'guest_checkout' => 0.6,
-        'place_order' => 0.5,
-        default => 0.5,
-    };
-}
+    public static function verifyV2(string $token, string $type = 'invisible'): bool
+    {
+        if (empty($token)) {
+            Log::warning('reCAPTCHA v2 verification failed: Empty token');
+            return false;
+        }
+
+        try {
+            // Select the appropriate secret key
+            $secretKey = $type === 'checkbox' 
+                ? config('services.recaptcha.v2_checkbox_secret_key')
+                : config('services.recaptcha.v2_invisible_secret_key');
+
+            if (empty($secretKey)) {
+                Log::error('reCAPTCHA v2 secret key not configured', ['type' => $type]);
+                return false;
+            }
+
+            $response = Http::asForm()->post('https://www.google.com/recaptcha/api/siteverify', [
+                'secret' => $secretKey,
+                'response' => $token,
+            ]);
+
+            $result = $response->json();
+
+            Log::info('reCAPTCHA v2 verification', [
+                'type' => $type,
+                'success' => $result['success'] ?? false,
+                'challenge_ts' => $result['challenge_ts'] ?? null,
+                'hostname' => $result['hostname'] ?? null,
+            ]);
+
+            // v2 is binary - either success or fail
+            if (!isset($result['success']) || !$result['success']) {
+                Log::warning('reCAPTCHA v2 verification failed', [
+                    'type' => $type,
+                    'error_codes' => $result['error-codes'] ?? []
+                ]);
+                return false;
+            }
+
+            return true;
+
+        } catch (\Exception $e) {
+            Log::error('reCAPTCHA v2 verification exception', [
+                'type' => $type,
+                'message' => $e->getMessage()
+            ]);
+            return false;
+        }
+    }
+
+    /**
+     * Get score threshold based on action
+     */
+    public static function getScoreThreshold(string $action): float
+    {
+        return match($action) {
+            'login' => 0.5,
+            'register' => 0.5,
+            'checkout' => 0.6,
+            'guest_checkout' => 0.5,
+            'guest_continue' => 0.4,
+            default => 0.5,
+        };
+    }
+
+    /**
+     * Get site key for v2 based on type
+     */
+    public static function getV2SiteKey(string $type = 'invisible'): string
+    {
+        return $type === 'checkbox'
+            ? config('services.recaptcha.v2_checkbox_site_key')
+            : config('services.recaptcha.v2_invisible_site_key');
+    }
 }

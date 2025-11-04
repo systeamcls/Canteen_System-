@@ -577,7 +577,9 @@
         max-width: 420px;
         width: 100%;
         max-height: 90vh;
-        overflow-y: auto;
+        overflow-y: auto !important;
+        /* ✅ Force it with !important */
+        overflow-x: hidden !important;
         position: relative;
         transform: scale(0.9) translateY(20px);
         transition: all 0.3s ease;
@@ -1821,6 +1823,29 @@
         .delivery-btn-primary {
             width: 100%;
         }
+    }
+
+    .guest-verification-content {
+        padding: 20px;
+        text-align: center;
+    }
+
+    .verification-message {
+        font-size: 15px;
+        color: #4a5568;
+        line-height: 1.6;
+        margin-bottom: 20px;
+    }
+
+    .security-note {
+        margin-top: 20px;
+        color: #718096;
+        font-size: 13px;
+    }
+
+    #guestContinueBtn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
     }
 </style>
 

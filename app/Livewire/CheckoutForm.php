@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire;
 
+use App\Helpers\RecaptchaHelper;
 use App\Models\Order;
 use App\Models\OrderGroup;
 use App\Models\OrderItem;
@@ -32,6 +33,8 @@ class CheckoutForm extends Component
     public string $customerPhone = '';
     public string $customerEmail = '';
     public string $notificationPreference = '';
+
+    public string $recaptcha_token = '';
 
     public bool $showPaymentMethods = false;
     public ?string $selectedPaymentMethod = null;
@@ -134,18 +137,29 @@ public function changePaymentMethod()
     }
 
     public function submitOrder(): void
-    {
-        if ($this->isProcessing) {
-            return;
-        }
+{
+    if ($this->isProcessing) {
+        return;
+    }
 
-        if (empty($this->paymentMethod)) {
-            $this->addError('paymentMethod', 'Please select a payment method to continue.');
-            $this->dispatch('checkout-error');
-            return;
-        }
+    if (empty($this->paymentMethod)) {
+        $this->addError('paymentMethod', 'Please select a payment method to continue.');
+        $this->dispatch('checkout-error');
+        return;
+    }
 
-        $this->validate();
+    // ✅ ADD: Verify reCAPTCHA FIRST
+    $action = Auth::check() ? 'checkout' : 'guest_checkout';
+    $minScore = RecaptchaHelper::getScoreThreshold($action);
+    
+    if (!RecaptchaHelper::verify($this->recaptcha_token, $action, $minScore)) {
+        $this->errorMessage = 'Security verification failed. Please try again.';
+        $this->dispatch('checkout-error', ['message' => 'Security verification failed']);
+        $this->recaptcha_token = ''; // Reset token
+        return;
+    }
+
+    $this->validate();
         
         if (empty($this->cartSnapshot)) {
             $this->errorMessage = 'Your cart is empty. Please add items before checkout.';
@@ -429,34 +443,37 @@ public function changePaymentMethod()
     }
 
     private function handleCashPayment(OrderGroup $orderGroup): void
-    {
-        $this->clearCart();
-        
-        $this->successMessage = "Order placed successfully! You can pay cash when you collect your order.";
-        
-        // Debug the order group
-        logger()->info('HandleCashPayment called', [
-            'order_group_id' => $orderGroup->id,
-            'order_group_exists' => $orderGroup->exists,
-            'order_group_attributes' => $orderGroup->getAttributes()
-        ]);
+{
+    $this->clearCart();
     
-    // Ensure we have a valid order group ID
-    if (!$orderGroup->id) {
-        logger()->error('Order group has no ID!');
-        throw new \Exception('Order group was not saved properly');
+    $this->successMessage = "Order placed successfully! You can pay cash when you collect your order.";
+    
+    // Ensure order group is saved and has an ID
+    if (!$orderGroup->exists || !$orderGroup->id) {
+        logger()->error('Order group not saved!', [
+            'exists' => $orderGroup->exists,
+            'id' => $orderGroup->id,
+            'attributes' => $orderGroup->getAttributes()
+        ]);
+        throw new \Exception('Order was not saved properly. Please try again.');
     }
 
-        // Redirect to success page after a short delay
-        $this->dispatch('order-completed', [
-            'orderGroupId' => $orderGroup->id,
-            'paymentMethod' => 'cash'
-        ]);
-        logger()->info('Event dispatched', [
-        'orderGroupId' => (int) $orderGroup->id,
-        'paymentMethod' => 'cash'
-        ]);
-    }
+    // Force refresh from database to ensure ID is set
+    $orderGroup->refresh();
+    
+    $orderGroupId = (int) $orderGroup->id;
+    
+    logger()->info('Cash payment - redirecting to success', [
+        'order_group_id' => $orderGroupId,
+        'order_group_exists' => $orderGroup->exists,
+    ]);
+
+    // Dispatch event with explicit integer ID
+    $this->dispatch('order-completed', 
+        orderGroupId: $orderGroupId,
+        paymentMethod: 'cash'
+    );
+}
 
    private function handleOnlinePayment(array $paymentResult): void
 {

@@ -36,8 +36,17 @@ return [
     ],
 
     'recaptcha' => [
-        'site_key' => env('RECAPTCHA_SITE_KEY'),
-        'secret_key' => env('RECAPTCHA_SECRET_KEY'),
+    // v3 (for checkout)
+    'site_key' => env('RECAPTCHA_SITE_KEY'),
+    'secret_key' => env('RECAPTCHA_SECRET_KEY'),
+    
+    // v2 Checkbox (for registration)
+    'v2_checkbox_site_key' => env('RECAPTCHA_V2_CHECKBOX_SITE_KEY'),
+    'v2_checkbox_secret_key' => env('RECAPTCHA_V2_CHECKBOX_SECRET_KEY'),
+    
+    // v2 Invisible (for login & guest)
+    'v2_invisible_site_key' => env('RECAPTCHA_V2_INVISIBLE_SITE_KEY'),
+    'v2_invisible_secret_key' => env('RECAPTCHA_V2_INVISIBLE_SECRET_KEY'),
     ],
 
 ];

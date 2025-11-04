@@ -227,13 +227,17 @@
         }
 
         .modal-container {
+            position: relative;
+            /* ✅ CRITICAL! */
             background: white;
             border-radius: 16px;
             box-shadow: 0 20px 25px -5px rgba(234, 88, 12, 0.2), 0 10px 10px -5px rgba(234, 88, 12, 0.1);
             max-width: 420px;
             width: 100%;
-            max-height: 90vh;
-            overflow-y: auto;
+            max-height: 95vh;
+            overflow-y: auto !important;
+            /* ✅ Force it with !important */
+            overflow-x: hidden !important;
             position: relative;
             transform: scale(0.9) translateY(20px);
             transition: all 0.3s ease;
@@ -1189,6 +1193,7 @@
 
             .modal-container {
                 margin: 20px;
+                max-height: 95vh !important;
                 max-width: calc(100% - 40px);
             }
 
@@ -1747,59 +1752,47 @@
         }
 
         /* Waving Hand Peeking from Top of Modal - Centered & Higher */
+        .wave-peek-wrapper {
+            position: absolute;
+            top: -30px;
+            /* Peek from top */
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1001;
+            /* Above modal */
+            pointer-events: none;
+            /* Don't block clicks */
+        }
+
         .wave-peek {
             position: absolute;
             top: -40px;
-            /* Raised higher (was -30px) */
+            /* Above the modal */
             left: 50%;
             /* Center horizontally */
             transform: translateX(-50%);
-            /* Perfect centering */
-            font-size: 3.5rem;
-            animation: wave-peek 1.8s ease-in-out infinite;
-            z-index: 100;
-            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.15));
+            /* Center it perfectly */
+            font-size: 70px;
+            z-index: 10;
+            animation: wave 1.5s ease-in-out infinite;
+            filter: drop-shadow(0 6px 12px rgba(234, 88, 12, 0.3));
+            pointer-events: none;
         }
 
-        @keyframes wave-peek {
+        @keyframes wave {
 
             0%,
             100% {
-                transform: translateX(-50%) rotate(0deg) translateY(0px);
+                transform: translateX(-50%) rotate(0deg);
             }
 
-            10%,
-            30% {
-                transform: translateX(-50%) rotate(14deg) translateY(-3px);
+            25% {
+                transform: translateX(-50%) rotate(20deg);
             }
 
-            20%,
-            40% {
-                transform: translateX(-50%) rotate(-8deg) translateY(0px);
+            75% {
+                transform: translateX(-50%) rotate(-20deg);
             }
-
-            50% {
-                transform: translateX(-50%) rotate(14deg) translateY(-3px);
-            }
-
-            60% {
-                transform: translateX(-50%) rotate(-4deg) translateY(0px);
-            }
-
-            70% {
-                transform: translateX(-50%) rotate(10deg) translateY(-2px);
-            }
-
-            80% {
-                transform: translateX(-50%) rotate(0deg) translateY(0px);
-            }
-        }
-
-        /* Make sure modal-container has overflow visible for the hand */
-        .modal-container {
-            position: relative;
-            overflow: visible;
-            /* Allow hand to peek out */
         }
 
         /* Adjust modal header spacing for wave */
@@ -1811,6 +1804,29 @@
 
         .modal-title {
             margin-top: 0;
+        }
+
+        .guest-verification-content {
+            padding: 20px;
+            text-align: center;
+        }
+
+        .verification-message {
+            font-size: 15px;
+            color: #4a5568;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .security-note {
+            margin-top: 20px;
+            color: #718096;
+            font-size: 13px;
+        }
+
+        #guestContinueBtn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
     </style>
 </head>

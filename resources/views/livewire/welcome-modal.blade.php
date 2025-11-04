@@ -1,4 +1,9 @@
 <div>
+    <!-- ✅ Hidden inputs for reCAPTCHA tokens -->
+    <input type="hidden" wire:model="recaptcha_token_guest" id="recaptcha_token_guest">
+    <input type="hidden" wire:model="recaptcha_token_login" id="recaptcha_token_login">
+    <input type="hidden" wire:model="recaptcha_token_register" id="recaptcha_token_register">
+
     @if ($showModal)
         <div class="modal-overlay active" id="welcomeModal">
             <div class="modal-container">
@@ -11,7 +16,7 @@
                     <!-- Back button for login/register forms -->
                     @if ($currentView !== 'options')
                         <button class="back-btn-header"
-                            wire:click="{{ $currentView === 'register-form' ? 'showEmployeeForm' : 'showOptions' }}">
+                            wire:click="{{ $currentView === 'register-form' ? 'showEmployeeForm' : ($currentView === 'guest-verification' ? 'showOptions' : 'showOptions') }}">
                             <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M15 19l-7-7 7-7" />
@@ -32,11 +37,12 @@
                 </div>
 
                 <div class="modal-body">
+                    {{-- OPTIONS VIEW --}}
                     @if ($currentView === 'options')
                         <!-- Login Options -->
                         <div id="loginOptions">
                             <!-- Guest Login -->
-                            <button class="login-option" wire:click="loginAsGuest">
+                            <button class="login-option" type="button" wire:click="showGuestVerification">
                                 <div class="login-option-content">
                                     <div class="login-option-icon guest-icon">👤</div>
                                     <div class="login-option-text">
@@ -61,6 +67,64 @@
                         </div>
                     @endif
 
+                    {{-- GUEST VERIFICATION VIEW --}}
+                    @if ($currentView === 'guest-verification')
+                        <div class="employee-form active">
+                            <!-- Header -->
+                            <div style="text-align: center; margin-bottom: 30px;">
+                                <div style="font-size: 40px; margin-bottom: 10px;">🔒</div>
+                                <h3 style="font-size: 24px; font-weight: 600; color: #2d3748; margin-bottom: 8px;">
+                                    Security Verification
+                                </h3>
+                                <p style="font-size: 14px; color: #718096;">
+                                    Just one quick step to continue
+                                </p>
+                            </div>
+
+                            <!-- Message -->
+                            <div style="background: #f7fafc; border-radius: 8px; padding: 20px; margin-bottom: 25px;">
+                                <p
+                                    style="font-size: 15px; color: #4a5568; line-height: 1.6; text-align: center; margin: 0;">
+                                    To protect our system from spam and bots, please complete this quick verification to
+                                    continue as a guest.
+                                </p>
+                            </div>
+
+                            <!-- reCAPTCHA Checkbox -->
+                            <div style="margin: 30px 0; display: flex; justify-content: center; min-height: 78px;">
+                                <div id="recaptcha-guest-container"></div>
+                            </div>
+
+                            <!-- Error Message -->
+                            @if ($loginError)
+                                <div class="error-message show" style="display: block; margin-bottom: 20px;">
+                                    <strong>⚠️ Verification Failed:</strong> {{ $loginError }}
+                                </div>
+                            @endif
+
+                            <!-- Continue Button -->
+                            <button type="button" onclick="proceedAsGuest()" class="submit-btn" id="guestContinueBtn"
+                                disabled
+                                style="width: 100%; padding: 14px; font-size: 16px; font-weight: 600; border-radius: 8px; border: none; background: #4299e1; color: white; opacity: 0.5; cursor: not-allowed; transition: all 0.3s ease;"
+                                wire:loading.class="loading" wire:target="loginAsGuest">
+                                <span wire:loading.remove wire:target="loginAsGuest">
+                                    ✓ Continue as Guest
+                                </span>
+                                <span wire:loading wire:target="loginAsGuest">
+                                    Verifying...
+                                </span>
+                            </button>
+
+                            <!-- Security Note -->
+                            <div style="margin-top: 20px; text-align: center;">
+                                <small style="color: #718096; font-size: 13px;">
+                                    🔒 This verification helps us keep the platform secure for everyone.
+                                </small>
+                            </div>
+                        </div>
+                    @endif
+
+                    {{-- EMPLOYEE LOGIN VIEW --}}
                     @if ($currentView === 'employee-form')
                         <!-- Employee Login Form with Floating Labels -->
                         <div class="employee-form active">
@@ -106,8 +170,15 @@
                                     </div>
                                 @endif
 
-                                <button type="submit" class="submit-btn" wire:loading.class="loading"
-                                    wire:target="loginAsEmployee">
+                                <!-- reCAPTCHA Checkbox -->
+                                <div class="recaptcha-container"
+                                    style="margin: 20px 0; display: flex; justify-content: center;">
+                                    <div id="recaptcha-login-container"></div>
+                                </div>
+
+                                <button type="button" onclick="executeRecaptchaLogin(event)" class="submit-btn"
+                                    id="loginSubmitBtn" disabled style="opacity: 0.5; cursor: not-allowed;"
+                                    wire:loading.class="loading" wire:target="loginAsEmployee">
                                     <span wire:loading.remove wire:target="loginAsEmployee">Sign In</span>
                                     <span wire:loading wire:target="loginAsEmployee">Signing In...</span>
                                 </button>
@@ -125,6 +196,7 @@
                         </div>
                     @endif
 
+                    {{-- REGISTRATION VIEW --}}
                     @if ($currentView === 'register-form')
                         <!-- Compact Registration Form -->
                         <div class="employee-form active">
@@ -249,11 +321,19 @@
                                     </div>
                                 @endif
 
+                                <!-- reCAPTCHA Checkbox -->
+                                <div class="recaptcha-container"
+                                    style="margin: 20px 0; display: flex; justify-content: center;">
+                                    <div id="recaptcha-register-container"></div>
+                                </div>
+
                                 <!-- Submit Button -->
-                                <button type="submit" class="submit-btn-modern" wire:loading.class="loading"
+                                <button type="button" onclick="executeRecaptchaRegister(event)"
+                                    class="submit-btn-modern" id="registerSubmitBtn" disabled
+                                    style="opacity: 0.5; cursor: not-allowed;" wire:loading.class="loading"
                                     wire:target="registerEmployee">
                                     <span class="btn-content" wire:loading.remove wire:target="registerEmployee">
-                                        <span class="btn-icon"></span>
+                                        <span class="btn-icon">🔐</span>
                                         <span>Create Account</span>
                                         <span class="btn-arrow">→</span>
                                     </span>
@@ -279,8 +359,223 @@
     @endif
 </div>
 
+{{-- Load reCAPTCHA API --}}
+<script src="https://www.google.com/recaptcha/api.js?onload=onRecaptchaLoadCallback&render=explicit" async defer>
+</script>
+
 <script>
-    // Show/hide password requirements
+    // Global widget IDs
+    window.recaptchaWidgets = {
+        guest: null,
+        login: null,
+        register: null
+    };
+
+    // Global flag
+    window.recaptchaReady = false;
+
+    // Callback when reCAPTCHA API loads
+    window.onRecaptchaLoadCallback = function() {
+        console.log('✅ reCAPTCHA API loaded successfully');
+        window.recaptchaReady = true;
+        renderVisibleRecaptchas();
+    };
+
+    // Function to render any visible reCAPTCHA containers
+    function renderVisibleRecaptchas() {
+        if (!window.recaptchaReady || typeof grecaptcha === 'undefined') {
+            console.log('⏳ reCAPTCHA not ready yet');
+            return;
+        }
+
+        console.log('🔍 Checking for reCAPTCHA containers...');
+
+        // Guest reCAPTCHA
+        var guestContainer = document.getElementById('recaptcha-guest-container');
+        if (guestContainer && guestContainer.innerHTML === '') {
+            console.log('🎯 Rendering GUEST reCAPTCHA');
+            try {
+                window.recaptchaWidgets.guest = grecaptcha.render('recaptcha-guest-container', {
+                    'sitekey': '{{ \App\Helpers\RecaptchaHelper::getV2SiteKey('checkbox') }}',
+                    'callback': function(token) {
+                        console.log('✅ Guest reCAPTCHA completed');
+                        var btn = document.getElementById('guestContinueBtn');
+                        if (btn) {
+                            btn.disabled = false;
+                            btn.style.opacity = '1';
+                            btn.style.cursor = 'pointer';
+                        }
+                    }
+                });
+                console.log('✅ Guest widget ID:', window.recaptchaWidgets.guest);
+            } catch (e) {
+                console.error('❌ Guest reCAPTCHA render error:', e);
+            }
+        }
+
+        // Login reCAPTCHA
+        var loginContainer = document.getElementById('recaptcha-login-container');
+        if (loginContainer && loginContainer.innerHTML === '') {
+            console.log('🎯 Rendering LOGIN reCAPTCHA');
+            try {
+                window.recaptchaWidgets.login = grecaptcha.render('recaptcha-login-container', {
+                    'sitekey': '{{ \App\Helpers\RecaptchaHelper::getV2SiteKey('checkbox') }}',
+                    'callback': function(token) {
+                        console.log('✅ Login reCAPTCHA completed');
+                        var btn = document.getElementById('loginSubmitBtn');
+                        if (btn) {
+                            btn.disabled = false;
+                            btn.style.opacity = '1';
+                            btn.style.cursor = 'pointer';
+                        }
+                    }
+                });
+                console.log('✅ Login widget ID:', window.recaptchaWidgets.login);
+            } catch (e) {
+                console.error('❌ Login reCAPTCHA render error:', e);
+            }
+        }
+
+        // Register reCAPTCHA
+        var registerContainer = document.getElementById('recaptcha-register-container');
+        if (registerContainer && registerContainer.innerHTML === '') {
+            console.log('🎯 Rendering REGISTER reCAPTCHA');
+            try {
+                window.recaptchaWidgets.register = grecaptcha.render('recaptcha-register-container', {
+                    'sitekey': '{{ \App\Helpers\RecaptchaHelper::getV2SiteKey('checkbox') }}',
+                    'callback': function(token) {
+                        console.log('✅ Register reCAPTCHA completed');
+                        var btn = document.getElementById('registerSubmitBtn');
+                        if (btn) {
+                            btn.disabled = false;
+                            btn.style.opacity = '1';
+                            btn.style.cursor = 'pointer';
+                        }
+                    }
+                });
+                console.log('✅ Register widget ID:', window.recaptchaWidgets.register);
+            } catch (e) {
+                console.error('❌ Register reCAPTCHA render error:', e);
+            }
+        }
+    }
+
+    // Re-render when Livewire updates the DOM
+    document.addEventListener('livewire:init', () => {
+        Livewire.hook('morph.updated', ({
+            el,
+            component
+        }) => {
+            console.log('🔄 Livewire updated - re-rendering reCAPTCHAs...');
+            setTimeout(renderVisibleRecaptchas, 100);
+        });
+    });
+
+    // Also try on DOMContentLoaded
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('📄 DOM loaded - trying to render...');
+        setTimeout(renderVisibleRecaptchas, 500);
+    });
+
+    // Guest proceed function
+    function proceedAsGuest() {
+        console.log('🚀 Proceed as Guest clicked');
+
+        if (window.recaptchaWidgets.guest === null) {
+            alert('reCAPTCHA not initialized. Please refresh the page.');
+            return false;
+        }
+
+        var token = grecaptcha.getResponse(window.recaptchaWidgets.guest);
+
+        if (!token) {
+            alert('Please complete the reCAPTCHA checkbox first.');
+            return false;
+        }
+
+        console.log('✅ Guest token received');
+
+        var elements = document.querySelectorAll('[wire\\:id]');
+        var component = null;
+
+        for (var i = 0; i < elements.length; i++) {
+            var wireId = elements[i].getAttribute('wire:id');
+            if (wireId) {
+                component = Livewire.find(wireId);
+                if (component) break;
+            }
+        }
+
+        if (component) {
+            component.set('recaptcha_token_guest', token);
+            component.call('loginAsGuest');
+        } else {
+            console.error('❌ Livewire component not found');
+            alert('Error: Could not process request. Please refresh.');
+        }
+    }
+
+    // Login execute function
+    function executeRecaptchaLogin(event) {
+        event.preventDefault();
+        console.log('🚀 Login button clicked');
+
+        if (window.recaptchaWidgets.login === null) {
+            alert('reCAPTCHA not initialized. Please refresh the page.');
+            return false;
+        }
+
+        var token = grecaptcha.getResponse(window.recaptchaWidgets.login);
+
+        if (!token) {
+            alert('Please complete the reCAPTCHA checkbox first.');
+            return false;
+        }
+
+        console.log('✅ Login token received');
+
+        var component = Livewire.find(event.target.closest('[wire\\:id]').getAttribute('wire:id'));
+
+        if (component) {
+            component.set('recaptcha_token_login', token);
+            component.call('loginAsEmployee');
+        } else {
+            console.error('❌ Livewire component not found');
+        }
+    }
+
+    // Register execute function
+    function executeRecaptchaRegister(event) {
+        event.preventDefault();
+        console.log('🚀 Register button clicked');
+
+        if (window.recaptchaWidgets.register === null) {
+            alert('reCAPTCHA not initialized. Please refresh the page.');
+            return false;
+        }
+
+        var token = grecaptcha.getResponse(window.recaptchaWidgets.register);
+
+        if (!token) {
+            alert('Please complete the reCAPTCHA checkbox first.');
+            return false;
+        }
+
+        console.log('✅ Register token received');
+
+        var component = Livewire.find(event.target.closest('[wire\\:id]').getAttribute('wire:id'));
+
+        if (component) {
+            component.set('recaptcha_token_register', token);
+            component.call('registerEmployee');
+        } else {
+            console.error('❌ Livewire component not found');
+        }
+    }
+</script>
+
+<script>
+    // Password functions
     function showPasswordRequirements() {
         const requirements = document.getElementById('passwordRequirements');
         if (requirements) {
@@ -289,7 +584,6 @@
     }
 
     function hidePasswordRequirements() {
-        // Don't hide immediately, give user time to see
         setTimeout(() => {
             const requirements = document.getElementById('passwordRequirements');
             if (requirements) {
@@ -298,7 +592,6 @@
         }, 300);
     }
 
-    // Password visibility toggle
     function togglePasswordVisibility(inputId, button) {
         const input = document.getElementById(inputId);
         const eyeOpen = button.querySelector('.eye-open');
@@ -315,7 +608,6 @@
         }
     }
 
-    // Password strength checker (compact badges)
     function checkPasswordStrength(password) {
         const lengthReq = document.getElementById('req-length');
         const uppercaseReq = document.getElementById('req-uppercase');
@@ -323,7 +615,6 @@
         const numberReq = document.getElementById('req-number');
         const specialReq = document.getElementById('req-special');
 
-        // Check length
         if (password.length >= 8) {
             lengthReq.classList.add('valid');
             lengthReq.classList.remove('invalid');
@@ -334,7 +625,6 @@
             lengthReq.classList.remove('valid', 'invalid');
         }
 
-        // Check uppercase
         if (/[A-Z]/.test(password)) {
             uppercaseReq.classList.add('valid');
             uppercaseReq.classList.remove('invalid');
@@ -345,7 +635,6 @@
             uppercaseReq.classList.remove('valid', 'invalid');
         }
 
-        // Check lowercase
         if (/[a-z]/.test(password)) {
             lowercaseReq.classList.add('valid');
             lowercaseReq.classList.remove('invalid');
@@ -356,7 +645,6 @@
             lowercaseReq.classList.remove('valid', 'invalid');
         }
 
-        // Check number
         if (/[0-9]/.test(password)) {
             numberReq.classList.add('valid');
             numberReq.classList.remove('invalid');
@@ -367,7 +655,6 @@
             numberReq.classList.remove('valid', 'invalid');
         }
 
-        // Check special character
         if (/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
             specialReq.classList.add('valid');
             specialReq.classList.remove('invalid');
@@ -377,22 +664,5 @@
         } else {
             specialReq.classList.remove('valid', 'invalid');
         }
-    }
-
-    // Existing functions
-    function closeModal() {
-        const modal = document.getElementById('welcomeModal');
-        if (modal) {
-            modal.style.display = 'none';
-            modal.classList.remove('active');
-        }
-    }
-
-    function loginAsGuest() {
-        window.location.href = '/menu';
-    }
-
-    function showEmployeeForm() {
-        alert('Employee login form would open here. Please refresh and try the Livewire version.');
     }
 </script>
