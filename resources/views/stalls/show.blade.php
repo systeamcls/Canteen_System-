@@ -160,7 +160,7 @@
                 id="menuGrid">
                 @forelse($stall->products->unique('id') as $product)
                     <div class="menu-item"
-                        data-category="{{ $product->category ? strtolower(str_replace(' ', '-', $product->category->name)) : 'uncategorized' }}"
+                        data-category="{{ $product->category ? strtolower(str_replace(' ', '-', $product->category)) : 'all' }}"
                         style="opacity: 1; transform: translateY(0); transition: all 0.3s ease;">
                         @livewire(
                             'add-to-cart-button',

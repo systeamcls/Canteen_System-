@@ -26,7 +26,7 @@ Route::get('/', function () {
 
 
 // Public routes accessible to both guests and employees
-Route::middleware(['web'])->group(function () {
+Route::middleware(['web', 'redirect.admin'])->group(function () {
     // Search functionality
     Route::get('/search', [HomeController::class, 'search'])->name('search');
 

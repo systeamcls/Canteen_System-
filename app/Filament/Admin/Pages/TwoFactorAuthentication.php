@@ -16,6 +16,7 @@ use Illuminate\Support\HtmlString;
 use Laravel\Fortify\Contracts\TwoFactorAuthenticationProvider;
 use Laravel\Fortify\Features;
 use Laravel\Fortify\RecoveryCode;
+use Illuminate\Support\Facades\Log;
 
 class TwoFactorAuthentication extends Page implements HasForms
 {
@@ -128,8 +129,8 @@ class TwoFactorAuthentication extends Page implements HasForms
                         ->action('confirmTwoFactorAuthentication')
                 ),
 
-            // RECOVERY CODES - FIXED TO ALWAYS RETURN STRING
-            Placeholder::make('recovery_codes')
+            // RECOVERY CODES - FIXED
+Placeholder::make('recovery_codes')
     ->label('Recovery Codes')
     ->content(function () use ($user): HtmlString {
         if (!$this->showingRecoveryCodes || !$user || !$user->two_factor_recovery_codes) {
@@ -140,58 +141,59 @@ class TwoFactorAuthentication extends Page implements HasForms
             $recoveryData = $user->two_factor_recovery_codes;
             $decrypted = decrypt($recoveryData);
 
-            // Ensure decrypted is string before decoding
-            if (!is_string($decrypted)) {
+            // Handle both string and array formats
+            if (is_string($decrypted)) {
+                $codes = json_decode($decrypted, true);
+            } elseif (is_array($decrypted)) {
+                $codes = $decrypted;
+            } else {
                 return new HtmlString('<div class="p-3 bg-yellow-100 rounded">Invalid recovery data format</div>');
             }
-
-            $codes = json_decode($decrypted, true);
 
             if (!is_array($codes) || empty($codes)) {
                 return new HtmlString('<div class="p-3 bg-yellow-100 rounded">No recovery codes available</div>');
             }
 
             // Build codes list safely
-            $codeHtml = '';
-            $count = 0;
-
-            foreach ($codes as $code) {
-                // Force code into string
+            $codesList = array_map(function($code) {
+                // Handle nested arrays or objects
                 if (is_array($code)) {
-                    $code = reset($code); // take first element if nested array
+                    $code = reset($code);
                 }
-                if (!is_string($code)) {
-                    continue; // skip invalid entries
-                }
+                return is_string($code) ? trim($code) : (string)$code;
+            }, $codes);
 
-                $safeCode = preg_replace('/[^A-Z0-9\-]/', '', strtoupper(trim($code)));
-                if (!empty($safeCode) && strlen($safeCode) > 3) {
-                    $codeHtml .= '<div class="p-2 bg-gray-100 rounded font-mono text-sm mb-1">' 
-                               . htmlspecialchars($safeCode) . '</div>';
-                    $count++;
-                }
+            // Filter valid codes
+            $validCodes = array_filter($codesList, function($code) {
+                return !empty($code) && strlen($code) >= 4;
+            });
 
-                if ($count >= 8) {
-                    break; // don’t display too many
-                }
-            }
-
-            if (empty($codeHtml)) {
+            if (empty($validCodes)) {
                 return new HtmlString('<div class="p-3 bg-yellow-100 rounded">No valid recovery codes found</div>');
             }
 
+            // Take first 8 codes
+            $displayCodes = array_slice($validCodes, 0, 8);
+
+            $codeHtml = '';
+            foreach ($displayCodes as $code) {
+                $codeHtml .= '<div class="p-2 bg-gray-100 rounded font-mono text-sm mb-1">' 
+                           . htmlspecialchars($code) . '</div>';
+            }
+
             return new HtmlString('
-                <div class="p-4 bg-yellow-50 border rounded">
-                    <p class="font-bold mb-2">⚠️ Recovery Codes</p>
-                    <div class="grid grid-cols-2 gap-2">
+                <div class="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <p class="font-bold mb-3 text-yellow-800">⚠️ Recovery Codes</p>
+                    <div class="grid grid-cols-2 gap-2 mb-3">
                         ' . $codeHtml . '
                     </div>
-                    <p class="text-xs mt-2 text-gray-600">Save these codes safely. Each can only be used once.</p>
+                    <p class="text-xs text-gray-600">💾 Save these codes safely. Each can only be used once if you lose access to your authenticator app.</p>
                 </div>
             ');
 
         } catch (\Exception $e) {
-            return new HtmlString('<div class="p-3 bg-red-100 rounded">Error displaying codes: ' . htmlspecialchars($e->getMessage()) . '</div>');
+            Log::error('2FA Recovery Codes Error: ' . $e->getMessage());
+            return new HtmlString('<div class="p-3 bg-red-100 rounded">Error displaying codes. Please regenerate them.</div>');
         }
     })
     ->visible(fn () => $this->showingRecoveryCodes),

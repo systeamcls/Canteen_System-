@@ -21,6 +21,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'filament.2fa' => \App\Http\Middleware\EnsureTwoFactorAuthenticated::class,
             'webhook.security' => \App\Http\Middleware\WebhookSecurityMiddleware::class,
             'verified' => \App\Http\Middleware\EnsureEmailIsVerified::class,
+            'redirect.admin' => \App\Http\Middleware\RedirectIfAdmin::class,
 
         ]);
 

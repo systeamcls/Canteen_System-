@@ -15,7 +15,7 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Filament\Navigation\NavigationGroup;
 use Illuminate\Support\Facades\Auth;
-
+use App\Filament\Admin\Pages\TwoFactorChallenge;
 
 
 class AdminPanelProvider extends PanelProvider
@@ -43,6 +43,7 @@ class AdminPanelProvider extends PanelProvider
             )
             ->pages([
             \App\Filament\Admin\Pages\DailyAttendance::class,
+            TwoFactorChallenge::class,
             ])
             ->discoverWidgets(
                 in: app_path('Filament/Admin/Widgets'),
@@ -69,6 +70,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
+                \App\Http\Middleware\FilamentTwoFactorAuth::class,
             ])
             // CRITICAL: Redirect after login based on role
             ->loginRouteSlug('login')

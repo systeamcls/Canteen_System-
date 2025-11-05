@@ -11,6 +11,7 @@ use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Fortify\Contracts\TwoFactorAuthenticationProvider;
+use Illuminate\Support\Facades\Log;
 
 class TwoFactorChallenge extends Page implements HasForms
 {
@@ -18,22 +19,32 @@ class TwoFactorChallenge extends Page implements HasForms
 
     protected static string $view = 'filament.admin.pages.two-factor-challenge';
     protected static bool $shouldRegisterNavigation = false;
-    protected static ?string $title = '2FA Verification Required';
+    protected static ?string $title = '2FA Verification';
+    protected static string $routePath = 'two-factor-challenge';
 
     public ?string $code = null;
+    public bool $recovery = false;
 
     public function mount(): void
     {
-        /** @var User|null $user */
-        $user = Auth::user();
-        
-        if (!$user || !$user->hasEnabledTwoFactorAuthentication()) {
-            $this->redirect('/admin');
+        // Check if user is logged in
+        if (!Auth::check()) {
+            redirect()->route('filament.admin.auth.login');
             return;
         }
 
+        /** @var User $user */
+        $user = Auth::user();
+        
+        // If 2FA not enabled, redirect to dashboard
+        if (!$user->hasEnabledTwoFactorAuthentication()) {
+            redirect()->route('filament.admin.pages.dashboard');
+            return;
+        }
+
+        // If already verified this session, redirect to dashboard
         if (session('auth.two_factor_confirmed_at')) {
-            $this->redirect('/admin');
+            redirect()->route('filament.admin.pages.dashboard');
             return;
         }
 
@@ -42,97 +53,170 @@ class TwoFactorChallenge extends Page implements HasForms
 
     public function form(Form $form): Form
     {
-        return $form->schema([
+return $form->schema([
             TextInput::make('code')
-                ->label('Verification Code')
-                ->placeholder('Enter 6-digit code from your app')
-                ->required()
-                ->autofocus()
-                ->maxLength(8)
-                ->minLength(6),
+    ->label($this->recovery ? 'Recovery Code' : 'Authentication Code')
+    ->placeholder($this->recovery ? 'Enter recovery code' : 'Enter 6-digit code')
+    ->required()
+    ->autofocus()
+    ->maxLength($this->recovery ? 30 : 6)
+    ->minLength($this->recovery ? 8 : 6)
+    ->rules($this->recovery ? ['string'] : ['required', 'string', 'size:6'])
+    ->helperText($this->recovery 
+        ? 'Enter one of your recovery codes' 
+        : 'Enter the code from your authenticator app'
+    ),
         ]);
     }
 
     public function verify(): void
     {
-        $data = $this->form->getState();
+        $this->validate();
         
         /** @var User $user */
         $user = Auth::user();
 
         if (!$user) {
-            $this->redirect('/admin/login');
+            $this->logout();
             return;
         }
 
-        // Try TOTP verification
-        $confirmed = app(TwoFactorAuthenticationProvider::class)->verify(
-            decrypt($user->two_factor_secret), 
-            $data['code']
-        );
+        $confirmed = false;
 
-        // Try recovery code if TOTP failed
-        if (!$confirmed) {
-            $confirmed = $this->verifyRecoveryCode($data['code']);
+        if ($this->recovery) {
+            $confirmed = $this->verifyRecoveryCode($this->code);
+        } else {
+            try {
+                $secret = decrypt($user->two_factor_secret);
+                $confirmed = app(TwoFactorAuthenticationProvider::class)
+                    ->verify($secret, $this->code);
+            } catch (\Exception $e) {
+                Log::error('2FA Verification Error: ' . $e->getMessage());
+            }
         }
 
         if ($confirmed) {
             session(['auth.two_factor_confirmed_at' => now()]);
+            session()->regenerate();
             
             Notification::make()
-                ->title('Access Granted')
+                ->title('Verification Successful')
+                ->body('Welcome back!')
                 ->success()
                 ->send();
 
-            $this->redirect('/admin');
+            redirect()->route('filament.admin.pages.dashboard');
             return;
         }
 
-        $this->addError('code', 'Invalid code. Please try again.');
+        $this->code = null;
+        
+        Notification::make()
+            ->title('Verification Failed')
+            ->body($this->recovery 
+                ? 'Invalid recovery code. Please try again.' 
+                : 'Invalid authentication code. Please try again or use a recovery code.'
+            )
+            ->danger()
+            ->send();
     }
 
     private function verifyRecoveryCode(string $code): bool
     {
-        /** @var User|null $user */
+        /** @var User $user */
         $user = Auth::user();
         
         if (!$user || !$user->two_factor_recovery_codes) {
             return false;
         }
         
-        $codes = json_decode(decrypt($user->two_factor_recovery_codes), true);
-        
-        if (in_array($code, $codes)) {
-            // Remove used recovery code
-            $remainingCodes = array_values(array_diff($codes, [$code]));
-            $user->forceFill([
-                'two_factor_recovery_codes' => encrypt(json_encode($remainingCodes)),
-            ])->save();
+        try {
+            $decrypted = decrypt($user->two_factor_recovery_codes);
+            $codes = is_string($decrypted) ? json_decode($decrypted, true) : $decrypted;
             
-            return true;
+            if (!is_array($codes)) {
+                return false;
+            }
+
+            $normalizedInput = strtolower(str_replace([' ', '-'], '', trim($code)));
+            
+            foreach ($codes as $index => $recoveryCode) {
+                $normalizedRecovery = strtolower(str_replace([' ', '-'], '', trim((string)$recoveryCode)));
+                
+                if ($normalizedInput === $normalizedRecovery) {
+                    unset($codes[$index]);
+                    $codes = array_values($codes);
+                    
+                    $user->forceFill([
+                        'two_factor_recovery_codes' => encrypt(json_encode($codes)),
+                    ])->save();
+                    
+                    Notification::make()
+                        ->title('Recovery Code Used')
+                        ->body('You have ' . count($codes) . ' recovery codes remaining.')
+                        ->warning()
+                        ->send();
+                    
+                    return true;
+                }
+            }
+            
+            return false;
+            
+        } catch (\Exception $e) {
+            Log::error('Recovery Code Verification Error: ' . $e->getMessage());
+            return false;
         }
-        
-        return false;
+    }
+
+    public function toggleRecovery(): void
+    {
+        $this->recovery = !$this->recovery;
+        $this->code = null;
+        $this->form->fill();
     }
 
     public function logout(): void
     {
         Auth::logout();
-        $this->redirect('/admin/login');
+        session()->invalidate();
+        session()->regenerateToken();
+        redirect()->route('filament.admin.auth.login');
     }
 
+    public function hasLogo(): bool
+{
+    return false;
+}
+
     protected function getFormActions(): array
+{
+    return [
+        \Filament\Actions\Action::make('verify')
+            ->label('Verify & Continue')
+            ->submit('verify')
+            ->color('primary')
+            ->icon('heroicon-o-check-circle')
+            ->size('lg')
+            ->extraAttributes(['class' => 'w-full justify-center']),
+            
+        \Filament\Actions\Action::make('logout')
+            ->label('Cancel & Logout')
+            ->color('gray')
+            ->icon('heroicon-o-arrow-left-on-rectangle')
+            ->action('logout')
+            ->size('lg')
+            ->outlined()
+            ->extraAttributes(['class' => 'w-full justify-center']),
+    ];
+}
+    public function getTitle(): string
     {
-        return [
-            \Filament\Actions\Action::make('verify')
-                ->label('Verify')
-                ->submit('verify')
-                ->color('primary'),
-                
-            \Filament\Actions\Action::make('logout')
-                ->label('Logout')
-                ->color('gray')
-                ->action('logout'),
-        ];
+        return '2FA Verification Required';
+    }
+
+    public function getHeading(): string
+    {
+        return '🔐 Two-Factor Authentication';
     }
 }
