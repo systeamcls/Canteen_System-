@@ -141,8 +141,8 @@
         }
 
         /* ========================================
-                           IMPROVED HERO SECTION - Replace in your index.blade.php
-                           ======================================== */
+                               IMPROVED HERO SECTION - Replace in your index.blade.php
+                               ======================================== */
 
         /* Hero Section with Curved Wave Shape */
         .hero-section {
@@ -463,8 +463,8 @@
 
 
         /* ========================================
-                           POPULAR ITEMS GRID - THIS WAS MISSING!
-                           ======================================== */
+                               POPULAR ITEMS GRID - THIS WAS MISSING!
+                               ======================================== */
 
         .popular-grid {
             display: grid;
@@ -491,8 +491,8 @@
         }
 
         /* ========================================
-                           IMPROVED PRODUCT CARD STYLES - HOMEPAGE
-                           ======================================== */
+                               IMPROVED PRODUCT CARD STYLES - HOMEPAGE
+                               ======================================== */
 
         .product-card-improved {
             background: white;
