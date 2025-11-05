@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Storage;
 
 class Stall extends Model
 {
@@ -24,6 +25,7 @@ class Stall extends Model
         'rental_fee',
         'is_active',
         'logo',
+        'image',
         'contact_number',
         'opening_time',
         'closing_time',
@@ -262,5 +264,45 @@ class Stall extends Model
     
     return $currentPayment->status;
 }
+    /**
+ * Get stall image URL with fallback to default
+ */
+public function getImageUrlAttribute(): string
+{
+    // If image exists, return storage URL
+    if ($this->image && Storage::disk('public')->exists($this->image)) {
+        return Storage::url($this->image);
+    }
     
+    // If logo exists, use that
+    if ($this->logo && Storage::disk('public')->exists($this->logo)) {
+        return Storage::url($this->logo);
+    }
+    
+    // Otherwise return dynamic placeholder with stall name
+    $name = urlencode($this->name ?? 'Stall');
+    return "https://ui-avatars.com/api/?name={$name}&size=800&background=FF6B35&color=fff&font-size=0.33&bold=true";
+}
+
+/**
+ * Get price range of available products in pesos
+ */
+public function getPriceRange(): string
+{
+    $availableProducts = $this->products->where('is_available', true);
+    
+    if ($availableProducts->count() === 0) {
+        return 'No items';
+    }
+    
+    $minPrice = $availableProducts->min('price') / 100; // Convert centavos to pesos
+    $maxPrice = $availableProducts->max('price') / 100;
+    
+    // If min and max are the same
+    if ($minPrice === $maxPrice) {
+        return '₱' . number_format($minPrice, 0);
+    }
+    
+    return '₱' . number_format($minPrice, 0) . '-' . number_format($maxPrice, 0);
+}
 }

@@ -113,41 +113,46 @@ class StallResource extends Resource
                             ]),
                     ]),
 
-                Forms\Components\Section::make('Rental Information')
-                    ->description('Fixed daily rental rate')
-                    ->schema([
-                        Forms\Components\TextInput::make('rental_fee')
-                            ->label('Daily Rental Fee')
-                            ->required()
-                            ->numeric()
-                            ->prefix('₱')
-                            ->step(0.01)
-                            ->minValue(0)
-                            ->default(5000.00)
-                            ->helperText('Fixed daily rate paid by tenant')
-                            ->columnSpan(1),
-                    ])
-                    ->columns(2),
-
                 Forms\Components\Section::make('Branding')
-                    ->description('Stall logo and visual identity')
-                    ->schema([
-                        Forms\Components\FileUpload::make('logo')
-                            ->image()
-                            ->directory('stall-logos')
-                            ->disk('public')
-                            ->visibility('public')
-                            ->maxSize(2048)
-                            ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
-                            ->helperText('Max 2MB. Recommended: 400x400px')
-                            ->imageEditor()
-                            ->imageEditorAspectRatios(['1:1'])
-                            ->columnSpanFull(),
+    ->description('Stall logo and visual identity')
+    ->schema([
+        Forms\Components\Grid::make(2)
+            ->schema([
+                Forms\Components\FileUpload::make('logo')
+                    ->label('Stall Logo')
+                    ->image()
+                    ->directory('stall-logos')
+                    ->disk('public')
+                    ->visibility('public')
+                    ->maxSize(2048)
+                    ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
+                    ->helperText('Square logo for branding. Max 2MB. Recommended: 400x400px')
+                    ->imageEditor()
+                    ->imageEditorAspectRatios(['1:1'])
+                    ->columnSpan(1),
+
+                // ✨ ADD THIS - Stall Cover Image
+                Forms\Components\FileUpload::make('image')
+                    ->label('Cover Photo')
+                    ->image()
+                    ->directory('stalls')
+                    ->disk('public')
+                    ->visibility('public')
+                    ->maxSize(5120) // 5MB
+                    ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
+                    ->helperText('Main stall photo shown on cards. Max 5MB. Recommended: 800x600px')
+                    ->imageEditor()
+                    ->imageEditorAspectRatios([
+                        '16:9',
+                        '4:3',
                     ])
-                    ->collapsible()
-                    ->collapsed(),
+                    ->columnSpan(1),
+            ]),
+    ])
+    ->collapsible()
+    ->collapsed(),
             ]);
-    }
+}
 
     public static function table(Table $table): Table
     {
