@@ -49,4 +49,8 @@ return [
     'v2_invisible_secret_key' => env('RECAPTCHA_V2_INVISIBLE_SECRET_KEY'),
     ],
 
+    'sendgrid' => [
+    'api_key' => env('SENDGRID_API_KEY'),
+],
+
 ];

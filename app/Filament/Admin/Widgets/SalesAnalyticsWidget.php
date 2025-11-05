@@ -140,4 +140,6 @@ class SalesAnalyticsWidget extends Widget
             'data' => $paymentData->pluck('total')->toArray()
         ];
     }
+
+    
 }

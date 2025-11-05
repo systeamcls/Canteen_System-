@@ -1,0 +1,173 @@
+@import '/vendor/filament/filament/resources/css/theme.css';
+
+/* Dashboard Layout Enhancement */
+.fi-page {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    min-height: 100vh;
+    padding: 1.5rem;
+}
+
+/* KPI Stats Cards */
+.fi-wi {
+    background: white;
+    border-radius: 1rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+    border: 1px solid rgba(239, 68, 68, 0.1);
+    overflow: hidden;
+}
+
+.fi-wi:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(239, 68, 68, 0.12);
+}
+
+/* Stats Card Header */
+.fi-wi-stats-overview-stat {
+    padding: 1.5rem;
+    position: relative;
+}
+
+.fi-wi-stats-overview-stat::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #ef4444, #f87171, #fca5a5);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.fi-wi-stats-overview-stat:hover::before {
+    opacity: 1;
+}
+
+/* Stats Values */
+.fi-wi-stats-overview-stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #ef4444;
+    line-height: 1.2;
+    margin-bottom: 0.5rem;
+}
+
+.fi-wi-stats-overview-stat-label {
+    color: #4b5563;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.fi-wi-stats-overview-stat-description {
+    color: #6b7280;
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Charts Section */
+.fi-wi-chart {
+    background: white;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(239, 68, 68, 0.1);
+}
+
+/* Tables in Widgets */
+.fi-ta {
+    border-radius: 0.75rem;
+    overflow: hidden;
+    border: 1px solid rgba(239, 68, 68, 0.1);
+}
+
+.fi-ta-header {
+    background: rgba(239, 68, 68, 0.05);
+}
+
+.fi-ta-row {
+    transition: background-color 0.2s ease;
+}
+
+.fi-ta-row:hover {
+    background-color: rgba(239, 68, 68, 0.02);
+}
+
+/* Custom Scrollbars */
+.fi-wi::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.fi-wi::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}
+
+.fi-wi::-webkit-scrollbar-thumb {
+    background: #e2e8f0;
+    border-radius: 3px;
+}
+
+.fi-wi::-webkit-scrollbar-thumb:hover {
+    background: #cbd5e1;
+}
+
+/* Responsive Grid Adjustments */
+@media (max-width: 1024px) {
+    .grid-cols-4 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .grid-cols-4 {
+        grid-template-columns: 1fr;
+    }
+
+    .fi-wi-stats-overview-stat-value {
+        font-size: 1.75rem;
+    }
+}
+
+/* Widget Headers */
+.fi-wi-header {
+    padding: 1.25rem;
+    border-bottom: 1px solid rgba(239, 68, 68, 0.1);
+    background: linear-gradient(to right, #ffffff, #fef2f2);
+}
+
+.fi-wi-header-heading {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #ef4444;
+}
+
+/* Chart Tooltips */
+.apexcharts-tooltip {
+    background: white !important;
+    border: none !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1) !important;
+    border-radius: 0.5rem !important;
+}
+
+/* Animation for Loading States */
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+}
+
+.fi-loading {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}

@@ -379,4 +379,43 @@ class AnalyticsService
     {
         return $this->getTopStallProducts($limit);
     }
+
+    public function getPaymentMethodBreakdown(): array
+{
+    $startDate = Carbon::now()->subDays(30);
+    $endDate = Carbon::now();
+    
+    $orders = Order::whereBetween('created_at', [$startDate, $endDate])
+        ->where('status', '!=', 'cancelled')
+        ->where('payment_status', 'paid')
+        ->get();
+
+    $paymentMethods = $orders->groupBy('payment_method')->map(function ($group) {
+        return $group->sum('amount_total');
+    });
+
+    $labels = [];
+    $data = [];
+    $colors = [];
+
+    $colorMap = [
+        'cash' => '#10B981',      // Green
+        'gcash' => '#3B82F6',     // Blue
+        'maya' => '#F59E0B',      // Orange
+        'card' => '#8B5CF6',      // Purple
+        'online' => '#EC4899',    // Pink
+    ];
+
+    foreach ($paymentMethods as $method => $amount) {
+        $labels[] = ucfirst($method ?? 'Unknown');
+        $data[] = self::centavosToPesos($amount);
+        $colors[] = $colorMap[strtolower($method ?? 'unknown')] ?? '#6B7280';
+    }
+
+    return [
+        'labels' => $labels,
+        'data' => $data,
+        'colors' => $colors,
+    ];
+}
 }

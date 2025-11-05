@@ -29,10 +29,14 @@ class AdminPanelProvider extends PanelProvider
             ->login()
             ->authGuard('web')
             ->colors([
-                'primary' => Color::Red,
-            ])
+    'primary' => Color::Red,    
+])
             ->darkMode()
             ->brandName('Canteen Admin')
+            // Add these sidebar configurations
+            ->sidebarWidth('290px')
+            ->sidebarCollapsibleOnDesktop()
+            ->collapsedSidebarWidth('80px')
             ->discoverResources(
                 in: app_path('Filament/Admin/Resources'),
                 for: 'App\\Filament\\Admin\\Resources'
