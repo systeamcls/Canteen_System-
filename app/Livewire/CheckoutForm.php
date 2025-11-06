@@ -64,7 +64,7 @@ class CheckoutForm extends Component
     $rules = [
         'customerName' => 'required|string|max:255',
         'customerEmail' => 'required|email|max:255',
-        'customerPhone' => 'required|string|regex:/^(09\\d{9}|63\\d{10}|\\+63\\d{10})$/',
+        'customerPhone' => 'required|string|regex:/^(09\d{9}|63\d{10}|\+63\d{10})$/',
         'notificationPreference' => 'required|string|in:sms,email,both',
         'paymentMethod' => 'required|string|in:gcash,paymaya,card,cash',
         'notes' => 'nullable|string|max:500',
@@ -74,7 +74,7 @@ class CheckoutForm extends Component
         $rules['customerPhone'] = [
             'required',
             'string',
-            'regex:/^(09\\d{9}|63\\d{10}|\\+63\\d{10})$/',
+            'regex:/^(09\d{9}|63\d{10}|\+63\d{10})$/',
             'min:11',
             'max:13'
         ];
