@@ -12,7 +12,11 @@ use Illuminate\Support\Facades\DB;
 class AdminTopSellerWidget extends BaseWidget
 {
     protected static ?int $sort = 4;
-    protected int | string | array $columnSpan = 1;
+    protected int | string | array $columnSpan = [
+    'md' => 12,
+    'lg' => 4,
+    'xl' => 4,
+];
 
     protected function getStats(): array
     {

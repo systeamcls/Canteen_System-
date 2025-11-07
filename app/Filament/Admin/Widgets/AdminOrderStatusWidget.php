@@ -10,8 +10,11 @@ class AdminOrderStatusWidget extends ChartWidget
 {
     protected static ?string $heading = 'Order Status Distribution';
     protected static ?int $sort = 4;
-    protected int | string | array $columnSpan = 1;
-
+    protected int | string | array $columnSpan = [
+    'md' => 12,
+    'lg' => 4,
+    'xl' => 4,
+];
     public ?string $filter = 'today';
 
     protected function getData(): array
@@ -105,31 +108,20 @@ class AdminOrderStatusWidget extends ChartWidget
     }
 
     protected function getOptions(): array
-    {
-        return [
-            'responsive' => true,
-            'maintainAspectRatio' => false,
-            'plugins' => [
-                'legend' => [
-                    'position' => 'bottom',
-                    'labels' => [
-                        'padding' => 20,
-                        'usePointStyle' => true,
-                    ],
-                ],
-                'tooltip' => [
-                    'backgroundColor' => 'rgba(0, 0, 0, 0.8)',
-                    'titleColor' => '#ffffff',
-                    'bodyColor' => '#ffffff',
-                    'cornerRadius' => 8,
+{
+    return [
+        'responsive' => true,
+        'maintainAspectRatio' => false,
+        'plugins' => [
+            'legend' => [
+                'position' => 'bottom',
+                'labels' => [
+                    'padding' => 20,
+                    'usePointStyle' => true,
                 ],
             ],
-            'cutout' => '60%',
-            'elements' => [
-                'arc' => [
-                    'borderWidth' => 2,
-                ],
-            ],
-        ];
-    }
+        ],
+        'cutout' => '60%',
+    ];
+}
 }

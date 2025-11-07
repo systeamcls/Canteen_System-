@@ -49,13 +49,25 @@ class AdminPanelProvider extends PanelProvider
             \App\Filament\Admin\Pages\DailyAttendance::class,
             TwoFactorChallenge::class,
             ])
-            ->discoverWidgets(
-                in: app_path('Filament/Admin/Widgets'),
-                for: 'App\\Filament\\Admin\\Widgets'
-            )
+            //->discoverWidgets(
+            //    in: app_path('Filament/Admin/Widgets'),
+            //    for: 'App\\Filament\\Admin\\Widgets'
+            //)
             ->widgets([
+                
                 \App\Filament\Admin\Widgets\SalesAnalyticsWidget::class,
                 \App\Filament\Admin\Widgets\RentalAnalyticsWidget::class,
+
+                // Dashboard widgets (register them here!)
+                \App\Filament\Admin\Widgets\AdminQuickStatsWidget::class,
+                \App\Filament\Admin\Widgets\AdminSalesChartWidget::class,
+                \App\Filament\Admin\Widgets\AdminPerformanceWidget::class,
+                \App\Filament\Admin\Widgets\AdminOrderStatusWidget::class,
+                \App\Filament\Admin\Widgets\AdminTopSellerWidget::class,
+                \App\Filament\Admin\Widgets\AdminPopularHoursWidget::class,
+                \App\Filament\Admin\Widgets\AdminLatestOrdersWidget::class,
+                \App\Filament\Admin\Widgets\AdminTrendingItemsWidget::class,
+                \App\Filament\Admin\Widgets\FinancialOverviewWidget::class,
             ])
             ->sidebarCollapsibleOnDesktop()
             ->navigationGroups([

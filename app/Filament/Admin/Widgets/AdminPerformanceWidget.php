@@ -6,17 +6,17 @@ use App\Models\Order;
 use Filament\Widgets\ChartWidget;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Filament\Support\RawJs;
 
 class AdminPerformanceWidget extends ChartWidget
 {
     protected static ?string $heading = 'Performance Overview (30 Days)';
     protected static ?int $sort = 3;
     protected int | string | array $columnSpan = [
-        'md' => 2,
-        'lg' => 2,
-        'xl' => 2,
-        '2xl' => 3,
-    ];
+    'md' => 12,
+    'lg' => 6,
+    'xl' => 6,
+];
 
     protected function getData(): array
     {
@@ -70,84 +70,57 @@ class AdminPerformanceWidget extends ChartWidget
     }
 
     protected function getOptions(): array
-    {
-        return [
-            'responsive' => true,
-            'maintainAspectRatio' => false,
-            'interaction' => [
-                'mode' => 'index',
-                'intersect' => false,
-            ],
-            'plugins' => [
-                'legend' => [
-                    'position' => 'top',
-                    'labels' => [
-                        'usePointStyle' => true,
-                        'padding' => 20,
-                    ],
-                ],
-                'tooltip' => [
-                    'backgroundColor' => 'rgba(0, 0, 0, 0.8)',
-                    'titleColor' => '#ffffff',
-                    'bodyColor' => '#ffffff',
-                    'cornerRadius' => 8,
-                    'callbacks' => [
-                        'label' => "function(context) {
-                            if (context.dataset.label === 'Revenue (PHP)') {
-                                return 'Revenue: PHP ' + context.parsed.y.toLocaleString();
-                            } else {
-                                return 'Orders: ' + context.parsed.y;
-                            }
-                        }",
-                    ],
+{
+    return [
+        'responsive' => true,
+        'maintainAspectRatio' => false,
+        'interaction' => [
+            'mode' => 'index',
+            'intersect' => false,
+        ],
+        'plugins' => [
+            'legend' => [
+                'position' => 'top',
+                'labels' => [
+                    'usePointStyle' => true,
+                    'padding' => 20,
                 ],
             ],
-            'scales' => [
-                'x' => [
-                    'display' => true,
-                    'grid' => [
-                        'display' => false,
-                    ],
-                    'ticks' => [
-                        'maxTicksLimit' => 7,
-                    ],
-                ],
-                'y' => [
-                    'type' => 'linear',
-                    'display' => true,
-                    'position' => 'left',
-                    'title' => [
-                        'display' => true,
-                        'text' => 'Revenue (PHP)',
-                        'color' => '#10b981',
-                    ],
-                    'grid' => [
-                        'color' => 'rgba(16, 185, 129, 0.1)',
-                    ],
-                    'ticks' => [
-                        'callback' => "function(value) { return 'PHP ' + value.toLocaleString(); }",
-                        'color' => '#10b981',
-                    ],
-                ],
-                'y1' => [
-                    'type' => 'linear',
-                    'display' => true,
-                    'position' => 'right',
-                    'title' => [
-                        'display' => true,
-                        'text' => 'Orders Count',
-                        'color' => '#3b82f6',
-                    ],
-                    'grid' => [
-                        'drawOnChartArea' => false,
-                    ],
-                    'ticks' => [
-                        'color' => '#3b82f6',
-                    ],
+        ],
+        'scales' => [
+            'x' => [
+                'display' => true,
+                'grid' => [
+                    'display' => false,
                 ],
             ],
-        ];
-    }
+            'y' => [
+                'type' => 'linear',
+                'display' => true,
+                'position' => 'left',
+                'title' => [
+                    'display' => true,
+                    'text' => 'Revenue (PHP)',
+                ],
+                'grid' => [
+                    'color' => 'rgba(16, 185, 129, 0.1)',
+                ],
+            ],
+            'y1' => [
+                'type' => 'linear',
+                'display' => true,
+                'position' => 'right',
+                'title' => [
+                    'display' => true,
+                    'text' => 'Orders Count',
+                ],
+                'grid' => [
+                    'drawOnChartArea' => false,
+                ],
+            ],
+        ],
+    ];
+}
 
     protected function getPerformanceData($stallId): array
     {

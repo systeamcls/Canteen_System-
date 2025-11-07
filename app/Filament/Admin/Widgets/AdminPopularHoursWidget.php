@@ -6,12 +6,17 @@ use App\Models\Order;
 use Filament\Widgets\ChartWidget;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Filament\Support\RawJs;
 
 class AdminPopularHoursWidget extends ChartWidget
 {
     protected static ?string $heading = 'Peak Order Hours';
     protected static ?int $sort = 5;
-    protected int | string | array $columnSpan = 1;
+    protected int | string | array $columnSpan = [
+    'md' => 12,
+    'lg' => 4,
+    'xl' => 4,
+];
 
     public ?string $filter = 'week';
 
@@ -99,54 +104,33 @@ class AdminPopularHoursWidget extends ChartWidget
     }
 
     protected function getOptions(): array
-    {
-        return [
-            'responsive' => true,
-            'maintainAspectRatio' => false,
-            'plugins' => [
-                'legend' => [
+{
+    return [
+        'responsive' => true,
+        'maintainAspectRatio' => false,
+        'plugins' => [
+            'legend' => [
+                'display' => false,
+            ],
+        ],
+        'scales' => [
+            'x' => [
+                'display' => true,
+                'grid' => [
                     'display' => false,
                 ],
-                'tooltip' => [
-                    'backgroundColor' => 'rgba(0, 0, 0, 0.8)',
-                    'titleColor' => '#ffffff',
-                    'bodyColor' => '#ffffff',
-                    'cornerRadius' => 8,
-                    'callbacks' => [
-                        'title' => "function(context) { return context[0].label; }",
-                        'label' => "function(context) { return context.parsed.y + ' orders'; }",
-                    ],
+            ],
+            'y' => [
+                'display' => true,
+                'beginAtZero' => true,
+                'grid' => [
+                    'color' => 'rgba(0, 0, 0, 0.1)',
+                ],
+                'ticks' => [
+                    'stepSize' => 1,
                 ],
             ],
-            'scales' => [
-                'x' => [
-                    'display' => true,
-                    'grid' => [
-                        'display' => false,
-                    ],
-                    'ticks' => [
-                        'maxTicksLimit' => 12,
-                        'callback' => "function(value, index) { 
-                            return index % 2 === 0 ? this.getLabelForValue(value) : ''; 
-                        }",
-                    ],
-                ],
-                'y' => [
-                    'display' => true,
-                    'beginAtZero' => true,
-                    'grid' => [
-                        'color' => 'rgba(0, 0, 0, 0.1)',
-                    ],
-                    'ticks' => [
-                        'stepSize' => 1,
-                    ],
-                ],
-            ],
-            'elements' => [
-                'bar' => [
-                    'borderSkipped' => false,
-                ],
-            ],
-        ];
-    }
+        ],
+    ];
+}
 }

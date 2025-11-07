@@ -21,6 +21,9 @@ class AnalyticsDashboard extends Page
     protected static ?int $navigationSort = 1;
     protected static ?string $navigationGroup = 'Analytics';
 
+    protected static bool $shouldRegisterNavigation = false;
+
+
     protected function getHeaderWidgets(): array
     {
         return [
@@ -147,4 +150,6 @@ class AnalyticsDashboard extends Page
             'cash_flow' => $analytics->getCashFlowSummary(),
         ];
     }
+
+    
 }

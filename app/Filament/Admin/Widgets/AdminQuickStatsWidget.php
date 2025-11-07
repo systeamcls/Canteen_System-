@@ -10,9 +10,11 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 
+
 class AdminQuickStatsWidget extends BaseWidget
 {
     protected static ?int $sort = 1;
+
     protected int | string | array $columnSpan = [
         'sm' => 2,
         'md' => 2,

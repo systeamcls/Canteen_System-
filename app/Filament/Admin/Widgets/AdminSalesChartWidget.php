@@ -3,20 +3,21 @@
 namespace App\Filament\Admin\Widgets;
 
 use App\Models\Order;
+use App\Models\Stall;
+use Carbon\Carbon;
 use Filament\Widgets\ChartWidget;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Filament\Support\RawJs;
 
 class AdminSalesChartWidget extends ChartWidget
 {
-    protected static ?string $heading = 'Sales Trend Analysis';
+    protected static ?string $heading = 'Sales Trend';
     protected static ?int $sort = 2;
     protected int | string | array $columnSpan = [
-        'md' => 2,
-        'lg' => 2,
-        'xl' => 2,
-        '2xl' => 3,
-    ];
+    'md' => 12,
+    'lg' => 6,
+    'xl' => 6,
+];
 
     public ?string $filter = '7days';
 
@@ -30,14 +31,11 @@ class AdminSalesChartWidget extends ChartWidget
                 'datasets' => [
                     [
                         'label' => 'No Data Available',
-                        'data' => [0, 0, 0, 0, 0, 0, 0],
+                        'data' => array_fill(0, 7, 0),
                         'borderColor' => '#ef4444',
-                        'backgroundColor' => 'rgba(239, 68, 68, 0.1)',
-                        'fill' => true,
-                        'tension' => 0.4,
                     ],
                 ],
-                'labels' => ['6 days ago', '5 days ago', '4 days ago', '3 days ago', '2 days ago', 'Yesterday', 'Today'],
+                'labels' => array_fill(0, 7, ''),
             ];
         }
 
@@ -84,55 +82,41 @@ class AdminSalesChartWidget extends ChartWidget
     }
 
     protected function getOptions(): array
-    {
-        return [
-            'responsive' => true,
-            'maintainAspectRatio' => false,
-            'plugins' => [
-                'legend' => [
-                    'display' => true,
-                    'position' => 'top',
-                    'labels' => [
-                        'padding' => 20,
-                        'usePointStyle' => true,
-                    ],
-                ],
-                'tooltip' => [
-                    'backgroundColor' => 'rgba(0, 0, 0, 0.8)',
-                    'titleColor' => '#ffffff',
-                    'bodyColor' => '#ffffff',
-                    'cornerRadius' => 8,
-                    'callbacks' => [
-                        'label' => "function(context) { 
-                            return 'Sales: PHP ' + context.parsed.y.toLocaleString(); 
-                        }",
-                    ],
+{
+    return [
+        'responsive' => true,
+        'maintainAspectRatio' => false,
+        'plugins' => [
+            'legend' => [
+                'display' => true,
+                'position' => 'top',
+                'labels' => [
+                    'padding' => 20,
+                    'usePointStyle' => true,
                 ],
             ],
-            'scales' => [
-                'x' => [
-                    'display' => true,
-                    'grid' => [
-                        'display' => false,
-                    ],
-                ],
-                'y' => [
-                    'display' => true,
-                    'beginAtZero' => true,
-                    'grid' => [
-                        'color' => 'rgba(0, 0, 0, 0.1)',
-                    ],
-                    'ticks' => [
-                        'callback' => "function(value) { return 'PHP ' + value.toLocaleString(); }",
-                    ],
+        ],
+        'scales' => [
+            'x' => [
+                'display' => true,
+                'grid' => [
+                    'display' => false,
                 ],
             ],
-            'interaction' => [
-                'intersect' => false,
-                'mode' => 'index',
+            'y' => [
+                'display' => true,
+                'beginAtZero' => true,
+                'grid' => [
+                    'color' => 'rgba(0, 0, 0, 0.1)',
+                ],
             ],
-        ];
-    }
+        ],
+        'interaction' => [
+            'intersect' => false,
+            'mode' => 'index',
+        ],
+    ];
+}
 
     protected function getDailySalesData($stallId, $days): array
     {
@@ -150,7 +134,6 @@ class AdminSalesChartWidget extends ChartWidget
 
             $sales[] = (float) $dailySales;
             
-            // Format labels based on period
             if ($days <= 7) {
                 $labels[] = $date->format('M j');
             } elseif ($days <= 14) {
@@ -165,4 +148,6 @@ class AdminSalesChartWidget extends ChartWidget
             'labels' => $labels,
         ];
     }
+
+    
 }

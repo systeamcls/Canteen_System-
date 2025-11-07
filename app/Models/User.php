@@ -422,4 +422,10 @@ public function canAccessPanel(\Filament\Panel $panel): bool
 {
     return $this->hasRole('admin') || $this->hasRole('cashier') || $this->hasRole('tenant');
 }
+
+    public function payrolls()
+    {
+        return $this->hasMany(Payroll::class);
+    }
+
 }

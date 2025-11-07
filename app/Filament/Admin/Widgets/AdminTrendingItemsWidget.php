@@ -14,11 +14,10 @@ class AdminTrendingItemsWidget extends BaseWidget
     protected static ?string $heading = 'Top Selling Products';
     protected static ?int $sort = 7;
     protected int | string | array $columnSpan = [
-        'md' => 2,
-        'lg' => 2,
-        'xl' => 2,
-        '2xl' => 3,
-    ];
+    'md' => 12,
+    'lg' => 12,
+    'xl' => 12,
+];
 
     public function table(Table $table): Table
     {

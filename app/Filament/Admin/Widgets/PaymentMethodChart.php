@@ -4,6 +4,7 @@ namespace App\Filament\Admin\Widgets;
 
 use App\Services\AnalyticsService;
 use Filament\Widgets\ChartWidget;
+use Filament\Support\RawJs;
 
 class PaymentMethodChart extends ChartWidget
 {
@@ -44,9 +45,11 @@ class PaymentMethodChart extends ChartWidget
                 ],
                 'tooltip' => [
                     'callbacks' => [
-                        'label' => "function(context) { 
-                            return context.label + ': ₱' + context.raw.toLocaleString(); 
-                        }",
+                        'label' => RawJs::make(<<<'JS'
+                            function(context) { 
+                                return context.label + ': ₱' + context.raw.toLocaleString(); 
+                            }
+                        JS),
                     ],
                 ],
             ],
