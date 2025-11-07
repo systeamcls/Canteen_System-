@@ -60,58 +60,130 @@ class CheckoutForm extends Component
 
 
     protected function rules()
-{
-    $rules = [
-        'customerName' => 'required|string|max:255',
-        'customerEmail' => 'required|email|max:255',
-        'customerPhone' => 'required|string|regex:/^(09\d{9}|63\d{10}|\+63\d{10})$/',
-        'notificationPreference' => 'required|string|in:sms,email,both',
-        'paymentMethod' => 'required|string|in:gcash,paymaya,card,cash',
-        'notes' => 'nullable|string|max:500',
-    ];
+    {
+        $rules = [
+            'customerName' => 'required|string|max:255',
+            'notificationPreference' => 'required|string|in:sms,email,both',
+            'paymentMethod' => 'required|string|in:gcash,paymaya,card,cash',
+            'notes' => 'nullable|string|max:500',
+        ];
 
-    if (in_array($this->notificationPreference, ['sms', 'both'])) {
-        $rules['customerPhone'] = [
-            'required',
-            'string',
-            'regex:/^(09\d{9}|63\d{10}|\+63\d{10})$/',
-            'min:11',
-            'max:13'
+        // Phone validation - only required if SMS notifications selected
+        if (in_array($this->notificationPreference, ['sms', 'both'])) {
+            $rules['customerPhone'] = [
+                'required',
+                'string',
+                'regex:#^(09\d{9}|63\d{10}|\+63\d{10})$#',
+                'min:11',
+                'max:13'
+            ];
+        } else {
+            // Phone is optional if not using SMS
+            $rules['customerPhone'] = 'nullable|string|regex:#^(09\d{9}|63\d{10}|\+63\d{10})$#|min:11|max:13';
+        }
+
+        // Email validation - only required if email notifications selected
+        if (in_array($this->notificationPreference, ['email', 'both'])) {
+            $rules['customerEmail'] = [
+                'required',
+                'email:rfc,dns',
+                'regex:#^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9-]+\.[a-zA-Z]{2,}$#',
+                'max:255'
+            ];
+        } else {
+            // Email is optional if not using email notifications
+            $rules['customerEmail'] = 'nullable|email:rfc,dns|regex:#^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9-]+\.[a-zA-Z]{2,}$#|max:255';
+        }
+
+        return $rules;
+    }
+
+    protected function messages()
+    {
+        return [
+            'customerPhone.regex' => 'Please enter a valid Philippine phone number (e.g., 09123456789, 639123456789, or +639123456789)',
+            'customerPhone.required' => 'Phone number is required for SMS notifications',
+            'customerPhone.min' => 'Phone number must be at least 11 digits',
+            'customerPhone.max' => 'Phone number must not exceed 13 digits',
+            
+            'customerEmail.required' => 'Email address is required for email notifications',
+            'customerEmail.email' => 'Please enter a valid email address',
+            'customerEmail.regex' => 'Email must have a proper format with a valid domain (e.g., user@example.com)',
+            
+            'notificationPreference.required' => 'Please select how you would like to receive notifications',
+            'paymentMethod.required' => 'Please select a payment method',
         ];
     }
 
-    if (in_array($this->notificationPreference, ['email', 'both'])) {
-        $rules['customerEmail'] = 'required|email|max:255';
+    // Real-time phone validation and formatting
+    public function updatedCustomerPhone($value)
+    {
+        // Remove any non-digit characters except + sign
+        $cleaned = preg_replace('/[^0-9+]/', '', $value);
+        
+        // Limit length
+        if (strlen($cleaned) > 13) {
+            $cleaned = substr($cleaned, 0, 13);
+        }
+        
+        $this->customerPhone = $cleaned;
+        
+        // Clear error if field becomes valid
+        if ($this->notificationPreference === 'email') {
+            $this->resetErrorBag('customerPhone');
+        }
     }
 
-    return $rules;
-}
+    // Real-time email validation
+    public function updatedCustomerEmail($value)
+    {
+        $this->customerEmail = trim($value);
+        
+        // Clear error if field becomes valid
+        if ($this->notificationPreference === 'sms') {
+            $this->resetErrorBag('customerEmail');
+        }
+    }
+
+    // Reset errors when notification preference changes
+    public function updatedNotificationPreference($value)
+    {
+        // Clear phone error if switching away from SMS
+        if (!in_array($value, ['sms', 'both'])) {
+            $this->resetErrorBag('customerPhone');
+        }
+        
+        // Clear email error if switching away from email
+        if (!in_array($value, ['email', 'both'])) {
+            $this->resetErrorBag('customerEmail');
+        }
+    }
 
     public function togglePaymentMethods()
-{
-    $this->showPaymentMethods = !$this->showPaymentMethods;
-}
+    {
+        $this->showPaymentMethods = !$this->showPaymentMethods;
+    }
 
-public function toggleExpandedItems()
-{
-    $this->showExpandedItems = !$this->showExpandedItems;
-}
+    public function toggleExpandedItems()
+    {
+        $this->showExpandedItems = !$this->showExpandedItems;
+    }
 
-public function selectPaymentMethod($method)
-{
-    $this->selectedPaymentMethod = $method;
-    $this->paymentMethod = $method;
-    $this->showPaymentMethods = false;
+    public function selectPaymentMethod($method)
+    {
+        $this->selectedPaymentMethod = $method;
+        $this->paymentMethod = $method;
+        $this->showPaymentMethods = false;
 
-    $this->resetErrorBag('paymentMethod');
-}
+        $this->resetErrorBag('paymentMethod');
+    }
 
-public function changePaymentMethod()
-{
-    $this->selectedPaymentMethod = null;
-    $this->paymentMethod = '';
-    $this->showPaymentMethods = true;
-}
+    public function changePaymentMethod()
+    {
+        $this->selectedPaymentMethod = null;
+        $this->paymentMethod = '';
+        $this->showPaymentMethods = true;
+    }
 
     public function boot(CartService $cartService, PaymentService $paymentService): void
     {
@@ -137,30 +209,30 @@ public function changePaymentMethod()
     }
 
     public function submitOrder(): void
-{
-    if ($this->isProcessing) {
-        return;
-    }
+    {
+        if ($this->isProcessing) {
+            return;
+        }
 
-    if (empty($this->paymentMethod)) {
-        $this->addError('paymentMethod', 'Please select a payment method to continue.');
-        $this->dispatch('checkout-error');
-        return;
-    }
+        if (empty($this->paymentMethod)) {
+            $this->addError('paymentMethod', 'Please select a payment method to continue.');
+            $this->dispatch('checkout-error');
+            return;
+        }
 
-    // ✅ ADD: Verify reCAPTCHA FIRST
-    $action = Auth::check() ? 'checkout' : 'guest_checkout';
-    $minScore = RecaptchaHelper::getScoreThreshold($action);
-    
-    if (!RecaptchaHelper::verify($this->recaptcha_token, $action, $minScore)) {
-        $this->errorMessage = 'Security verification failed. Please try again.';
-        $this->dispatch('checkout-error', ['message' => 'Security verification failed']);
-        $this->recaptcha_token = ''; // Reset token
-        return;
-    }
-
-    $this->validate();
+        // ✅ Verify reCAPTCHA FIRST
+        $action = Auth::check() ? 'checkout' : 'guest_checkout';
+        $minScore = RecaptchaHelper::getScoreThreshold($action);
         
+        if (!RecaptchaHelper::verify($this->recaptcha_token, $action, $minScore)) {
+            $this->errorMessage = 'Security verification failed. Please try again.';
+            $this->dispatch('checkout-error', ['message' => 'Security verification failed']);
+            $this->recaptcha_token = ''; // Reset token
+            return;
+        }
+
+        $this->validate();
+            
         if (empty($this->cartSnapshot)) {
             $this->errorMessage = 'Your cart is empty. Please add items before checkout.';
             return;
@@ -256,20 +328,20 @@ public function changePaymentMethod()
         if (!empty($this->availablePaymentMethods)) {
             $allowedMethods = [];
         
-        foreach ($this->availablePaymentMethods as $key => $value) {
-            if (is_string($value)) {
-                // If it's just a list of method names: ['gcash', 'paymaya']
-                $allowedMethods[] = $value;
-            } elseif (is_string($key)) {
-                // If it's associative: ['gcash' => [...], 'paymaya' => [...]]
-                $allowedMethods[] = $key;
+            foreach ($this->availablePaymentMethods as $key => $value) {
+                if (is_string($value)) {
+                    // If it's just a list of method names: ['gcash', 'paymaya']
+                    $allowedMethods[] = $value;
+                } elseif (is_string($key)) {
+                    // If it's associative: ['gcash' => [...], 'paymaya' => [...]]
+                    $allowedMethods[] = $key;
+                }
             }
-        }
-        
-        // Only return methods that are in the allowed list
-        return array_filter($methods, function($key) use ($allowedMethods) {
-            return in_array($key, $allowedMethods);
-        }, ARRAY_FILTER_USE_KEY);
+            
+            // Only return methods that are in the allowed list
+            return array_filter($methods, function($key) use ($allowedMethods) {
+                return in_array($key, $allowedMethods);
+            }, ARRAY_FILTER_USE_KEY);
         }
 
         return $methods;
@@ -353,7 +425,6 @@ public function changePaymentMethod()
 
     private function setDefaultOptions(): void
     {
-
         // Set default order type
         if ($this->initialUserType === 'employee') {
             $this->orderType = 'onsite';
@@ -361,23 +432,27 @@ public function changePaymentMethod()
             $this->orderType = 'online';
         }
         
+        // Set default notification preference
         $this->notificationPreference = 'sms';
-        $this->customerPhone = '09';
+        
+        // ✅ FIXED: Don't pre-fill phone with '09' - start empty
+        if (empty($this->customerPhone)) {
+            $this->customerPhone = '';
+        }
     }
 
     private function createOrderGroup(): OrderGroup
     {
-
-    $billingContact = ['name' => $this->customerName];
-    
-    // Only include email/phone if they were required and filled
-    if (in_array($this->notificationPreference, ['email', 'both'])) {
-        $billingContact['email'] = $this->customerEmail;
-    }
-    
-    if (in_array($this->notificationPreference, ['sms', 'both'])) {
-        $billingContact['phone'] = $this->customerPhone;
-    }
+        $billingContact = ['name' => $this->customerName];
+        
+        // Only include email/phone if they were required and filled
+        if (in_array($this->notificationPreference, ['email', 'both']) && !empty($this->customerEmail)) {
+            $billingContact['email'] = $this->customerEmail;
+        }
+        
+        if (in_array($this->notificationPreference, ['sms', 'both']) && !empty($this->customerPhone)) {
+            $billingContact['phone'] = $this->customerPhone;
+        }
 
         return OrderGroup::create([
             'payer_type' => session('user_type') === 'employee' ? 'employee' : 'guest',
@@ -443,60 +518,60 @@ public function changePaymentMethod()
     }
 
     private function handleCashPayment(OrderGroup $orderGroup): void
-{
-    $this->clearCart();
-    
-    $this->successMessage = "Order placed successfully! You can pay cash when you collect your order.";
-    
-    // Ensure order group is saved and has an ID
-    if (!$orderGroup->exists || !$orderGroup->id) {
-        logger()->error('Order group not saved!', [
-            'exists' => $orderGroup->exists,
-            'id' => $orderGroup->id,
-            'attributes' => $orderGroup->getAttributes()
-        ]);
-        throw new \Exception('Order was not saved properly. Please try again.');
-    }
-
-    // Force refresh from database to ensure ID is set
-    $orderGroup->refresh();
-    
-    $orderGroupId = (int) $orderGroup->id;
-    
-    logger()->info('Cash payment - redirecting to success', [
-        'order_group_id' => $orderGroupId,
-        'order_group_exists' => $orderGroup->exists,
-    ]);
-
-    // Dispatch event with explicit integer ID
-    $this->dispatch('order-completed', 
-        orderGroupId: $orderGroupId,
-        paymentMethod: 'cash'
-    );
-}
-
-   private function handleOnlinePayment(array $paymentResult): void
-{
-    logger()->info('Payment result in handleOnlinePayment: ', $paymentResult);
-    
-    $this->clearCart();
-    
-    if (isset($paymentResult['checkout_url'])) {
-        logger()->info('Checkout URL found, dispatching redirect', [
-            'url' => $paymentResult['checkout_url'],
-            'paymentId' => $paymentResult['payment_id']
-        ]);
+    {
+        $this->clearCart();
         
-        // Redirect to PayMongo checkout
-        $this->dispatch('redirect-to-payment', [
-            'url' => $paymentResult['checkout_url'],
-            'paymentId' => $paymentResult['payment_id']
+        $this->successMessage = "Order placed successfully! You can pay cash when you collect your order.";
+        
+        // Ensure order group is saved and has an ID
+        if (!$orderGroup->exists || !$orderGroup->id) {
+            logger()->error('Order group not saved!', [
+                'exists' => $orderGroup->exists,
+                'id' => $orderGroup->id,
+                'attributes' => $orderGroup->getAttributes()
+            ]);
+            throw new \Exception('Order was not saved properly. Please try again.');
+        }
+
+        // Force refresh from database to ensure ID is set
+        $orderGroup->refresh();
+        
+        $orderGroupId = (int) $orderGroup->id;
+        
+        logger()->info('Cash payment - redirecting to success', [
+            'order_group_id' => $orderGroupId,
+            'order_group_exists' => $orderGroup->exists,
         ]);
-    } else {
-        logger()->error('No checkout_url in payment result: ', $paymentResult);
-        throw new \Exception('No checkout URL received from payment gateway');
+
+        // Dispatch event with explicit integer ID
+        $this->dispatch('order-completed', 
+            orderGroupId: $orderGroupId,
+            paymentMethod: 'cash'
+        );
     }
-}
+
+    private function handleOnlinePayment(array $paymentResult): void
+    {
+        logger()->info('Payment result in handleOnlinePayment: ', $paymentResult);
+        
+        $this->clearCart();
+        
+        if (isset($paymentResult['checkout_url'])) {
+            logger()->info('Checkout URL found, dispatching redirect', [
+                'url' => $paymentResult['checkout_url'],
+                'paymentId' => $paymentResult['payment_id']
+            ]);
+            
+            // Redirect to PayMongo checkout
+            $this->dispatch('redirect-to-payment', [
+                'url' => $paymentResult['checkout_url'],
+                'paymentId' => $paymentResult['payment_id']
+            ]);
+        } else {
+            logger()->error('No checkout_url in payment result: ', $paymentResult);
+            throw new \Exception('No checkout URL received from payment gateway');
+        }
+    }
 
     private function clearCart(): void
     {
@@ -520,51 +595,41 @@ public function changePaymentMethod()
     }
 
     public function updateQuantity($index, $newQuantity)
-{
-    if ($newQuantity < 1) {
-        return;
-    }
-    
-    if (isset($this->cartSnapshot[$index])) {
-        // Update quantity in cart snapshot
-        $this->cartSnapshot[$index]['quantity'] = $newQuantity;
-        $this->cartSnapshot[$index]['line_total'] = $this->cartSnapshot[$index]['unit_price'] * $newQuantity;
+    {
+        if ($newQuantity < 1) {
+            return;
+        }
         
-        // Recalculate total
-        $this->totalAmount = collect($this->cartSnapshot)->sum('line_total');
-        
-        // If you have a cart service, also update the actual cart
-        // $this->cartService->updateQuantity($cartItemId, $newQuantity);
-    }
-}
-
-public function removeItem($index)
-{
-    if (isset($this->cartSnapshot[$index])) {
-        // Remove item from snapshot
-        unset($this->cartSnapshot[$index]);
-        $this->cartSnapshot = array_values($this->cartSnapshot); // Re-index array
-        
-        // Recalculate total
-        $this->totalAmount = collect($this->cartSnapshot)->sum('line_total');
-        
-        // If you have a cart service, also remove from actual cart
-        // $this->cartService->removeFromCart($cartItemId);
-        
-        // Redirect to menu if cart is empty
-        if (empty($this->cartSnapshot)) {
-            return redirect()->route('menu.index')->with('info', 'Your cart is now empty.');
+        if (isset($this->cartSnapshot[$index])) {
+            // Update quantity in cart snapshot
+            $this->cartSnapshot[$index]['quantity'] = $newQuantity;
+            $this->cartSnapshot[$index]['line_total'] = $this->cartSnapshot[$index]['unit_price'] * $newQuantity;
+            
+            // Recalculate total
+            $this->totalAmount = collect($this->cartSnapshot)->sum('line_total');
+            
+            // If you have a cart service, also update the actual cart
+            // $this->cartService->updateQuantity($cartItemId, $newQuantity);
         }
     }
-}
 
-protected function messages()
-{
-    return [
-        'customerPhone.regex' => 'Please enter a valid Philippine phone number (e.g., 09123456789, 639123456789, or +639123456789)',
-        'customerPhone.required' => 'Phone number is required for SMS notifications',
-        'customerEmail.required' => 'Email address is required for email notifications',
-    ];
-}
-
+    public function removeItem($index)
+    {
+        if (isset($this->cartSnapshot[$index])) {
+            // Remove item from snapshot
+            unset($this->cartSnapshot[$index]);
+            $this->cartSnapshot = array_values($this->cartSnapshot); // Re-index array
+            
+            // Recalculate total
+            $this->totalAmount = collect($this->cartSnapshot)->sum('line_total');
+            
+            // If you have a cart service, also remove from actual cart
+            // $this->cartService->removeFromCart($cartItemId);
+            
+            // Redirect to menu if cart is empty
+            if (empty($this->cartSnapshot)) {
+                return redirect()->route('menu.index')->with('info', 'Your cart is now empty.');
+            }
+        }
+    }
 }
