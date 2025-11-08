@@ -83,6 +83,15 @@ class StallResource extends Resource
                                     ])
                                     ->createOptionModalHeading('Create New Tenant'),
 
+                            Forms\Components\TextInput::make('rental_fee')
+                        ->label('Monthly Rental Fee')
+                        ->numeric()
+                        ->prefix('₱')
+                        ->default(0)
+                        ->required()
+                        ->minValue(0)
+                        ->step(0.01),
+                        
                                 Forms\Components\Toggle::make('is_active')
                                     ->label('Stall Active')
                                     ->helperText('Available for operation')
@@ -214,6 +223,7 @@ class StallResource extends Resource
                     ->label('Daily Rate')
                     ->money('PHP')
                     ->sortable()
+                    
                     ->weight(FontWeight::Medium),
 
                 Tables\Columns\TextColumn::make('operating_hours')
