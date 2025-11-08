@@ -384,4 +384,13 @@ class CashierProductResource extends Resource
     {
         return false;
     }
+    public static function canEdit($record): bool
+{
+    return true; // Allow cashiers to edit orders
+}
+
+public static function canView($record): bool
+{
+    return true;
+}
 }

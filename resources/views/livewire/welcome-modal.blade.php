@@ -77,23 +77,9 @@
                                 <!-- Header -->
                                 <div style="text-align: center; margin-bottom: 30px;">
                                     <div style="font-size: 40px; margin-bottom: 10px;">🔒</div>
-                                    <h3 style="font-size: 24px; font-weight: 600; color: #2d3748; margin-bottom: 8px;">
-                                        Security Verification
+                                    <h3 style="font-size: 24px; font-weight: 600; color: #2d3748; margin-bottom: 0;">
+                                        Verify You're Human
                                     </h3>
-                                    <p style="font-size: 14px; color: #718096;">
-                                        Just one quick step to continue
-                                    </p>
-                                </div>
-
-                                <!-- Message -->
-                                <div
-                                    style="background: #f7fafc; border-radius: 8px; padding: 20px; margin-bottom: 25px;">
-                                    <p
-                                        style="font-size: 15px; color: #4a5568; line-height: 1.6; text-align: center; margin: 0;">
-                                        To protect our system from spam and bots, please complete this quick
-                                        verification to
-                                        continue as a guest.
-                                    </p>
                                 </div>
 
                                 <!-- reCAPTCHA Checkbox -->
@@ -120,13 +106,6 @@
                                         Verifying...
                                     </span>
                                 </button>
-
-                                <!-- Security Note -->
-                                <div style="margin-top: 20px; text-align: center;">
-                                    <small style="color: #718096; font-size: 13px;">
-                                        🔒 This verification helps us keep the platform secure for everyone.
-                                    </small>
-                                </div>
                             </div>
                         @endif
 
