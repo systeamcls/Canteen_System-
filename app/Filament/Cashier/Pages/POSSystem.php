@@ -23,6 +23,7 @@ class POSSystem extends Page
     protected static ?int $navigationSort = 10;
     protected static string $view = 'filament.cashier.pages.pos-system';
     protected static ?string $title = '🛒 Point of Sale';
+    protected $listeners = ['refreshData'];
 
     // Cart state
     public array $cart = [];
@@ -35,9 +36,9 @@ class POSSystem extends Page
     // Order settings
     public string $orderType = 'dine-in'; // dine-in or take-away
     public string $paymentMethod = 'cash'; // cash or qr
-    public float $cashReceived = 0.00;
-    public float $changeAmount = 0.00;
-    public bool $showCashInput = false;
+    public $cashReceived = 0.00;
+    public $changeAmount = 0.00;
+    public $showCashInput = false;
     
     // UI state
     public string $searchTerm = '';
