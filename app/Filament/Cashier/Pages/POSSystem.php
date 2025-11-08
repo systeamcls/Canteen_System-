@@ -246,13 +246,13 @@ class POSSystem extends Page
     }
 
     public function updateCartTotals(): void
-    {
-        $this->cartTotal = collect($this->cart)->sum(function ($item) {
-            return $item['price'] * $item['quantity'];
-        });
-        
-        $this->cartCount = collect($this->cart)->sum('quantity');
-    }
+{
+    $this->cartTotal = (float) collect($this->cart)->sum(function ($item) {
+        return (float) $item['price'] * (int) $item['quantity'];
+    });
+    
+    $this->cartCount = (int) collect($this->cart)->sum('quantity');
+}
 
     public function resetCart(): void
     {
@@ -433,18 +433,20 @@ class POSSystem extends Page
     }
 
     public function setCashReceived($amount)
-    {
-    $this->cashReceived = (float) $amount;
+{
+    $this->cashReceived = (float) ($amount ?? 0);
     $this->calculateChange();
-    }
+}
 
     public function calculateChange()
 {
-    $this->changeAmount = max(0, $this->cashReceived - $this->cartTotal);
+    $cashReceived = (float) ($this->cashReceived ?? 0);
+    $cartTotal = (float) ($this->cartTotal ?? 0);
+    $this->changeAmount = max(0, $cashReceived - $cartTotal);
 }
 
-    public function showCashInputModal()
-    {
+public function showCashInputModal()
+{
     if ($this->paymentMethod === 'cash') {
         $this->showCashInput = true;
         $this->cashReceived = 0.00;
@@ -452,28 +454,35 @@ class POSSystem extends Page
     } else {
         $this->proceedToCheckout(); // For non-cash payments, go directly to order summary
     }
-    }
+}
 
-    public function closeCashInput()
-    {
+public function closeCashInput()
+{
     $this->showCashInput = false;
     $this->cashReceived = 0.00;
     $this->changeAmount = 0.00;
-    }
-    public function placeOrder(): void
+}
+
+public function placeOrder(): void
 {
     $this->proceedToCheckout();
 }
+
 public function processCashPayment()
 {
-    if ($this->cashReceived >= $this->cartTotal) {
+    $cashReceived = (float) ($this->cashReceived ?? 0);
+    $cartTotal = (float) ($this->cartTotal ?? 0);
+    
+    if ($cashReceived >= $cartTotal) {
         $this->calculateChange();
         $this->showCashInput = false;
         $this->proceedToCheckout();
     }
 }
-public function updatedCashReceived()
+
+public function updatedCashReceived($value)
 {
+    $this->cashReceived = (float) ($value ?? 0);
     $this->calculateChange();
 }
 
