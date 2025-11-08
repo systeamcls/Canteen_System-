@@ -32,7 +32,9 @@
                         <!-- Top Right: Close button -->
                         <button class="modal-close" wire:click="close">&times;</button>
 
-                        <h2 class="modal-title">Welcome to Canteen Central</h2>
+                        <h2 class="modal-title" @if ($currentView === 'guest-verification') style="display: none;" @endif>
+                            Welcome to Canteen Central
+                        </h2>
 
                         <!-- Only show subtitle on options view -->
                         @if ($currentView === 'options')
