@@ -13,13 +13,10 @@ class AdminSalesChartWidget extends ChartWidget
 {
     protected static ?string $heading = 'Sales Trend';
     protected static ?int $sort = 2;
-    protected int | string | array $columnSpan = [
-    'md' => 12,
-    'lg' => 6,
-    'xl' => 6,
-];
+    protected int | string | array $columnSpan = 'full';
 
-    public ?string $filter = '7days';
+
+    public ?string $filter = 'week';
 
     protected function getData(): array
     {
@@ -39,14 +36,16 @@ class AdminSalesChartWidget extends ChartWidget
             ];
         }
 
-        $days = match ($this->filter) {
-            '7days' => 7,
-            '14days' => 14,
-            '30days' => 30,
-            default => 7,
+        $data = match ($this->filter) {
+            'today' => $this->getTodayData($stallId),
+            'week' => $this->getWeekData($stallId),
+            'month' => $this->getMonthData($stallId),
+            'year' => $this->getYearData($stallId),
+            '7days' => $this->getDailySalesData($stallId, 7),
+            '14days' => $this->getDailySalesData($stallId, 14),
+            '30days' => $this->getDailySalesData($stallId, 30),
+            default => $this->getWeekData($stallId),
         };
-
-        $data = $this->getDailySalesData($stallId, $days);
 
         return [
             'datasets' => [
@@ -75,6 +74,10 @@ class AdminSalesChartWidget extends ChartWidget
     protected function getFilters(): ?array
     {
         return [
+            'today' => 'Today (Hourly)',
+            'week' => 'This Week',
+            'month' => 'This Month',
+            'year' => 'This Year',
             '7days' => 'Last 7 Days',
             '14days' => 'Last 14 Days', 
             '30days' => 'Last 30 Days',
@@ -141,6 +144,115 @@ class AdminSalesChartWidget extends ChartWidget
             } else {
                 $labels[] = $i % 3 === 0 ? $date->format('M j') : '';
             }
+        }
+
+        return [
+            'sales' => $sales,
+            'labels' => $labels,
+        ];
+    }
+
+    protected function getTodayData($stallId): array
+    {
+        $sales = [];
+        $labels = [];
+
+        // Get sales by hour for today
+        for ($hour = 0; $hour < 24; $hour++) {
+            $hourlySales = Order::whereHas('items.product', function ($query) use ($stallId) {
+                $query->where('stall_id', $stallId);
+            })
+            ->whereDate('created_at', Carbon::today())
+            ->whereRaw('HOUR(created_at) = ?', [$hour])
+            ->where('status', 'completed')
+            ->sum('total_amount');
+
+            $sales[] = (float) $hourlySales;
+            $labels[] = sprintf('%02d:00', $hour);
+        }
+
+        return [
+            'sales' => $sales,
+            'labels' => $labels,
+        ];
+    }
+
+    protected function getWeekData($stallId): array
+    {
+        $sales = [];
+        $labels = [];
+
+        // Get sales for each day this week (Monday to Sunday)
+        $startOfWeek = Carbon::now()->startOfWeek();
+        
+        for ($i = 0; $i < 7; $i++) {
+            $date = $startOfWeek->copy()->addDays($i);
+            
+            $dailySales = Order::whereHas('items.product', function ($query) use ($stallId) {
+                $query->where('stall_id', $stallId);
+            })
+            ->whereDate('created_at', $date)
+            ->where('status', 'completed')
+            ->sum('total_amount');
+
+            $sales[] = (float) $dailySales;
+            $labels[] = $date->format('D, M j'); // Mon, Jan 1
+        }
+
+        return [
+            'sales' => $sales,
+            'labels' => $labels,
+        ];
+    }
+
+    protected function getMonthData($stallId): array
+    {
+        $sales = [];
+        $labels = [];
+
+        // Get sales for each day this month
+        $startOfMonth = Carbon::now()->startOfMonth();
+        $daysInMonth = $startOfMonth->daysInMonth;
+        
+        for ($day = 1; $day <= $daysInMonth; $day++) {
+            $date = $startOfMonth->copy()->addDays($day - 1);
+            
+            $dailySales = Order::whereHas('items.product', function ($query) use ($stallId) {
+                $query->where('stall_id', $stallId);
+            })
+            ->whereDate('created_at', $date)
+            ->where('status', 'completed')
+            ->sum('total_amount');
+
+            $sales[] = (float) $dailySales;
+            
+            // Show every 3rd day label to avoid crowding
+            $labels[] = ($day % 3 === 1 || $day === 1) ? $date->format('M j') : '';
+        }
+
+        return [
+            'sales' => $sales,
+            'labels' => $labels,
+        ];
+    }
+
+    protected function getYearData($stallId): array
+    {
+        $sales = [];
+        $labels = [];
+
+        // Get sales for each month this year
+        for ($month = 1; $month <= 12; $month++) {
+            $monthlySales = Order::whereHas('items.product', function ($query) use ($stallId) {
+                $query->where('stall_id', $stallId);
+            })
+            ->whereYear('created_at', Carbon::now()->year)
+            ->whereMonth('created_at', $month)
+            ->where('status', 'completed')
+            ->sum('total_amount');
+
+            $sales[] = (float) $monthlySales;
+            $labels[] = Carbon::create()->month($month)->format('M'); // Jan, Feb, etc
         }
 
         return [

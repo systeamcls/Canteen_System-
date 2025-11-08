@@ -30,6 +30,9 @@
             --success: #10b981;
             --error: #dc2626;
             --warning: #f59e0b;
+            --hand-size: 110px;
+            /* Emoji size */
+            --hand-overlap: -130px;
         }
 
         * {
@@ -219,6 +222,7 @@
             opacity: 0;
             visibility: hidden;
             transition: all 0.3s ease;
+            overflow: visible;
         }
 
         .modal-overlay.active {
@@ -235,9 +239,8 @@
             max-width: 420px;
             width: 100%;
             max-height: 95vh;
-            overflow-y: auto !important;
+            overflow: visible !important;
             /* ✅ Force it with !important */
-            overflow-x: hidden !important;
             position: relative;
             transform: scale(0.9) translateY(20px);
             transition: all 0.3s ease;
@@ -294,6 +297,13 @@
 
         .modal-body {
             padding: 0 24px 24px 24px;
+        }
+
+        .modal-scroll-wrapper {
+            max-height: 95vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+            border-radius: 16px;
         }
 
         /* Login Options */
@@ -1752,46 +1762,60 @@
         }
 
         /* Waving Hand Peeking from Top of Modal - Centered & Higher */
-        .wave-peek-wrapper {
+        .wave-container {
             position: absolute;
-            top: -30px;
-            /* Peek from top */
-            left: 50%;
-            transform: translateX(-50%);
+            width: 100%;
+            top: 0;
+            left: 0;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
             z-index: 1001;
-            /* Above modal */
             pointer-events: none;
-            /* Don't block clicks */
         }
 
         .wave-peek {
-            position: absolute;
-            top: -40px;
-            /* Above the modal */
-            left: 50%;
-            /* Center horizontally */
-            transform: translateX(-50%);
-            /* Center it perfectly */
-            font-size: 70px;
-            z-index: 10;
+            position: relative;
+            top: var(--hand-overlap);
+            /* ⭐ Easily adjust overlap */
+            font-size: var(--hand-size);
+            /* ⭐ Easily adjust size */
+            padding: 20px;
+
             animation: wave 1.5s ease-in-out infinite;
-            filter: drop-shadow(0 6px 12px rgba(234, 88, 12, 0.3));
-            pointer-events: none;
+            transform-origin: center center;
+            pointer-events: auto;
         }
 
         @keyframes wave {
 
             0%,
             100% {
-                transform: translateX(-50%) rotate(0deg);
+                transform: rotate(0deg);
             }
 
-            25% {
-                transform: translateX(-50%) rotate(20deg);
+            10% {
+                transform: rotate(14deg);
             }
 
-            75% {
-                transform: translateX(-50%) rotate(-20deg);
+            20% {
+                transform: rotate(-8deg);
+            }
+
+            30% {
+                transform: rotate(14deg);
+            }
+
+            40% {
+                transform: rotate(-4deg);
+            }
+
+            50% {
+                transform: rotate(10deg);
+            }
+
+            60% {
+                transform: rotate(0deg);
             }
         }
 
@@ -1827,6 +1851,261 @@
         #guestContinueBtn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
+        }
+
+        /* ⭐ Terms Checkbox Styles */
+        .terms-checkbox-wrapper {
+            margin: 20px 0;
+        }
+
+        .checkbox-container-custom {
+            display: flex;
+            align-items: flex-start;
+            cursor: pointer;
+            font-size: 14px;
+            user-select: none;
+            gap: 12px;
+            line-height: 1.5;
+        }
+
+        .checkbox-container-custom input {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .checkmark-custom {
+            position: relative;
+            min-width: 20px;
+            height: 20px;
+            background-color: #fff;
+            border: 2px solid #f97316;
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+
+        .checkbox-container-custom:hover .checkmark-custom {
+            background-color: #fff7ed;
+        }
+
+        .checkbox-container-custom input:checked~.checkmark-custom {
+            background-color: #f97316;
+        }
+
+        .checkmark-custom:after {
+            content: "";
+            position: absolute;
+            display: none;
+            left: 6px;
+            top: 2px;
+            width: 5px;
+            height: 10px;
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+        }
+
+        .checkbox-container-custom input:checked~.checkmark-custom:after {
+            display: block;
+        }
+
+        .terms-text-custom {
+            color: #6b7280;
+            line-height: 1.6;
+        }
+
+        .terms-link-custom {
+            color: #f97316;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .terms-link-custom:hover {
+            color: #ea580c;
+            text-decoration: underline;
+        }
+
+        /* ⭐ Legal Modal Styles */
+        .legal-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(4px);
+            z-index: 10000;
+            /* Higher than welcome modal */
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .legal-modal-overlay.active {
+            display: flex !important;
+        }
+
+        .legal-modal-container {
+            background: white;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 900px;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+            animation: legalModalSlideIn 0.3s ease;
+        }
+
+        @keyframes legalModalSlideIn {
+            from {
+                transform: scale(0.9) translateY(20px);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1) translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .legal-modal-header {
+            padding: 24px 24px 16px;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .legal-modal-header h2 {
+            margin: 0;
+            font-size: 1.5rem;
+            color: #1f2937;
+        }
+
+        .legal-modal-close {
+            background: none;
+            border: none;
+            font-size: 32px;
+            color: #9ca3af;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.2s;
+        }
+
+        .legal-modal-close:hover {
+            background: #f3f4f6;
+            color: #1f2937;
+        }
+
+        .legal-tabs {
+            display: flex;
+            padding: 0 24px;
+            gap: 8px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .legal-tab {
+            padding: 12px 24px;
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            color: #6b7280;
+            transition: all 0.2s;
+        }
+
+        .legal-tab:hover {
+            color: #f97316;
+        }
+
+        .legal-tab.active {
+            color: #f97316;
+            border-bottom-color: #f97316;
+        }
+
+        .legal-modal-content {
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .legal-tab-content {
+            display: none;
+            height: 100%;
+        }
+
+        .legal-tab-content.active {
+            display: block;
+        }
+
+        .legal-modal-footer {
+            padding: 16px 24px;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        .btn-accept-legal,
+        .btn-decline-legal {
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+        }
+
+        .btn-accept-legal {
+            background: #f97316;
+            color: white;
+        }
+
+        .btn-accept-legal:hover {
+            background: #ea580c;
+        }
+
+        .btn-decline-legal {
+            background: #f3f4f6;
+            color: #6b7280;
+        }
+
+        .btn-decline-legal:hover {
+            background: #e5e7eb;
+            color: #1f2937;
+        }
+
+        @media (max-width: 768px) {
+            .legal-modal-container {
+                max-width: 100%;
+                max-height: 100vh;
+                border-radius: 0;
+            }
+
+            .legal-tabs {
+                flex-direction: column;
+                gap: 0;
+            }
+
+            .legal-tab {
+                border-bottom: 1px solid #e5e7eb;
+                border-left: 3px solid transparent;
+            }
+
+            .legal-tab.active {
+                border-bottom-color: #e5e7eb;
+                border-left-color: #f97316;
+            }
         }
     </style>
 </head>

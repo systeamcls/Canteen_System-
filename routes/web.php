@@ -17,6 +17,8 @@ use App\Livewire\TestComponent;
 use App\Http\Controllers\WebhookController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\EmailVerificationController;
+use App\Http\Controllers\FinancialReportController;
+use App\Http\Controllers\LegalController;
 
 
 // Welcome page - first entry point
@@ -134,14 +136,21 @@ Route::middleware(['auth'])->group(function () {
         ->name('verification.success');
 });
 
-// Admin and Tenant routes (require specific roles)
-Route::middleware([
-    'auth:sanctum',
-    config('jetstream.auth_session'),
-    'verified',
-])->group(function () {
-    // Admin/Tenant specific routes will go here
-});
+// ========================================
+// 🔒 FILAMENT PANELS (Already Protected)
+// ========================================
+// Admin Panel: /admin (protected by Filament + FilamentTwoFactorAuth)
+// Cashier Panel: /cashier (protected by Filament + CheckCashierAccess)
+// Tenant Panel: /tenant (protected by Filament + EnsureTwoFactorAuthenticated)
+
+// Additional role-protected routes (if you need any custom routes outside Filament)
+Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified', 'role:admin'])
+    ->prefix('custom-admin')
+    ->name('custom.admin.')
+    ->group(function () {
+        // Add any custom admin routes here that are NOT in Filament
+        // Example: Route::get('/reports', [CustomReportController::class, 'index']);
+    });
 
 // Webhook routes (outside other middleware for security)
 Route::middleware(['webhook.security'])->group(function () {
@@ -175,3 +184,26 @@ Route::get('/payment/failed', function () {
 Route::get('/payment/cancelled', function () {
     return view('payment.cancelled');
 })->name('payment.cancelled');
+
+Route::middleware(['auth'])->prefix('admin/financial-reports')->name('admin.financial.')->group(function () {
+    
+    // Full Dashboard Export
+    Route::get('/export-full', [FinancialReportController::class, 'exportFullDashboard'])
+        ->name('export-full');
+    
+    // Individual Widget Exports
+    Route::get('/export-sales-chart', [FinancialReportController::class, 'exportSalesChart'])
+        ->name('export-sales-chart');
+    
+    Route::get('/export-revenue-expense', [FinancialReportController::class, 'exportRevenueExpense'])
+        ->name('export-revenue-expense');
+    
+    Route::get('/export-expense-breakdown', [FinancialReportController::class, 'exportExpenseBreakdown'])
+        ->name('export-expense-breakdown');
+    
+    Route::get('/export-rental-payments', [FinancialReportController::class, 'exportRentalPayments'])
+        ->name('export-rental-payments');
+});
+
+Route::get('/legal/terms', [LegalController::class, 'terms'])->name('legal.terms');
+Route::get('/legal/privacy', [LegalController::class, 'privacy'])->name('legal.privacy');

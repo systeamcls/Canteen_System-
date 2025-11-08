@@ -106,11 +106,9 @@ class DailyAttendance extends Page
             return;
         }
 
-        // Set default times based on status
+        // SIMPLIFIED: Only Present or Absent
         $defaultTimes = match($status) {
             'present' => ['clock_in' => '08:00', 'clock_out' => '17:00'],
-            'late' => ['clock_in' => '09:00', 'clock_out' => '17:00'],
-            'half_day' => ['clock_in' => '08:00', 'clock_out' => '12:00'],
             'absent' => ['clock_in' => null, 'clock_out' => null],
             default => ['clock_in' => null, 'clock_out' => null],
         };
@@ -134,10 +132,10 @@ class DailyAttendance extends Page
                 'clock_in' => $defaultTimes['clock_in'],
                 'clock_out' => $defaultTimes['clock_out'],
                 'total_hours' => $totalHours,
-                'regular_hours' => min($totalHours, 8),
-                'overtime_hours' => max(0, $totalHours - 8),
+                'regular_hours' => $totalHours, // All hours are regular now
+                'overtime_hours' => 0, // No overtime tracking
                 'recorded_by' => Auth::id(),
-                'free_meal_taken' => $status !== 'absent' ? ($this->attendanceData[$employeeId]['free_meal_taken'] ?? false) : false,
+                'free_meal_taken' => $status === 'present' ? ($this->attendanceData[$employeeId]['free_meal_taken'] ?? false) : false,
             ]
         );
 
@@ -145,12 +143,11 @@ class DailyAttendance extends Page
         $this->loadAttendanceData();
         $this->dispatch('attendance-updated');
 
-        // Show notification
+        // Show notification - SIMPLIFIED
         $statusText = match($status) {
-            'present' => 'Present (Full Day)',
-            'late' => 'Late Arrival',
-            'half_day' => 'Half Day',
+            'present' => 'Present',
             'absent' => 'Absent',
+            default => $status,
         };
 
         Notification::make()
@@ -159,6 +156,7 @@ class DailyAttendance extends Page
             ->success()
             ->send();
     }
+
     public function changeStatus($employeeId, $status): void
     {
         $employee = User::find($employeeId);
@@ -172,11 +170,9 @@ class DailyAttendance extends Page
             return;
         }
 
-        // Set default times based on status
+        // SIMPLIFIED: Only Present or Absent
         $defaultTimes = match($status) {
             'present' => ['clock_in' => '08:00', 'clock_out' => '17:00'],
-            'late' => ['clock_in' => '09:00', 'clock_out' => '17:00'],
-            'half_day' => ['clock_in' => '08:00', 'clock_out' => '12:00'],
             'absent' => ['clock_in' => null, 'clock_out' => null],
             default => ['clock_in' => null, 'clock_out' => null],
         };
@@ -200,22 +196,21 @@ class DailyAttendance extends Page
                 'clock_in' => $defaultTimes['clock_in'],
                 'clock_out' => $defaultTimes['clock_out'],
                 'total_hours' => $totalHours,
-                'regular_hours' => min($totalHours, 8),
-                'overtime_hours' => max(0, $totalHours - 8),
+                'regular_hours' => $totalHours, // All hours are regular
+                'overtime_hours' => 0, // No overtime
                 'recorded_by' => Auth::id(),
-                'free_meal_taken' => $status !== 'absent' ? ($this->attendanceData[$employeeId]['free_meal_taken'] ?? false) : false,
+                'free_meal_taken' => $status === 'present' ? ($this->attendanceData[$employeeId]['free_meal_taken'] ?? false) : false,
             ]
         );
 
         // Reload data to reflect changes
         $this->loadAttendanceData();
 
-        // Show notification
+        // Show notification - SIMPLIFIED
         $statusText = match($status) {
-            'present' => 'Present (Full Day)',
-            'late' => 'Late Arrival',
-            'half_day' => 'Half Day',
+            'present' => 'Present',
             'absent' => 'Absent',
+            default => $status,
         };
 
         Notification::make()

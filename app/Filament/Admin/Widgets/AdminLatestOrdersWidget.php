@@ -13,11 +13,8 @@ class AdminLatestOrdersWidget extends BaseWidget
 {
     protected static ?string $heading = 'Recent Orders';
     protected static ?int $sort = 6;
-    protected int | string | array $columnSpan = [
-    'md' => 12,
-    'lg' => 12,
-    'xl' => 12,
-];
+    protected int | string | array $columnSpan = 'full';
+
     protected static ?string $pollingInterval = '30s';
 
     #[On('orderCreated')]

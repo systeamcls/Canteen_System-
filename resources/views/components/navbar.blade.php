@@ -1847,6 +1847,188 @@
         opacity: 0.5;
         cursor: not-allowed;
     }
+
+    /* ⭐ Legal Modal Styles */
+    .legal-modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.75);
+        backdrop-filter: blur(4px);
+        z-index: 10000;
+        /* Higher than welcome modal */
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+
+    .legal-modal-overlay.active {
+        display: flex !important;
+    }
+
+    .legal-modal-container {
+        background: white;
+        border-radius: 12px;
+        width: 100%;
+        max-width: 900px;
+        max-height: 90vh;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+        animation: legalModalSlideIn 0.3s ease;
+    }
+
+    @keyframes legalModalSlideIn {
+        from {
+            transform: scale(0.9) translateY(20px);
+            opacity: 0;
+        }
+
+        to {
+            transform: scale(1) translateY(0);
+            opacity: 1;
+        }
+    }
+
+    .legal-modal-header {
+        padding: 24px 24px 16px;
+        border-bottom: 1px solid #e5e7eb;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .legal-modal-header h2 {
+        margin: 0;
+        font-size: 1.5rem;
+        color: #1f2937;
+    }
+
+    .legal-modal-close {
+        background: none;
+        border: none;
+        font-size: 32px;
+        color: #9ca3af;
+        cursor: pointer;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        transition: all 0.2s;
+    }
+
+    .legal-modal-close:hover {
+        background: #f3f4f6;
+        color: #1f2937;
+    }
+
+    .legal-tabs {
+        display: flex;
+        padding: 0 24px;
+        gap: 8px;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .legal-tab {
+        padding: 12px 24px;
+        background: none;
+        border: none;
+        border-bottom: 3px solid transparent;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 600;
+        color: #6b7280;
+        transition: all 0.2s;
+    }
+
+    .legal-tab:hover {
+        color: #f97316;
+    }
+
+    .legal-tab.active {
+        color: #f97316;
+        border-bottom-color: #f97316;
+    }
+
+    .legal-modal-content {
+        flex: 1;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .legal-tab-content {
+        display: none;
+        height: 100%;
+    }
+
+    .legal-tab-content.active {
+        display: block;
+    }
+
+    .legal-modal-footer {
+        padding: 16px 24px;
+        border-top: 1px solid #e5e7eb;
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+    }
+
+    .btn-accept-legal,
+    .btn-decline-legal {
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        border: none;
+    }
+
+    .btn-accept-legal {
+        background: #f97316;
+        color: white;
+    }
+
+    .btn-accept-legal:hover {
+        background: #ea580c;
+    }
+
+    .btn-decline-legal {
+        background: #f3f4f6;
+        color: #6b7280;
+    }
+
+    .btn-decline-legal:hover {
+        background: #e5e7eb;
+        color: #1f2937;
+    }
+
+    @media (max-width: 768px) {
+        .legal-modal-container {
+            max-width: 100%;
+            max-height: 100vh;
+            border-radius: 0;
+        }
+
+        .legal-tabs {
+            flex-direction: column;
+            gap: 0;
+        }
+
+        .legal-tab {
+            border-bottom: 1px solid #e5e7eb;
+            border-left: 3px solid transparent;
+        }
+
+        .legal-tab.active {
+            border-bottom-color: #e5e7eb;
+            border-left-color: #f97316;
+        }
+    }
 </style>
 
 <nav class="navbar-component">

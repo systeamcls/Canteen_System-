@@ -20,7 +20,7 @@ class WelcomeModal extends Component
     public $password = '';
     public $loginError = '';
 
-    // ✅ ADD: reCAPTCHA tokens
+    // reCAPTCHA tokens
     public $recaptcha_token_guest = '';
     public $recaptcha_token_login = '';
     public $recaptcha_token_register = '';
@@ -32,6 +32,9 @@ class WelcomeModal extends Component
     public $registerPasswordConfirmation = '';
     public $registerPhone = '';
     public $registerError = '';
+    
+    // ⭐ NEW: Terms acceptance
+    public $acceptTerms = false;
 
     protected $listeners = ['openWelcomeModal' => 'open'];
 
@@ -63,7 +66,8 @@ class WelcomeModal extends Component
         $this->reset([
             'email', 'password', 'loginError',
             'registerName', 'registerEmail', 'registerPassword', 
-            'registerPasswordConfirmation', 'registerPhone', 'registerError'
+            'registerPasswordConfirmation', 'registerPhone', 'registerError',
+            'acceptTerms' // ⭐ Reset terms checkbox
         ]);
     }
 
@@ -80,10 +84,10 @@ class WelcomeModal extends Component
     }
 
     public function showGuestVerification()
-{
-    $this->currentView = 'guest-verification';
-    $this->resetForm();
-}
+    {
+        $this->currentView = 'guest-verification';
+        $this->resetForm();
+    }
 
     public function showOptions()
     {
@@ -92,39 +96,39 @@ class WelcomeModal extends Component
     }
 
     public function loginAsGuest()
-{
-    // ✅ Verify reCAPTCHA v2 Checkbox
-    if (!RecaptchaHelper::verifyV2($this->recaptcha_token_guest, 'checkbox')) {
-        $this->loginError = 'Security verification failed. Please complete the reCAPTCHA and try again.';
-        $this->recaptcha_token_guest = ''; // Reset token
-        return;
+    {
+        // Verify reCAPTCHA v2 Checkbox
+        if (!RecaptchaHelper::verifyV2($this->recaptcha_token_guest, 'checkbox')) {
+            $this->loginError = 'Security verification failed. Please complete the reCAPTCHA and try again.';
+            $this->recaptcha_token_guest = ''; // Reset token
+            return;
+        }
+
+        // Set guest session
+        session([
+            'user_type' => 'guest',
+            'guest_session_id' => uniqid('guest_', true)
+        ]);
+
+        $this->close();
+
+        // Emit event for other components
+        $this->dispatch('userTypeUpdated', 'guest');
+
+        // Redirect to menu
+        return redirect()->route('home.index');
     }
-
-    // Set guest session
-    session([
-        'user_type' => 'guest',
-        'guest_session_id' => uniqid('guest_', true)
-    ]);
-
-    $this->close();
-
-    // Emit event for other components
-    $this->dispatch('userTypeUpdated', 'guest');
-
-    // Redirect to menu
-    return redirect()->route('home.index');
-}
 
     public function loginAsEmployee()
-{
-    $this->loginError = '';
+    {
+        $this->loginError = '';
 
-    // ✅ Verify reCAPTCHA v2 Checkbox
-    if (!RecaptchaHelper::verifyV2($this->recaptcha_token_login, 'checkbox')) {
-        $this->loginError = 'Security verification failed. Please complete the reCAPTCHA and try again.';
-        $this->recaptcha_token_login = ''; // Reset token
-        return;
-    }
+        // Verify reCAPTCHA v2 Checkbox
+        if (!RecaptchaHelper::verifyV2($this->recaptcha_token_login, 'checkbox')) {
+            $this->loginError = 'Security verification failed. Please complete the reCAPTCHA and try again.';
+            $this->recaptcha_token_login = ''; // Reset token
+            return;
+        }
 
         try {
             $this->validate([
@@ -160,61 +164,65 @@ class WelcomeModal extends Component
     }
 
     public function registerEmployee()
-{
-    $this->registerError = '';
+    {
+        $this->registerError = '';
 
-    // ✅ Verify reCAPTCHA v2 Checkbox FIRST
-    if (!RecaptchaHelper::verifyV2($this->recaptcha_token_register, 'checkbox')) {
-        $this->registerError = 'Security verification failed. Please complete the reCAPTCHA and try again.';
-        $this->recaptcha_token_register = ''; // Reset token
-        return;
-    }
-
-    try {
-        $validated = $this->validate([
-            'registerName' => 'required|string|max:255',
-            'registerEmail' => 'required|string|email|max:255|unique:users,email',
-            'registerPassword' => 'required|string|min:8',
-            'registerPasswordConfirmation' => 'required|string|min:8|same:registerPassword',
-            'registerPhone' => 'nullable|string|max:20',
-        ]);
-
-        // Create the user
-        $user = User::create([
-            'name' => $this->registerName,
-            'email' => $this->registerEmail,
-            'password' => Hash::make($this->registerPassword),
-            'phone' => $this->registerPhone,
-            'type' => 'employee',
-            'is_active' => true,
-             'verification_sent_at' => now(),
-        ]);
-
-        // Check if Spatie roles package is installed
-        if (method_exists($user, 'assignRole')) {
-            $user->assignRole('customer');
+        // Verify reCAPTCHA v2 Checkbox FIRST
+        if (!RecaptchaHelper::verifyV2($this->recaptcha_token_register, 'checkbox')) {
+            $this->registerError = 'Security verification failed. Please complete the reCAPTCHA and try again.';
+            $this->recaptcha_token_register = ''; // Reset token
+            return;
         }
 
-        // Send verification email
-        $user->sendEmailVerificationNotification();
+        try {
+            $validated = $this->validate([
+                'registerName' => 'required|string|max:255',
+                'registerEmail' => 'required|string|email|max:255|unique:users,email',
+                'registerPassword' => 'required|string|min:8',
+                'registerPasswordConfirmation' => 'required|string|min:8|same:registerPassword',
+                'registerPhone' => 'nullable|string|max:20',
+                'acceptTerms' => 'accepted', // ⭐ NEW: Validate terms acceptance
+            ], [
+                'acceptTerms.accepted' => 'You must accept the Terms and Conditions and Privacy Policy to register.',
+            ]);
 
-        // Log the user in
-        
-        Auth::login($user);
-        session(['user_type' => 'employee']);
-        
-        $this->close();
+            // Create the user
+            $user = User::create([
+                'name' => $this->registerName,
+                'email' => $this->registerEmail,
+                'password' => Hash::make($this->registerPassword),
+                'phone' => $this->registerPhone,
+                'type' => 'employee',
+                'is_active' => true,
+                'verification_sent_at' => now(),
+                // ⭐ Optional: Track terms acceptance
+                'terms_accepted_at' => now(),
+            ]);
 
-        // Redirect to dashboard
-         $this->redirectRoute('verification.notice');
+            // Check if Spatie roles package is installed
+            if (method_exists($user, 'assignRole')) {
+                $user->assignRole('customer');
+            }
 
-    } catch (ValidationException $e) {
-        $this->registerError = 'Validation failed: ' . implode(', ', $e->validator->errors()->all());
-    } catch (\Exception $e) {
-        $this->registerError = 'Registration failed: ' . $e->getMessage();
-        \Illuminate\Support\Facades\Log::error('Registration error: ' . $e->getMessage());
+            // Send verification email
+            $user->sendEmailVerificationNotification();
+
+            // Log the user in
+            Auth::login($user);
+            session(['user_type' => 'employee']);
+            
+            $this->close();
+
+            // Redirect to dashboard
+            $this->redirectRoute('verification.notice');
+
+        } catch (ValidationException $e) {
+            $this->registerError = 'Validation failed: ' . implode(', ', $e->validator->errors()->all());
+        } catch (\Exception $e) {
+            $this->registerError = 'Registration failed: ' . $e->getMessage();
+            \Illuminate\Support\Facades\Log::error('Registration error: ' . $e->getMessage());
+        }
     }
-}
 
     public function render()
     {

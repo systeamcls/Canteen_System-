@@ -34,9 +34,9 @@ class AdminPanelProvider extends PanelProvider
             ->darkMode()
             ->brandName('Canteen Admin')
             // Add these sidebar configurations
-            ->sidebarWidth('290px')
+            ->maxContentWidth('full')
             ->sidebarCollapsibleOnDesktop()
-            ->collapsedSidebarWidth('80px')
+            ->sidebarFullyCollapsibleOnDesktop()
             ->discoverResources(
                 in: app_path('Filament/Admin/Resources'),
                 for: 'App\\Filament\\Admin\\Resources'
@@ -48,6 +48,7 @@ class AdminPanelProvider extends PanelProvider
             ->pages([
             \App\Filament\Admin\Pages\DailyAttendance::class,
             TwoFactorChallenge::class,
+            \App\Filament\Admin\Pages\FinancialDashboard::class,
             ])
             //->discoverWidgets(
             //    in: app_path('Filament/Admin/Widgets'),
@@ -67,7 +68,13 @@ class AdminPanelProvider extends PanelProvider
                 \App\Filament\Admin\Widgets\AdminPopularHoursWidget::class,
                 \App\Filament\Admin\Widgets\AdminLatestOrdersWidget::class,
                 \App\Filament\Admin\Widgets\AdminTrendingItemsWidget::class,
+
                 \App\Filament\Admin\Widgets\FinancialOverviewWidget::class,
+                \App\Filament\Admin\Widgets\AdminSalesChartWidget::class,
+                \App\Filament\Admin\Widgets\AdminOrderStatsWidget::class,
+                \App\Filament\Admin\Widgets\AdminRevenueVsExpenseWidget::class,
+                \App\Filament\Admin\Widgets\AdminExpenseBreakdownWidget::class,
+                \App\Filament\Admin\Widgets\AdminRentalPaymentsWidget::class,
             ])
             ->sidebarCollapsibleOnDesktop()
             ->navigationGroups([

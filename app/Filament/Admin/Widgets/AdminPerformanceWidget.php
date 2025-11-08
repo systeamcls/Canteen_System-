@@ -12,11 +12,7 @@ class AdminPerformanceWidget extends ChartWidget
 {
     protected static ?string $heading = 'Performance Overview (30 Days)';
     protected static ?int $sort = 3;
-    protected int | string | array $columnSpan = [
-    'md' => 12,
-    'lg' => 6,
-    'xl' => 6,
-];
+    protected int | string | array $columnSpan = 'full';
 
     protected function getData(): array
     {

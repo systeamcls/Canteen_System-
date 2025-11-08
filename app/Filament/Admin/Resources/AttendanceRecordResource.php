@@ -37,7 +37,7 @@ class AttendanceRecordResource extends Resource
                                 Forms\Components\Select::make('user_id')
                                     ->label('Staff Member')
                                     ->options(User::where('is_active', true)
-                                        ->where('is_staff', true)  // Only staff members
+                                        ->where('is_staff', true)
                                         ->pluck('name', 'id'))
                                     ->required()
                                     ->searchable()
@@ -57,9 +57,7 @@ class AttendanceRecordResource extends Resource
                                 Forms\Components\Select::make('status')
                                     ->label('Attendance Status')
                                     ->options([
-                                        'present' => 'Present (Full Day)',
-                                        'late' => 'Late Arrival',
-                                        'half_day' => 'Half Day',
+                                        'present' => 'Present',
                                         'absent' => 'Absent',
                                     ])
                                     ->default('present')
@@ -70,15 +68,11 @@ class AttendanceRecordResource extends Resource
                                         if ($state === 'present') {
                                             $set('clock_in', '08:00');
                                             $set('clock_out', '17:00');
-                                        } elseif ($state === 'late') {
-                                            $set('clock_in', '09:00');
-                                            $set('clock_out', '17:00');
-                                        } elseif ($state === 'half_day') {
-                                            $set('clock_in', '08:00');
-                                            $set('clock_out', '12:00');
+                                            $set('total_hours', 8.0);
                                         } elseif ($state === 'absent') {
                                             $set('clock_in', null);
                                             $set('clock_out', null);
+                                            $set('total_hours', 0);
                                         }
                                     }),
 
@@ -86,25 +80,25 @@ class AttendanceRecordResource extends Resource
                                     ->label('Free Meal Taken')
                                     ->helperText('Did the employee take their free meal today?')
                                     ->default(false)
-                                    ->visible(fn ($get) => in_array($get('status'), ['present', 'late', 'half_day'])),
+                                    ->visible(fn ($get) => $get('status') === 'present'),
                             ]),
                     ]),
 
                 Forms\Components\Section::make('Time Records')
-                    ->description('Clock in/out times (auto-filled based on status)')
+                    ->description('Clock in/out times (auto-filled for present status)')
                     ->schema([
                         Forms\Components\Grid::make(2)
                             ->schema([
                                 Forms\Components\TimePicker::make('clock_in')
                                     ->label('Clock In Time')
                                     ->seconds(false)
-                                    ->visible(fn ($get) => $get('status') !== 'absent')
+                                    ->visible(fn ($get) => $get('status') === 'present')
                                     ->live(),
                                     
                                 Forms\Components\TimePicker::make('clock_out')
                                     ->label('Clock Out Time')
                                     ->seconds(false)
-                                    ->visible(fn ($get) => $get('status') !== 'absent')
+                                    ->visible(fn ($get) => $get('status') === 'present')
                                     ->live(),
                             ]),
 
@@ -140,11 +134,10 @@ class AttendanceRecordResource extends Resource
                                         if (!$userId) return 'Select employee first';
                                         
                                         $user = User::find($userId);
-                                        $dailyRate = $user?->daily_rate ?? 500; // Default fallback
+                                        $dailyRate = $user?->daily_rate ?? 500;
                                         
                                         return match($status) {
-                                            'present', 'late' => "₱{$dailyRate}",
-                                            'half_day' => "₱" . ($dailyRate / 2),
+                                            'present' => "₱{$dailyRate}",
                                             'absent' => "₱0",
                                             default => "₱0"
                                         };
@@ -205,8 +198,6 @@ class AttendanceRecordResource extends Resource
                     })
                     ->color(fn ($record) => match($record->status) {
                         'present' => 'success',
-                        'late' => 'warning', 
-                        'half_day' => 'info',
                         'absent' => 'danger',
                         default => 'gray'
                     })
@@ -218,15 +209,11 @@ class AttendanceRecordResource extends Resource
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
                         'present' => 'success',
-                        'late' => 'warning',
-                        'half_day' => 'info',
                         'absent' => 'danger',
                         default => 'gray',
                     })
                     ->formatStateUsing(fn (string $state): string => match ($state) {
-                        'present' => 'Full Day',
-                        'late' => 'Late',
-                        'half_day' => 'Half Day',
+                        'present' => 'Present',
                         'absent' => 'Absent',
                         default => $state,
                     }),
@@ -245,16 +232,15 @@ class AttendanceRecordResource extends Resource
                     ->numeric(decimalPlaces: 1)
                     ->suffix('h')
                     ->alignCenter()
-                    ->color(fn ($state) => $state >= 8 ? 'success' : ($state >= 4 ? 'warning' : 'danger')),
+                    ->color(fn ($state) => $state >= 8 ? 'success' : ($state > 0 ? 'warning' : 'danger')),
 
                 Tables\Columns\TextColumn::make('daily_earnings')
                     ->label('Daily Pay')
                     ->getStateUsing(function (AttendanceRecord $record): string {
-                        $dailyRate = $record->user?->daily_rate ?? 500; // Get user's rate or default
+                        $dailyRate = $record->user?->daily_rate ?? 500;
                         
                         $earnings = match($record->status) {
-                            'present', 'late' => $dailyRate,
-                            'half_day' => $dailyRate / 2,
+                            'present' => $dailyRate,
                             'absent' => 0,
                             default => 0
                         };
@@ -274,7 +260,7 @@ class AttendanceRecordResource extends Resource
                 SelectFilter::make('user_id')
                     ->label('Staff Member')
                     ->options(User::where('is_active', true)
-                        ->where('is_staff', true)  // Only staff members
+                        ->where('is_staff', true)
                         ->pluck('name', 'id'))
                     ->searchable()
                     ->multiple(),
@@ -283,8 +269,6 @@ class AttendanceRecordResource extends Resource
                     ->label('Status')
                     ->options([
                         'present' => 'Present',
-                        'late' => 'Late',
-                        'half_day' => 'Half Day',
                         'absent' => 'Absent',
                     ])
                     ->multiple(),
@@ -345,7 +329,7 @@ class AttendanceRecordResource extends Resource
                         Forms\Components\Select::make('employees')
                             ->label('Mark Present')
                             ->options(User::where('is_active', true)
-                                ->where('type', 'employee')
+                                ->where('is_staff', true)
                                 ->pluck('name', 'id'))
                             ->multiple()
                             ->searchable(),
@@ -395,7 +379,7 @@ class AttendanceRecordResource extends Resource
                                 ->success()
                                 ->send();
                         })
-                        ->visible(fn ($record) => in_array($record->status, ['present', 'late', 'half_day'])),
+                        ->visible(fn ($record) => $record->status === 'present'),
 
                     Tables\Actions\DeleteAction::make(),
                 ])
@@ -411,7 +395,7 @@ class AttendanceRecordResource extends Resource
                         ->action(function ($records) {
                             $updated = 0;
                             foreach ($records as $record) {
-                                if (in_array($record->status, ['present', 'late', 'half_day'])) {
+                                if ($record->status === 'present') {
                                     $record->update(['free_meal_taken' => true]);
                                     $updated++;
                                 }
@@ -441,7 +425,7 @@ class AttendanceRecordResource extends Resource
                 ]),
             ])
             ->defaultSort('work_date', 'desc')
-            ->poll('30s') // Auto-refresh for real-time updates
+            ->poll('30s')
             ->emptyStateHeading('No attendance records')
             ->emptyStateDescription('Start tracking daily attendance for your staff members.')
             ->emptyStateIcon('heroicon-o-clock')
@@ -470,10 +454,10 @@ class AttendanceRecordResource extends Resource
         $ratio = $todayCount / $totalStaff;
         
         return match(true) {
-            $ratio >= 0.9 => 'success',   // Most staff recorded
-            $ratio >= 0.6 => 'warning',  // Some staff recorded
-            $ratio > 0 => 'info',        // Few staff recorded
-            default => 'danger',         // No staff recorded yet
+            $ratio >= 0.9 => 'success',
+            $ratio >= 0.6 => 'warning',
+            $ratio > 0 => 'info',
+            default => 'danger',
         };
     }
 

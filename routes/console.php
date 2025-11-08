@@ -11,3 +11,6 @@ Artisan::command('inspire', function () {
 
 Schedule::command('rent:generate-daily')->dailyAt('06:00');
 
+Schedule::command('payouts:generate-weekly')
+    ->weeklyOn(1, '1:00') // Every Monday at 1 AM
+    ->timezone('Asia/Manila');

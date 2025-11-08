@@ -144,6 +144,8 @@
                                     <i class="user-icon"></i>
                                     <h3>Contact Details</h3>
                                 </div>
+                                <!-- Replace lines 164-215 in your blade file with this updated contact form section -->
+
                                 <div class="contact-form">
                                     <div class="input-group">
                                         <label>Full Name</label>
@@ -156,47 +158,47 @@
                                     </div>
 
                                     <div class="input-group">
-                                        <label>Email Address</label>
-                                        <input type="email" wire:model.blur="customerEmail"
-                                            class="text-input @error('customerEmail') error @enderror"
-                                            placeholder="Enter your email address">
-                                        @error('customerEmail')
-                                            <span class="error-message">{{ $message }}</span>
-                                        @enderror
-                                    </div>
-
-                                    <div class="input-group">
                                         <label>How would you like to receive order updates?</label>
                                         <select wire:model.live="notificationPreference"
                                             class="text-input @error('notificationPreference') error @enderror">
                                             <option value="">Select notification method</option>
                                             <option value="sms">SMS (requires phone number)</option>
                                             <option value="email">Email (requires email address)</option>
-                                            <option value="both">Both (requires both)</option>
+                                            <option value="both">Both SMS & Email (requires both)</option>
                                         </select>
                                         @error('notificationPreference')
                                             <span class="error-message">{{ $message }}</span>
                                         @enderror
                                     </div>
 
+                                    <!-- Phone Number Field - Shows when SMS or Both selected -->
                                     @if (in_array($notificationPreference, ['sms', 'both']))
                                         <div class="input-group">
-                                            <label>Phone Number</label>
+                                            <label>Phone Number <span style="color: #e53e3e;">*</span></label>
                                             <input type="tel" wire:model.blur="customerPhone"
                                                 class="text-input phone-input @error('customerPhone') error @enderror"
-                                                placeholder="09123456789" maxlength="11" inputmode="numeric">
+                                                placeholder="09123456789" maxlength="13" inputmode="numeric">
+                                            <small
+                                                style="color: #718096; font-size: 12px; margin-top: 4px; display: block;">
+                                                Format: 09123456789, 639123456789, or +639123456789
+                                            </small>
                                             @error('customerPhone')
                                                 <span class="error-message">{{ $message }}</span>
                                             @enderror
                                         </div>
                                     @endif
 
+                                    <!-- Email Address Field - Shows when Email or Both selected -->
                                     @if (in_array($notificationPreference, ['email', 'both']))
                                         <div class="input-group">
-                                            <label>Email Address</label>
+                                            <label>Email Address <span style="color: #e53e3e;">*</span></label>
                                             <input type="email" wire:model.blur="customerEmail"
                                                 class="text-input @error('customerEmail') error @enderror"
-                                                placeholder="Enter email address">
+                                                placeholder="your.email@example.com">
+                                            <small
+                                                style="color: #718096; font-size: 12px; margin-top: 4px; display: block;">
+                                                Please enter a valid email with proper domain (e.g., user@gmail.com)
+                                            </small>
                                             @error('customerEmail')
                                                 <span class="error-message">{{ $message }}</span>
                                             @enderror
@@ -1595,60 +1597,6 @@
 
 
     // Alpine.js component for phone number formatting
-    function phoneInput() {
-        return {
-            formatPhone(event) {
-                let value = event.target.value;
-
-                // Remove any non-numeric characters
-                value = value.replace(/\D/g, '');
-
-                // If empty or user cleared it, set default '09'
-                if (value.length === 0) {
-                    value = '09';
-                }
-
-                // If user tries to change the first two digits, reset to '09'
-                if (!value.startsWith('09')) {
-                    value = '09' + value.substring(2);
-                }
-
-                // Limit to 11 digits total
-                if (value.length > 11) {
-                    value = value.substring(0, 11);
-                }
-
-                // Update the input value
-                event.target.value = value;
-
-                // Update Livewire property
-                this.$wire.set('customerPhone', value);
-            },
-
-            onlyNumbers(event) {
-                // Allow: backspace, delete, tab, escape, enter
-                if ([8, 9, 27, 13, 46].indexOf(event.keyCode) !== -1 ||
-                    // Allow: Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
-                    (event.keyCode === 65 && event.ctrlKey === true) ||
-                    (event.keyCode === 67 && event.ctrlKey === true) ||
-                    (event.keyCode === 86 && event.ctrlKey === true) ||
-                    (event.keyCode === 88 && event.ctrlKey === true)) {
-                    return;
-                }
-
-                // Ensure that it's a number and stop the keypress if not
-                if ((event.shiftKey || (event.keyCode < 48 || event.keyCode > 57)) && (event.keyCode < 96 || event
-                        .keyCode > 105)) {
-                    event.preventDefault();
-                }
-
-                // Don't allow typing if already at 11 characters
-                if (event.target.value.length >= 11) {
-                    event.preventDefault();
-                }
-            }
-        }
-    }
 
     // Initialize default phone value when component mounts
     document.addEventListener('livewire:init', () => {

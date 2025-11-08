@@ -22,6 +22,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'webhook.security' => \App\Http\Middleware\WebhookSecurityMiddleware::class,
             'verified' => \App\Http\Middleware\EnsureEmailIsVerified::class,
             'redirect.admin' => \App\Http\Middleware\RedirectIfAdmin::class,
+            'role' => \App\Http\Middleware\CheckRole::class,
 
         ]);
 

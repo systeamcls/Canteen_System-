@@ -2,14 +2,12 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Carbon\Carbon;
 
 class WeeklyPayout extends Model
 {
-    use HasFactory;
-
     protected $fillable = [
         'user_id',
         'week_start',
@@ -21,7 +19,6 @@ class WeeklyPayout extends Model
         'regular_pay',
         'overtime_pay',
         'bonuses',
-        'deductions',
         'total_payout',
         'status',
         'paid_date',
@@ -40,64 +37,50 @@ class WeeklyPayout extends Model
         'regular_pay' => 'decimal:2',
         'overtime_pay' => 'decimal:2',
         'bonuses' => 'decimal:2',
-        'deductions' => 'decimal:2',
         'total_payout' => 'decimal:2',
     ];
 
-    public function user()
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    public function processedBy()
+    public function processedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'processed_by');
     }
 
-    public static function generateWeeklyPayout($userId, $weekStart)
+    // Auto-generate payout from attendance
+    public static function generateForWeek(User $user, Carbon $weekStart): self
     {
-        $weekEnd = Carbon::parse($weekStart)->endOfWeek();
-        
-        // Get attendance records for the week
-        $attendanceRecords = AttendanceRecord::forUser($userId)
-            ->forWeek($weekStart)
+        $weekEnd = $weekStart->copy()->endOfWeek();
+
+        $attendance = AttendanceRecord::where('user_id', $user->id)
+            ->whereBetween('work_date', [$weekStart, $weekEnd])
+            ->where('status', 'present')
             ->get();
 
-        // Get current wage info
-        $wage = EmployeeWage::forUser($userId)->active()->first();
-        if (!$wage) {
-            return null;
-        }
+        $daysWorked = $attendance->count();
+        $dailyRate = $user->daily_rate ?? 500;
+        $totalPayout = $daysWorked * $dailyRate;
 
-        $totalHours = $attendanceRecords->sum('total_hours');
-        $regularHours = $attendanceRecords->sum('regular_hours');
-        $overtimeHours = $attendanceRecords->sum('overtime_hours');
-
-        $regularPay = $regularHours * $wage->hourly_rate;
-        $overtimePay = $overtimeHours * ($wage->hourly_rate * 1.5); // 1.5x for overtime
-
-        return static::updateOrCreate(
-            ['user_id' => $userId, 'week_start' => $weekStart],
+        return self::updateOrCreate(
+            [
+                'user_id' => $user->id,
+                'week_start' => $weekStart,
+            ],
             [
                 'week_end' => $weekEnd,
-                'total_hours' => $totalHours,
-                'regular_hours' => $regularHours,
-                'overtime_hours' => $overtimeHours,
-                'hourly_rate' => $wage->hourly_rate,
-                'regular_pay' => $regularPay,
-                'overtime_pay' => $overtimePay,
-                'total_payout' => $regularPay + $overtimePay,
+                'total_hours' => $daysWorked * 8, // 8 hours per day
+                'regular_hours' => $daysWorked * 8,
+                'overtime_hours' => 0,
+                'hourly_rate' => $dailyRate / 8,
+                'regular_pay' => $totalPayout,
+                'overtime_pay' => 0,
+                'bonuses' => 0,
+                'total_payout' => $totalPayout,
+                'status' => 'pending',
             ]
         );
-    }
-
-    public function scopePending($query)
-    {
-        return $query->where('status', 'pending');
-    }
-
-    public function scopePaid($query)
-    {
-        return $query->where('status', 'paid');
     }
 }

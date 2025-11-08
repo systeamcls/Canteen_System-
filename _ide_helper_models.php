@@ -24,6 +24,7 @@ namespace App\Models{
  * @property numeric|null $regular_hours
  * @property numeric|null $overtime_hours
  * @property string $status
+ * @property int $free_meal_taken
  * @property string|null $notes
  * @property int|null $recorded_by
  * @property \Illuminate\Support\Carbon|null $created_at
@@ -40,6 +41,7 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|AttendanceRecord whereClockIn($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|AttendanceRecord whereClockOut($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|AttendanceRecord whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|AttendanceRecord whereFreeMealTaken($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|AttendanceRecord whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|AttendanceRecord whereNotes($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|AttendanceRecord whereOvertimeHours($value)
@@ -475,6 +477,57 @@ namespace App\Models{
 namespace App\Models{
 /**
  * @property int $id
+ * @property int $user_id
+ * @property \Illuminate\Support\Carbon $period_start
+ * @property \Illuminate\Support\Carbon $period_end
+ * @property int $days_worked
+ * @property int $days_present
+ * @property int $days_late
+ * @property int $days_half_day
+ * @property int $days_absent
+ * @property numeric $total_hours
+ * @property numeric $daily_rate
+ * @property numeric $gross_pay
+ * @property numeric $net_pay
+ * @property string $status
+ * @property string|null $paid_at
+ * @property \Illuminate\Support\Carbon|null $paid_date
+ * @property string|null $notes
+ * @property int|null $generated_by
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \App\Models\User|null $generatedBy
+ * @property-read \App\Models\User $user
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Payroll newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Payroll newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Payroll query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Payroll whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Payroll whereDailyRate($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Payroll whereDaysAbsent($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Payroll whereDaysHalfDay($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Payroll whereDaysLate($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Payroll whereDaysPresent($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Payroll whereDaysWorked($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Payroll whereGeneratedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Payroll whereGrossPay($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Payroll whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Payroll whereNetPay($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Payroll whereNotes($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Payroll wherePaidAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Payroll wherePaidDate($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Payroll wherePeriodEnd($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Payroll wherePeriodStart($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Payroll whereStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Payroll whereTotalHours($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Payroll whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Payroll whereUserId($value)
+ */
+	class Payroll extends \Eloquent {}
+}
+
+namespace App\Models{
+/**
+ * @property int $id
  * @property string $name
  * @property float $price
  * @property string|null $image
@@ -737,6 +790,7 @@ namespace App\Models{
  * @property string|null $type
  * @property bool $is_active
  * @property bool $is_staff
+ * @property string $daily_rate
  * @property string|null $remember_token
  * @property int|null $current_team_id
  * @property string|null $profile_photo_path
@@ -758,6 +812,8 @@ namespace App\Models{
  * @property-read int|null $order_groups_count
  * @property-read int|null $orders_count
  * @property-read \App\Models\Stall|null $ownedStall
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Payroll> $payrolls
+ * @property-read int|null $payrolls_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Permission\Models\Permission> $permissions
  * @property-read int|null $permissions_count
  * @property-read string $profile_photo_url
@@ -780,6 +836,7 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereCanPayOnsite($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereCurrentTeamId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereDailyRate($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereEmail($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereEmailVerifiedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereId($value)
@@ -818,7 +875,6 @@ namespace App\Models{
  * @property numeric $regular_pay
  * @property numeric $overtime_pay
  * @property numeric $bonuses
- * @property numeric $deductions
  * @property numeric $total_payout
  * @property string $status
  * @property \Illuminate\Support\Carbon|null $paid_date
@@ -830,12 +886,9 @@ namespace App\Models{
  * @property-read \App\Models\User $user
  * @method static \Illuminate\Database\Eloquent\Builder<static>|WeeklyPayout newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|WeeklyPayout newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|WeeklyPayout paid()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|WeeklyPayout pending()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|WeeklyPayout query()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|WeeklyPayout whereBonuses($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|WeeklyPayout whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder<static>|WeeklyPayout whereDeductions($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|WeeklyPayout whereHourlyRate($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|WeeklyPayout whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|WeeklyPayout whereNotes($value)

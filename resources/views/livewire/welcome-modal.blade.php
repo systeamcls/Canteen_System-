@@ -9,355 +9,439 @@
             <div class="modal-container">
                 <!-- Waving Hand Peeking from Top (only on options view) -->
                 @if ($currentView === 'options')
-                    <div class="wave-peek">👋</div>
+                    <div class="wave-container">
+                        <div class="wave-peek">👋</div>
+                    </div>
                 @endif
 
-                <div class="modal-header">
-                    <!-- Back button for login/register forms -->
-                    @if ($currentView !== 'options')
-                        <button class="back-btn-header"
-                            wire:click="{{ $currentView === 'register-form' ? 'showEmployeeForm' : ($currentView === 'guest-verification' ? 'showOptions' : 'showOptions') }}">
-                            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M15 19l-7-7 7-7" />
-                            </svg>
-                            Back
-                        </button>
-                    @endif
+                <div class="modal-scroll-wrapper">
+                    <div class="modal-header">
+                        <!-- Back button for login/register forms -->
+                        @if ($currentView !== 'options')
+                            <button class="back-btn-header"
+                                wire:click="{{ $currentView === 'register-form' ? 'showEmployeeForm' : ($currentView === 'guest-verification' ? 'showOptions' : 'showOptions') }}">
+                                <svg width="20" height="20" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M15 19l-7-7 7-7" />
+                                </svg>
+                                Back
+                            </button>
+                        @endif
 
-                    <!-- Top Right: Close button -->
-                    <button class="modal-close" wire:click="close">&times;</button>
+                        <!-- Top Right: Close button -->
+                        <button class="modal-close" wire:click="close">&times;</button>
 
-                    <h2 class="modal-title">Welcome to Canteen Central</h2>
+                        <h2 class="modal-title">Welcome to Canteen Central</h2>
 
-                    <!-- Only show subtitle on options view -->
-                    @if ($currentView === 'options')
-                        <p class="modal-subtitle">Choose how you'd like to continue</p>
-                    @endif
-                </div>
+                        <!-- Only show subtitle on options view -->
+                        @if ($currentView === 'options')
+                            <p class="modal-subtitle">Choose how you'd like to continue</p>
+                        @endif
+                    </div>
 
-                <div class="modal-body">
-                    {{-- OPTIONS VIEW --}}
-                    @if ($currentView === 'options')
-                        <!-- Login Options -->
-                        <div id="loginOptions">
-                            <!-- Guest Login -->
-                            <button class="login-option" type="button" wire:click="showGuestVerification">
-                                <div class="login-option-content">
-                                    <div class="login-option-icon guest-icon">👤</div>
-                                    <div class="login-option-text">
-                                        <h3>Login as Guest</h3>
-                                        <p>Browse and order without creating an account</p>
+                    <div class="modal-body">
+                        {{-- OPTIONS VIEW --}}
+                        @if ($currentView === 'options')
+                            <!-- Login Options -->
+                            <div id="loginOptions">
+                                <!-- Guest Login -->
+                                <button class="login-option" type="button" wire:click="showGuestVerification">
+                                    <div class="login-option-content">
+                                        <div class="login-option-icon guest-icon">👤</div>
+                                        <div class="login-option-text">
+                                            <h3>Login as Guest</h3>
+                                            <p>Browse and order without creating an account</p>
+                                        </div>
+                                        <div class="login-option-arrow">→</div>
                                     </div>
-                                    <div class="login-option-arrow">→</div>
-                                </div>
-                            </button>
+                                </button>
 
-                            <!-- Employee Login -->
-                            <button class="login-option" wire:click="showEmployeeForm">
-                                <div class="login-option-content">
-                                    <div class="login-option-icon employee-icon">👨‍💼</div>
-                                    <div class="login-option-text">
-                                        <h3>Regular Customer Login</h3>
-                                        <p>Enjoy a lot of perks and Discounts!</p>
+                                <!-- Employee Login -->
+                                <button class="login-option" wire:click="showEmployeeForm">
+                                    <div class="login-option-content">
+                                        <div class="login-option-icon employee-icon">👨‍💼</div>
+                                        <div class="login-option-text">
+                                            <h3>Regular Customer Login</h3>
+                                            <p>Enjoy a lot of perks and Discounts!</p>
+                                        </div>
+                                        <div class="login-option-arrow">→</div>
                                     </div>
-                                    <div class="login-option-arrow">→</div>
-                                </div>
-                            </button>
-                        </div>
-                    @endif
-
-                    {{-- GUEST VERIFICATION VIEW --}}
-                    @if ($currentView === 'guest-verification')
-                        <div class="employee-form active">
-                            <!-- Header -->
-                            <div style="text-align: center; margin-bottom: 30px;">
-                                <div style="font-size: 40px; margin-bottom: 10px;">🔒</div>
-                                <h3 style="font-size: 24px; font-weight: 600; color: #2d3748; margin-bottom: 8px;">
-                                    Security Verification
-                                </h3>
-                                <p style="font-size: 14px; color: #718096;">
-                                    Just one quick step to continue
-                                </p>
+                                </button>
                             </div>
+                        @endif
 
-                            <!-- Message -->
-                            <div style="background: #f7fafc; border-radius: 8px; padding: 20px; margin-bottom: 25px;">
-                                <p
-                                    style="font-size: 15px; color: #4a5568; line-height: 1.6; text-align: center; margin: 0;">
-                                    To protect our system from spam and bots, please complete this quick verification to
-                                    continue as a guest.
-                                </p>
-                            </div>
-
-                            <!-- reCAPTCHA Checkbox -->
-                            <div style="margin: 30px 0; display: flex; justify-content: center; min-height: 78px;">
-                                <div id="recaptcha-guest-container"></div>
-                            </div>
-
-                            <!-- Error Message -->
-                            @if ($loginError)
-                                <div class="error-message show" style="display: block; margin-bottom: 20px;">
-                                    <strong>⚠️ Verification Failed:</strong> {{ $loginError }}
-                                </div>
-                            @endif
-
-                            <!-- Continue Button -->
-                            <button type="button" onclick="proceedAsGuest()" class="submit-btn" id="guestContinueBtn"
-                                disabled
-                                style="width: 100%; padding: 14px; font-size: 16px; font-weight: 600; border-radius: 8px; border: none; background: #4299e1; color: white; opacity: 0.5; cursor: not-allowed; transition: all 0.3s ease;"
-                                wire:loading.class="loading" wire:target="loginAsGuest">
-                                <span wire:loading.remove wire:target="loginAsGuest">
-                                    ✓ Continue as Guest
-                                </span>
-                                <span wire:loading wire:target="loginAsGuest">
-                                    Verifying...
-                                </span>
-                            </button>
-
-                            <!-- Security Note -->
-                            <div style="margin-top: 20px; text-align: center;">
-                                <small style="color: #718096; font-size: 13px;">
-                                    🔒 This verification helps us keep the platform secure for everyone.
-                                </small>
-                            </div>
-                        </div>
-                    @endif
-
-                    {{-- EMPLOYEE LOGIN VIEW --}}
-                    @if ($currentView === 'employee-form')
-                        <!-- Employee Login Form with Floating Labels -->
-                        <div class="employee-form active">
-                            <div class="form-divider">
-                                <span>Regular Customer Sign In</span>
-                            </div>
-
-                            <form wire:submit.prevent="loginAsEmployee">
-                                <!-- Floating Label Email -->
-                                <div class="floating-form-group">
-                                    <input type="email" id="email" wire:model.defer="email"
-                                        class="floating-input @error('email') error @enderror" required placeholder=" ">
-                                    <label for="email" class="floating-label">Email Address</label>
+                        {{-- GUEST VERIFICATION VIEW --}}
+                        @if ($currentView === 'guest-verification')
+                            <div class="employee-form active">
+                                <!-- Header -->
+                                <div style="text-align: center; margin-bottom: 30px;">
+                                    <div style="font-size: 40px; margin-bottom: 10px;">🔒</div>
+                                    <h3 style="font-size: 24px; font-weight: 600; color: #2d3748; margin-bottom: 8px;">
+                                        Security Verification
+                                    </h3>
+                                    <p style="font-size: 14px; color: #718096;">
+                                        Just one quick step to continue
+                                    </p>
                                 </div>
 
-                                <!-- Floating Label Password WITH EYE ICON -->
-                                <div class="floating-form-group password-toggle-wrapper">
-                                    <input type="password" id="password" wire:model.defer="password"
-                                        class="floating-input @error('password') error @enderror" required
-                                        placeholder=" ">
-                                    <label for="password" class="floating-label">Password</label>
-
-                                    <!-- Eye Toggle Button -->
-                                    <button type="button" class="password-toggle-btn"
-                                        onclick="togglePasswordVisibility('password', this)">
-                                        <svg class="eye-open" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                        </svg>
-                                        <svg class="eye-closed" style="display: none;" fill="none"
-                                            stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-                                        </svg>
-                                    </button>
+                                <!-- Message -->
+                                <div
+                                    style="background: #f7fafc; border-radius: 8px; padding: 20px; margin-bottom: 25px;">
+                                    <p
+                                        style="font-size: 15px; color: #4a5568; line-height: 1.6; text-align: center; margin: 0;">
+                                        To protect our system from spam and bots, please complete this quick
+                                        verification to
+                                        continue as a guest.
+                                    </p>
                                 </div>
 
+                                <!-- reCAPTCHA Checkbox -->
+                                <div style="margin: 30px 0; display: flex; justify-content: center; min-height: 78px;">
+                                    <div id="recaptcha-guest-container"></div>
+                                </div>
+
+                                <!-- Error Message -->
                                 @if ($loginError)
-                                    <div class="error-message show">
-                                        <strong>Login Failed:</strong> {{ $loginError }}
+                                    <div class="error-message show" style="display: block; margin-bottom: 20px;">
+                                        <strong>⚠️ Verification Failed:</strong> {{ $loginError }}
                                     </div>
                                 @endif
 
-                                <!-- reCAPTCHA Checkbox -->
-                                <div class="recaptcha-container"
-                                    style="margin: 20px 0; display: flex; justify-content: center;">
-                                    <div id="recaptcha-login-container"></div>
-                                </div>
-
-                                <button type="button" onclick="executeRecaptchaLogin(event)" class="submit-btn"
-                                    id="loginSubmitBtn" disabled style="opacity: 0.5; cursor: not-allowed;"
-                                    wire:loading.class="loading" wire:target="loginAsEmployee">
-                                    <span wire:loading.remove wire:target="loginAsEmployee">Sign In</span>
-                                    <span wire:loading wire:target="loginAsEmployee">Signing In...</span>
+                                <!-- Continue Button -->
+                                <button type="button" onclick="proceedAsGuest()" class="submit-btn"
+                                    id="guestContinueBtn" disabled
+                                    style="width: 100%; padding: 14px; font-size: 16px; font-weight: 600; border-radius: 8px; border: none; background: #4299e1; color: white; opacity: 0.5; cursor: not-allowed; transition: all 0.3s ease;"
+                                    wire:loading.class="loading" wire:target="loginAsGuest">
+                                    <span wire:loading.remove wire:target="loginAsGuest">
+                                        ✓ Continue as Guest
+                                    </span>
+                                    <span wire:loading wire:target="loginAsGuest">
+                                        Verifying...
+                                    </span>
                                 </button>
-                            </form>
 
-                            <div class="text-center mt-4">
-                                <p class="text-sm text-gray-600">
-                                    Don't have an account?
-                                    <button type="button" wire:click="showRegisterForm"
-                                        class="text-blue-600 hover:text-blue-800 font-medium">
-                                        Register as Regular Customer
-                                    </button>
-                                </p>
-                            </div>
-                        </div>
-                    @endif
-
-                    {{-- REGISTRATION VIEW --}}
-                    @if ($currentView === 'register-form')
-                        <!-- Compact Registration Form -->
-                        <div class="employee-form active">
-                            <!-- Simple Welcome Header (no animation) -->
-                            <div class="welcome-header-simple">
-                                <h3 class="welcome-title">Create Your Account</h3>
-                                <p class="welcome-subtitle">Join us to get started</p>
-                            </div>
-
-                            <!-- Progress Indicator -->
-                            <div class="progress-indicator">
-                                <div class="progress-step active">
-                                    <div class="progress-dot">1</div>
-                                    <span>Details</span>
-                                </div>
-                                <div class="progress-line"></div>
-                                <div class="progress-step">
-                                    <div class="progress-dot">2</div>
-                                    <span>Verify</span>
-                                </div>
-                                <div class="progress-line"></div>
-                                <div class="progress-step">
-                                    <div class="progress-dot">3</div>
-                                    <span>Done</span>
+                                <!-- Security Note -->
+                                <div style="margin-top: 20px; text-align: center;">
+                                    <small style="color: #718096; font-size: 13px;">
+                                        🔒 This verification helps us keep the platform secure for everyone.
+                                    </small>
                                 </div>
                             </div>
+                        @endif
 
-                            <form wire:submit.prevent="registerEmployee">
-                                <!-- Full Name with Icon -->
-                                <div class="floating-form-group input-with-icon">
-                                    <span class="input-icon">👤</span>
-                                    <input type="text" id="registerName" wire:model.defer="registerName"
-                                        class="floating-input @error('registerName') error @enderror" required
-                                        placeholder=" ">
-                                    <label for="registerName" class="floating-label">Full Name</label>
+                        {{-- EMPLOYEE LOGIN VIEW --}}
+                        @if ($currentView === 'employee-form')
+                            <!-- Employee Login Form with Floating Labels -->
+                            <div class="employee-form active">
+                                <div class="form-divider">
+                                    <span>Regular Customer Sign In</span>
                                 </div>
 
-                                <!-- Email with Icon -->
-                                <div class="floating-form-group input-with-icon">
-                                    <span class="input-icon">✉️</span>
-                                    <input type="email" id="registerEmail" wire:model.defer="registerEmail"
-                                        class="floating-input @error('registerEmail') error @enderror" required
-                                        placeholder=" ">
-                                    <label for="registerEmail" class="floating-label">Email Address</label>
-                                </div>
-
-                                <!-- Phone with Icon -->
-                                <div class="floating-form-group input-with-icon">
-                                    <span class="input-icon">📱</span>
-                                    <input type="tel" id="registerPhone" wire:model.defer="registerPhone"
-                                        class="floating-input @error('registerPhone') error @enderror"
-                                        placeholder=" ">
-                                    <label for="registerPhone" class="floating-label">Phone Number (Optional)</label>
-                                </div>
-
-                                <!-- Password with Icon & Toggle -->
-                                <div class="floating-form-group password-toggle-wrapper input-with-icon">
-                                    <span class="input-icon">🔑</span>
-                                    <input type="password" id="registerPassword" wire:model.defer="registerPassword"
-                                        class="floating-input @error('registerPassword') error @enderror" required
-                                        placeholder=" " onfocus="showPasswordRequirements()"
-                                        onblur="hidePasswordRequirements()"
-                                        oninput="checkPasswordStrength(this.value)">
-                                    <label for="registerPassword" class="floating-label">Password</label>
-
-                                    <button type="button" class="password-toggle-btn"
-                                        onclick="togglePasswordVisibility('registerPassword', this)">
-                                        <svg class="eye-open" fill="none" stroke="currentColor"
-                                            viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                        </svg>
-                                        <svg class="eye-closed" style="display: none;" fill="none"
-                                            stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-                                        </svg>
-                                    </button>
-                                </div>
-
-                                <!-- Password Requirements -->
-                                <div class="password-requirements" id="passwordRequirements">
-                                    <span class="req-badge" id="req-length">8+ chars</span>
-                                    <span class="req-badge" id="req-uppercase">A-Z</span>
-                                    <span class="req-badge" id="req-lowercase">a-z</span>
-                                    <span class="req-badge" id="req-number">0-9</span>
-                                    <span class="req-badge" id="req-special">!@#$</span>
-                                </div>
-
-                                <!-- Confirm Password with Icon & Toggle -->
-                                <div class="floating-form-group password-toggle-wrapper input-with-icon">
-                                    <span class="input-icon">🔑</span>
-                                    <input type="password" id="registerPasswordConfirmation"
-                                        wire:model.defer="registerPasswordConfirmation"
-                                        class="floating-input @error('registerPasswordConfirmation') error @enderror"
-                                        required placeholder=" ">
-                                    <label for="registerPasswordConfirmation" class="floating-label">Confirm
-                                        Password</label>
-
-                                    <button type="button" class="password-toggle-btn"
-                                        onclick="togglePasswordVisibility('registerPasswordConfirmation', this)">
-                                        <svg class="eye-open" fill="none" stroke="currentColor"
-                                            viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                        </svg>
-                                        <svg class="eye-closed" style="display: none;" fill="none"
-                                            stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-                                        </svg>
-                                    </button>
-                                </div>
-
-                                @if ($registerError)
-                                    <div class="error-message show">
-                                        <strong>⚠️ Registration Failed:</strong> {{ $registerError }}
+                                <form wire:submit.prevent="loginAsEmployee">
+                                    <!-- Floating Label Email -->
+                                    <div class="floating-form-group">
+                                        <input type="email" id="email" wire:model.defer="email"
+                                            class="floating-input @error('email') error @enderror" required
+                                            placeholder=" ">
+                                        <label for="email" class="floating-label">Email Address</label>
                                     </div>
-                                @endif
 
-                                <!-- reCAPTCHA Checkbox -->
-                                <div class="recaptcha-container"
-                                    style="margin: 20px 0; display: flex; justify-content: center;">
-                                    <div id="recaptcha-register-container"></div>
-                                </div>
+                                    <!-- Floating Label Password WITH EYE ICON -->
+                                    <div class="floating-form-group password-toggle-wrapper">
+                                        <input type="password" id="password" wire:model.defer="password"
+                                            class="floating-input @error('password') error @enderror" required
+                                            placeholder=" ">
+                                        <label for="password" class="floating-label">Password</label>
 
-                                <!-- Submit Button -->
-                                <button type="button" onclick="executeRecaptchaRegister(event)"
-                                    class="submit-btn-modern" id="registerSubmitBtn" disabled
-                                    style="opacity: 0.5; cursor: not-allowed;" wire:loading.class="loading"
-                                    wire:target="registerEmployee">
-                                    <span class="btn-content" wire:loading.remove wire:target="registerEmployee">
-                                        <span class="btn-icon">🔐</span>
-                                        <span>Create Account</span>
-                                        <span class="btn-arrow">→</span>
-                                    </span>
-                                    <span wire:loading wire:target="registerEmployee">
-                                        <span class="spinner"></span>
-                                        Creating Account...
-                                    </span>
-                                </button>
+                                        <!-- Eye Toggle Button -->
+                                        <button type="button" class="password-toggle-btn"
+                                            onclick="togglePasswordVisibility('password', this)">
+                                            <svg class="eye-open" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                            </svg>
+                                            <svg class="eye-closed" style="display: none;" fill="none"
+                                                stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                                            </svg>
+                                        </button>
+                                    </div>
 
-                                <!-- Already have account link -->
-                                <div class="already-have-account">
-                                    Already have an account?
-                                    <button type="button" wire:click="showEmployeeForm" class="link-btn">
-                                        Sign in here
+                                    @if ($loginError)
+                                        <div class="error-message show">
+                                            <strong>Login Failed:</strong> {{ $loginError }}
+                                        </div>
+                                    @endif
+
+                                    <!-- reCAPTCHA Checkbox -->
+                                    <div class="recaptcha-container"
+                                        style="margin: 20px 0; display: flex; justify-content: center;">
+                                        <div id="recaptcha-login-container"></div>
+                                    </div>
+
+                                    <button type="button" onclick="executeRecaptchaLogin(event)" class="submit-btn"
+                                        id="loginSubmitBtn" disabled style="opacity: 0.5; cursor: not-allowed;"
+                                        wire:loading.class="loading" wire:target="loginAsEmployee">
+                                        <span wire:loading.remove wire:target="loginAsEmployee">Sign In</span>
+                                        <span wire:loading wire:target="loginAsEmployee">Signing In...</span>
                                     </button>
+                                </form>
+
+                                <div class="text-center mt-4">
+                                    <p class="text-sm text-gray-600">
+                                        Don't have an account?
+                                        <button type="button" wire:click="showRegisterForm"
+                                            class="text-blue-600 hover:text-blue-800 font-medium">
+                                            Register as Regular Customer
+                                        </button>
+                                    </p>
                                 </div>
-                            </form>
-                        </div>
-                    @endif
+                            </div>
+                        @endif
+
+                        {{-- REGISTRATION VIEW --}}
+                        @if ($currentView === 'register-form')
+                            <!-- Compact Registration Form -->
+                            <div class="employee-form active">
+                                <!-- Simple Welcome Header (no animation) -->
+                                <div class="welcome-header-simple">
+                                    <h3 class="welcome-title">Create Your Account</h3>
+                                    <p class="welcome-subtitle">Join us to get started</p>
+                                </div>
+
+                                <!-- Progress Indicator -->
+                                <div class="progress-indicator">
+                                    <div class="progress-step active">
+                                        <div class="progress-dot">1</div>
+                                        <span>Details</span>
+                                    </div>
+                                    <div class="progress-line"></div>
+                                    <div class="progress-step">
+                                        <div class="progress-dot">2</div>
+                                        <span>Verify</span>
+                                    </div>
+                                    <div class="progress-line"></div>
+                                    <div class="progress-step">
+                                        <div class="progress-dot">3</div>
+                                        <span>Done</span>
+                                    </div>
+                                </div>
+
+                                <form wire:submit.prevent="registerEmployee">
+                                    <!-- Full Name with Icon -->
+                                    <div class="floating-form-group input-with-icon">
+                                        <span class="input-icon">👤</span>
+                                        <input type="text" id="registerName" wire:model.defer="registerName"
+                                            class="floating-input @error('registerName') error @enderror" required
+                                            placeholder=" ">
+                                        <label for="registerName" class="floating-label">Full Name</label>
+                                    </div>
+
+                                    <!-- Email with Icon -->
+                                    <div class="floating-form-group input-with-icon">
+                                        <span class="input-icon">✉️</span>
+                                        <input type="email" id="registerEmail" wire:model.defer="registerEmail"
+                                            class="floating-input @error('registerEmail') error @enderror" required
+                                            placeholder=" ">
+                                        <label for="registerEmail" class="floating-label">Email Address</label>
+                                    </div>
+
+                                    <!-- Phone with Icon -->
+                                    <div class="floating-form-group input-with-icon">
+                                        <span class="input-icon">📱</span>
+                                        <input type="tel" id="registerPhone" wire:model.defer="registerPhone"
+                                            class="floating-input @error('registerPhone') error @enderror"
+                                            placeholder=" ">
+                                        <label for="registerPhone" class="floating-label">Phone Number
+                                            (Optional)</label>
+                                    </div>
+
+                                    <!-- Password with Icon & Toggle -->
+                                    <div class="floating-form-group password-toggle-wrapper input-with-icon">
+                                        <span class="input-icon">🔑</span>
+                                        <input type="password" id="registerPassword"
+                                            wire:model.defer="registerPassword"
+                                            class="floating-input @error('registerPassword') error @enderror" required
+                                            placeholder=" " onfocus="showPasswordRequirements()"
+                                            onblur="hidePasswordRequirements()"
+                                            oninput="checkPasswordStrength(this.value)">
+                                        <label for="registerPassword" class="floating-label">Password</label>
+
+                                        <button type="button" class="password-toggle-btn"
+                                            onclick="togglePasswordVisibility('registerPassword', this)">
+                                            <svg class="eye-open" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                            </svg>
+                                            <svg class="eye-closed" style="display: none;" fill="none"
+                                                stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                                            </svg>
+                                        </button>
+                                    </div>
+
+                                    <!-- Password Requirements -->
+                                    <div class="password-requirements" id="passwordRequirements">
+                                        <span class="req-badge" id="req-length">8+ chars</span>
+                                        <span class="req-badge" id="req-uppercase">A-Z</span>
+                                        <span class="req-badge" id="req-lowercase">a-z</span>
+                                        <span class="req-badge" id="req-number">0-9</span>
+                                        <span class="req-badge" id="req-special">!@#$</span>
+                                    </div>
+
+                                    <!-- Confirm Password with Icon & Toggle -->
+                                    <div class="floating-form-group password-toggle-wrapper input-with-icon">
+                                        <span class="input-icon">🔑</span>
+                                        <input type="password" id="registerPasswordConfirmation"
+                                            wire:model.defer="registerPasswordConfirmation"
+                                            class="floating-input @error('registerPasswordConfirmation') error @enderror"
+                                            required placeholder=" ">
+                                        <label for="registerPasswordConfirmation" class="floating-label">Confirm
+                                            Password</label>
+
+                                        <button type="button" class="password-toggle-btn"
+                                            onclick="togglePasswordVisibility('registerPasswordConfirmation', this)">
+                                            <svg class="eye-open" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                            </svg>
+                                            <svg class="eye-closed" style="display: none;" fill="none"
+                                                stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                                            </svg>
+                                        </button>
+                                    </div>
+
+                                    @if ($registerError)
+                                        <div class="error-message show">
+                                            <strong>⚠️ Registration Failed:</strong> {{ $registerError }}
+                                        </div>
+                                    @endif
+
+                                    <!-- reCAPTCHA Checkbox -->
+                                    <div class="recaptcha-container"
+                                        style="margin: 20px 0; display: flex; justify-content: center;">
+                                        <div id="recaptcha-register-container"></div>
+                                    </div>
+
+                                    <!-- ⭐ Terms & Privacy Policy Checkbox -->
+                                    <div class="terms-checkbox-wrapper" style="margin: 20px 0;">
+                                        <label class="checkbox-container-custom">
+                                            <input type="checkbox" wire:model="acceptTerms" id="acceptTermsCheckbox">
+                                            <span class="checkmark-custom"></span>
+                                            <span class="terms-text-custom">
+                                                I agree to the
+                                                <a href="{{ route('legal.terms') }}" target="_blank"
+                                                    class="terms-link-custom">
+                                                    Terms and Conditions
+                                                </a>
+                                                and
+                                                <a href="{{ route('legal.privacy') }}" target="_blank"
+                                                    class="terms-link-custom">
+                                                    Privacy Policy
+                                                </a>
+                                            </span>
+                                        </label>
+
+                                        @error('acceptTerms')
+                                            <div class="error-message show" style="margin-top: 8px; font-size: 13px;">
+                                                <strong>⚠️</strong> {{ $message }}
+                                            </div>
+                                        @enderror
+                                    </div>
+
+                                    {{-- ⭐ Legal Documents Modal (Add at the end of your modal, before closing </div>) --}}
+                                    <div class="legal-modal-overlay" id="legalModal" style="display: none;">
+                                        <div class="legal-modal-container">
+                                            <div class="legal-modal-header">
+                                                <h2 id="legalModalTitle">Legal Documents</h2>
+                                                <button class="legal-modal-close"
+                                                    onclick="closeLegalModal()">&times;</button>
+                                            </div>
+
+                                            <div class="legal-tabs">
+                                                <button class="legal-tab active" onclick="switchLegalTab('terms')">
+                                                    Terms & Conditions
+                                                </button>
+                                                <button class="legal-tab" onclick="switchLegalTab('privacy')">
+                                                    Privacy Policy
+                                                </button>
+                                            </div>
+
+                                            <div class="legal-modal-content">
+                                                <!-- Terms Content -->
+                                                <div id="legalTerms" class="legal-tab-content active">
+                                                    <iframe src="{{ route('legal.terms') }}" frameborder="0"
+                                                        style="width: 100%; height: 100%; border: none;">
+                                                    </iframe>
+                                                </div>
+
+                                                <!-- Privacy Content -->
+                                                <div id="legalPrivacy" class="legal-tab-content">
+                                                    <iframe src="{{ route('legal.privacy') }}" frameborder="0"
+                                                        style="width: 100%; height: 100%; border: none;">
+                                                    </iframe>
+                                                </div>
+                                            </div>
+
+                                            <div class="legal-modal-footer">
+                                                <button class="btn-accept-legal" onclick="acceptAndCloseLegal()">
+                                                    I Accept
+                                                </button>
+                                                <button class="btn-decline-legal" onclick="closeLegalModal()">
+                                                    Close
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Submit Button -->
+                                    <button type="button" onclick="executeRecaptchaRegister(event)"
+                                        class="submit-btn-modern" id="registerSubmitBtn" disabled
+                                        style="opacity: 0.5; cursor: not-allowed;" wire:loading.class="loading"
+                                        wire:target="registerEmployee">
+                                        <span class="btn-content" wire:loading.remove wire:target="registerEmployee">
+                                            <span class="btn-icon">🔐</span>
+                                            <span>Create Account</span>
+                                            <span class="btn-arrow">→</span>
+                                        </span>
+                                        <span wire:loading wire:target="registerEmployee">
+                                            <span class="spinner"></span>
+                                            Creating Account...
+                                        </span>
+                                    </button>
+
+                                    <!-- Already have account link -->
+                                    <div class="already-have-account">
+                                        Already have an account?
+                                        <button type="button" wire:click="showEmployeeForm" class="link-btn">
+                                            Sign in here
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        @endif
+                    </div>
                 </div>
             </div>
         </div>
     @endif
 </div>
+
+
 
 {{-- Load reCAPTCHA API --}}
 <script src="https://www.google.com/recaptcha/api.js?onload=onRecaptchaLoadCallback&render=explicit" async defer>
@@ -380,6 +464,70 @@
         window.recaptchaReady = true;
         renderVisibleRecaptchas();
     };
+
+    // ⭐ MOVED UP: Define validation function BEFORE rendering reCAPTCHA
+    function checkRegisterFormValidity() {
+        const btn = document.getElementById('registerSubmitBtn');
+        const termsCheckbox = document.getElementById('acceptTermsCheckbox');
+
+        // Get reCAPTCHA response
+        let recaptchaResponse = '';
+        try {
+            if (window.recaptchaWidgets && window.recaptchaWidgets.register !== undefined) {
+                recaptchaResponse = grecaptcha.getResponse(window.recaptchaWidgets.register);
+            }
+        } catch (e) {
+            console.error('Error getting reCAPTCHA response:', e);
+        }
+
+        // Check if BOTH are valid
+        const recaptchaValid = recaptchaResponse && recaptchaResponse.length > 0;
+        const termsValid = termsCheckbox && termsCheckbox.checked;
+
+        console.log('📋 Form Validity Check:', {
+            recaptcha: recaptchaValid ? '✅' : '❌',
+            terms: termsValid ? '✅' : '❌',
+            termsCheckboxExists: termsCheckbox ? '✅' : '❌'
+        });
+
+        // Enable button only if BOTH are valid
+        const isValid = recaptchaValid && termsValid;
+
+        if (btn) {
+            btn.disabled = !isValid;
+            btn.style.opacity = isValid ? '1' : '0.5';
+            btn.style.cursor = isValid ? 'pointer' : 'not-allowed';
+        }
+    }
+
+    // ⭐ MOVED UP: Attach terms listener function BEFORE rendering reCAPTCHA
+    function attachTermsListener() {
+        const termsCheckbox = document.getElementById('acceptTermsCheckbox');
+        if (termsCheckbox) {
+            // Check if listener already attached
+            if (termsCheckbox.dataset.listenerAttached === 'true') {
+                console.log('✅ Terms listener already attached');
+                return;
+            }
+
+            // Add listener
+            termsCheckbox.addEventListener('change', function() {
+                console.log('📝 Terms checkbox changed:', this.checked);
+                checkRegisterFormValidity();
+            });
+
+            // Mark as attached
+            termsCheckbox.dataset.listenerAttached = 'true';
+            console.log('✅ Terms checkbox listener attached');
+
+            // Check validity immediately
+            checkRegisterFormValidity();
+        } else {
+            console.log('⚠️ Terms checkbox not found, will retry...');
+            // Retry after a short delay
+            setTimeout(attachTermsListener, 100);
+        }
+    }
 
     // Function to render any visible reCAPTCHA containers
     function renderVisibleRecaptchas() {
@@ -436,21 +584,25 @@
             }
         }
 
-        // Register reCAPTCHA
+        // ⭐ FIXED: Register reCAPTCHA - Attach listener FIRST, then render
         var registerContainer = document.getElementById('recaptcha-register-container');
         if (registerContainer && registerContainer.innerHTML === '') {
             console.log('🎯 Rendering REGISTER reCAPTCHA');
+
+            // ⭐ Attach terms listener BEFORE rendering reCAPTCHA
+            attachTermsListener();
+
             try {
                 window.recaptchaWidgets.register = grecaptcha.render('recaptcha-register-container', {
                     'sitekey': '{{ \App\Helpers\RecaptchaHelper::getV2SiteKey('checkbox') }}',
                     'callback': function(token) {
                         console.log('✅ Register reCAPTCHA completed');
-                        var btn = document.getElementById('registerSubmitBtn');
-                        if (btn) {
-                            btn.disabled = false;
-                            btn.style.opacity = '1';
-                            btn.style.cursor = 'pointer';
-                        }
+                        // ⭐ Now this works regardless of order
+                        checkRegisterFormValidity();
+                    },
+                    'expired-callback': function() {
+                        console.log('⚠️ reCAPTCHA expired');
+                        checkRegisterFormValidity();
                     }
                 });
                 console.log('✅ Register widget ID:', window.recaptchaWidgets.register);
@@ -467,14 +619,21 @@
             component
         }) => {
             console.log('🔄 Livewire updated - re-rendering reCAPTCHAs...');
-            setTimeout(renderVisibleRecaptchas, 100);
+            setTimeout(() => {
+                renderVisibleRecaptchas();
+                // Re-attach listener after Livewire updates
+                attachTermsListener();
+            }, 100);
         });
     });
 
     // Also try on DOMContentLoaded
     document.addEventListener('DOMContentLoaded', function() {
         console.log('📄 DOM loaded - trying to render...');
-        setTimeout(renderVisibleRecaptchas, 500);
+        setTimeout(() => {
+            renderVisibleRecaptchas();
+            attachTermsListener();
+        }, 500);
     });
 
     // Guest proceed function
@@ -547,30 +706,52 @@
     // Register execute function
     function executeRecaptchaRegister(event) {
         event.preventDefault();
-        console.log('🚀 Register button clicked');
+        console.log('🚀 Registration submit clicked');
 
-        if (window.recaptchaWidgets.register === null) {
-            alert('reCAPTCHA not initialized. Please refresh the page.');
-            return false;
+        // Get reCAPTCHA token
+        let recaptchaToken = '';
+        try {
+            if (window.recaptchaWidgets && window.recaptchaWidgets.register !== undefined) {
+                recaptchaToken = grecaptcha.getResponse(window.recaptchaWidgets.register);
+            }
+        } catch (e) {
+            console.error('❌ Error getting reCAPTCHA:', e);
         }
 
-        var token = grecaptcha.getResponse(window.recaptchaWidgets.register);
+        // Get terms checkbox
+        const termsCheckbox = document.getElementById('acceptTermsCheckbox');
 
-        if (!token) {
-            alert('Please complete the reCAPTCHA checkbox first.');
-            return false;
+        // Validate reCAPTCHA
+        if (!recaptchaToken || recaptchaToken.length === 0) {
+            alert('⚠️ Please complete the reCAPTCHA verification.');
+            return;
         }
 
-        console.log('✅ Register token received');
-
-        var component = Livewire.find(event.target.closest('[wire\\:id]').getAttribute('wire:id'));
-
-        if (component) {
-            component.set('recaptcha_token_register', token);
-            component.call('registerEmployee');
-        } else {
-            console.error('❌ Livewire component not found');
+        // Validate terms
+        if (!termsCheckbox || !termsCheckbox.checked) {
+            alert('⚠️ You must accept the Terms and Conditions and Privacy Policy.');
+            return;
         }
+
+        console.log('✅ All validations passed');
+
+        // Set token and call registration
+        @this.set('recaptcha_token_register', recaptchaToken).then(() => {
+            console.log('✅ Token set successfully');
+            @this.call('registerEmployee');
+        }).catch((error) => {
+            console.error('❌ Failed to set token:', error);
+
+            // Show modal again, hide loading
+            if (modal) {
+                modal.style.display = 'flex';
+            }
+            if (loadingOverlay) {
+                loadingOverlay.style.display = 'none';
+            }
+
+            alert('An error occurred. Please try again.');
+        });
     }
 </script>
 
@@ -665,4 +846,88 @@
             specialReq.classList.remove('valid', 'invalid');
         }
     }
+
+    // ⭐ Legal Modal Functions
+    function openLegalModal(tab = 'terms') {
+        const modal = document.getElementById('legalModal');
+        modal.style.display = 'flex';
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+        switchLegalTab(tab);
+    }
+
+    function closeLegalModal() {
+        const modal = document.getElementById('legalModal');
+        modal.style.display = 'none';
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+
+    function switchLegalTab(tab) {
+        // Update tabs
+        document.querySelectorAll('.legal-tab').forEach(t => {
+            t.classList.remove('active');
+        });
+
+        // Find and activate clicked tab
+        const tabs = document.querySelectorAll('.legal-tab');
+        if (tab === 'terms') {
+            tabs[0]?.classList.add('active');
+        } else {
+            tabs[1]?.classList.add('active');
+        }
+
+        // Update content
+        document.querySelectorAll('.legal-tab-content').forEach(content => {
+            content.classList.remove('active');
+        });
+
+        if (tab === 'terms') {
+            document.getElementById('legalTerms').classList.add('active');
+            document.getElementById('legalModalTitle').textContent = 'Terms and Conditions';
+        } else {
+            document.getElementById('legalPrivacy').classList.add('active');
+            document.getElementById('legalModalTitle').textContent = 'Privacy Policy';
+        }
+    }
+
+    function acceptAndCloseLegal() {
+        // Check the terms checkbox
+        const checkbox = document.getElementById('acceptTermsCheckbox');
+        if (checkbox) {
+            checkbox.checked = true;
+            // Trigger change event
+            checkbox.dispatchEvent(new Event('change', {
+                bubbles: true
+            }));
+            // Also trigger input for Livewire
+            checkbox.dispatchEvent(new Event('input', {
+                bubbles: true
+            }));
+
+            console.log('✅ Terms accepted via modal button');
+
+            // Manually trigger validation check
+            setTimeout(() => {
+                checkRegisterFormValidity();
+            }, 50);
+        }
+        closeLegalModal();
+    }
+
+    // Close on outside click
+    document.addEventListener('click', function(e) {
+        const modal = document.getElementById('legalModal');
+        if (e.target === modal) {
+            closeLegalModal();
+        }
+    });
+
+    // Close on Escape key
+    document.addEventListener('keydown', function(e) {
+        const modal = document.getElementById('legalModal');
+        if (e.key === 'Escape' && modal && modal.classList.contains('active')) {
+            closeLegalModal();
+        }
+    });
 </script>

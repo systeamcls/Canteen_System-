@@ -5,14 +5,14 @@ namespace App\Filament\Admin\Widgets;
 use App\Models\Order;
 use App\Models\Expense;
 use App\Models\RentalPayment;
-use App\Models\Payroll;
+use App\Models\WeeklyPayout;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Support\Facades\Auth;
 
 class FinancialOverviewWidget extends BaseWidget
 {
-    protected static ?int $sort = 1;
+
     protected int | string | array $columnSpan = [
         'sm' => 2,
         'md' => 2,
@@ -63,9 +63,16 @@ class FinancialOverviewWidget extends BaseWidget
 
         // EXPENSES
         // 1. Staff Salaries (already in pesos - decimal)
-        $staffSalaries = Payroll::whereBetween('period_start', [$startDate, $endDate])
-            ->whereIn('status', ['approved', 'paid'])
-            ->sum('net_pay'); // This is in PESOS (decimal)
+        $staffSalaries = WeeklyPayout::where('status', 'paid')
+            ->where(function($query) use ($startDate, $endDate) {
+                $query->whereBetween('week_start', [$startDate, $endDate])
+                      ->orWhereBetween('week_end', [$startDate, $endDate])
+                      ->orWhere(function($q) use ($startDate, $endDate) {
+                          $q->where('week_start', '<=', $startDate)
+                            ->where('week_end', '>=', $endDate);
+                      });
+            })
+            ->sum('total_payout'); // This is in PESOS (decimal)
 
         // 2. Other Expenses (already in pesos - decimal)
         $otherExpenses = Expense::whereBetween('expense_date', [$startDate, $endDate])
@@ -246,9 +253,12 @@ class FinancialOverviewWidget extends BaseWidget
         $totalIncome = $salesRevenue + $rentalIncome;
 
         // Expenses - already in pesos
-        $staffSalaries = Payroll::whereBetween('period_start', [$startDate, $endDate])
-            ->whereIn('status', ['approved', 'paid'])
-            ->sum('net_pay');
+        $staffSalaries = WeeklyPayout::where('status', 'paid')
+            ->where(function($query) use ($startDate, $endDate) {
+                $query->whereBetween('week_start', [$startDate, $endDate])
+                      ->orWhereBetween('week_end', [$startDate, $endDate]);
+            })
+            ->sum('total_payout');
 
         $otherExpenses = Expense::whereBetween('expense_date', [$startDate, $endDate])
             ->sum('amount');
