@@ -595,41 +595,75 @@ class CheckoutForm extends Component
     }
 
     public function updateQuantity($index, $newQuantity)
-    {
-        if ($newQuantity < 1) {
-            return;
-        }
+{
+    if ($newQuantity < 1) {
+        return;
+    }
+    
+    if (isset($this->cartSnapshot[$index])) {
+        $productId = $this->cartSnapshot[$index]['product_id'];
         
-        if (isset($this->cartSnapshot[$index])) {
-            // Update quantity in cart snapshot
+        try {
+            // 1. Update actual cart in database
+            $cart = $this->cartService->getCart();
+            $cartItem = $cart->items()->where('product_id', $productId)->first();
+            
+            if ($cartItem) {
+                $this->cartService->updateQuantity($cartItem->id, $newQuantity);
+            }
+            
+            // 2. Update snapshot (for UI)
             $this->cartSnapshot[$index]['quantity'] = $newQuantity;
             $this->cartSnapshot[$index]['line_total'] = $this->cartSnapshot[$index]['unit_price'] * $newQuantity;
             
-            // Recalculate total
+            // 3. Recalculate total
             $this->totalAmount = collect($this->cartSnapshot)->sum('line_total');
             
-            // If you have a cart service, also update the actual cart
-            // $this->cartService->updateQuantity($cartItemId, $newQuantity);
+            // 4. Dispatch event to update other cart components
+            $this->dispatch('cart-updated');
+            $this->dispatch('refresh-cart');
+            
+        } catch (\Exception $e) {
+            logger()->error('Failed to update quantity: ' . $e->getMessage());
+            $this->errorMessage = 'Failed to update quantity. Please try again.';
         }
     }
+}
 
     public function removeItem($index)
-    {
-        if (isset($this->cartSnapshot[$index])) {
-            // Remove item from snapshot
-            unset($this->cartSnapshot[$index]);
-            $this->cartSnapshot = array_values($this->cartSnapshot); // Re-index array
+{
+    if (isset($this->cartSnapshot[$index])) {
+        $productId = $this->cartSnapshot[$index]['product_id'];
+        
+        try {
+            // 1. Remove from actual cart in database
+            $cart = $this->cartService->getCart();
+            $cartItem = $cart->items()->where('product_id', $productId)->first();
             
-            // Recalculate total
+            if ($cartItem) {
+                $this->cartService->removeFromCart($cartItem->id);
+            }
+            
+            // 2. Remove from snapshot (for UI)
+            unset($this->cartSnapshot[$index]);
+            $this->cartSnapshot = array_values($this->cartSnapshot);
+            
+            // 3. Recalculate total
             $this->totalAmount = collect($this->cartSnapshot)->sum('line_total');
             
-            // If you have a cart service, also remove from actual cart
-            // $this->cartService->removeFromCart($cartItemId);
+            // 4. Dispatch event to update other cart components
+            $this->dispatch('cart-updated');
+            $this->dispatch('refresh-cart');
             
-            // Redirect to menu if cart is empty
+            // 5. Redirect to menu if cart is empty
             if (empty($this->cartSnapshot)) {
                 return redirect()->route('menu.index')->with('info', 'Your cart is now empty.');
             }
+            
+        } catch (\Exception $e) {
+            logger()->error('Failed to remove item from cart: ' . $e->getMessage());
+            $this->errorMessage = 'Failed to remove item. Please try again.';
         }
     }
+}
 }

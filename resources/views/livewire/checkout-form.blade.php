@@ -87,7 +87,7 @@
 
                                             <div class="item-actions">
                                                 <button type="button" class="delete-item-btn"
-                                                    wire:click="removeItem({{ $index }})">
+                                                    onclick="confirmDelete({{ $index }}, '{{ $item['product_name'] }}')">
                                                     🗑️
                                                 </button>
                                                 <div class="price-section">
@@ -1609,4 +1609,32 @@
             }
         });
     });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    function confirmDelete(index, productName) {
+        Swal.fire({
+            title: 'Remove Item?',
+            text: `Are you sure you want to remove "${productName}" from your cart?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: 'Yes, remove it',
+            cancelButtonText: 'Cancel'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                @this.call('removeItem', index);
+
+                Swal.fire({
+                    title: 'Removed!',
+                    text: 'Item has been removed from your cart.',
+                    icon: 'success',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            }
+        });
+    }
 </script>
