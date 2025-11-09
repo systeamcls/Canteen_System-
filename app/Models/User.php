@@ -117,8 +117,9 @@ class User extends Authenticatable implements MustVerifyEmail, FilamentUser
         }
 
         if ($panel->getId() === 'tenant') {
-            return $this->hasRole('tenant') && $this->hasEnabledTwoFactorAuthentication();
-        }
+        // Removed 2FA requirement - tenants can login with just role check
+        return $this->hasRole('tenant') && $this->is_active;
+}
 
         if ($panel->getId() === 'cashier') {
             return $this->hasRole('cashier');
