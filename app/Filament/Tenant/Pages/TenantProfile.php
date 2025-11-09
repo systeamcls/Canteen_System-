@@ -52,6 +52,7 @@ class TenantProfile extends Page implements HasForms
                 'name' => $stall->name,
                 'description' => $stall->description,
                 'logo' => $stall->logo,
+                'cover_photo' => $stall->cover_photo, // Add this line
                 'contact_number' => $stall->contact_number,
                 'opening_time' => $stall->opening_time,
                 'closing_time' => $stall->closing_time,
@@ -128,35 +129,53 @@ class TenantProfile extends Page implements HasForms
                             ->maxLength(1000)
                             ->rows(3)
                             ->columnSpanFull()
-                            ->helperText('Describe your stall, cuisine type, and what makes it special')
-                            ->placeholder('Authentic Filipino dishes made with love...'),
+                            ->helperText('Describe your stall, cuisine type, and what makes it special'),
+                    ]),
+
+                // Add this new section for branding
+                Section::make('Stall Branding')
+                    ->description('Upload your stall logo and cover photo')
+                    ->schema([
+                        FileUpload::make('cover_photo')
+                            ->label('Cover Photo')
+                            ->image()
+                            ->disk('public')
+                            ->directory('stall-covers')
+                            ->maxSize(5120) // 5MB
+                            ->imageEditor()
+                            ->imageCropAspectRatio('16:4')
+                            ->imageResizeTargetWidth(1200)
+                            ->imageResizeTargetHeight(300)
+                            ->helperText('Upload a banner image for your profile (recommended: 1200x300px)')
+                            ->columnSpanFull(),
 
                         FileUpload::make('logo')
                             ->label('Stall Logo')
                             ->image()
-                            ->directory('stall-logos')
                             ->disk('public')
-                            ->visibility('public')
-                            ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
+                            ->directory('stall-logos')
+                            ->maxSize(2048) // 2MB
                             ->imageEditor()
-                            ->imageEditorAspectRatios(['1:1'])
-                            ->imageResizeMode('cover')
-                            ->imageResizeTargetWidth('400')
-                            ->imageResizeTargetHeight('400')
-                            ->maxSize(2048)
-                            ->helperText('Square logo recommended, max 2MB')
+                            ->imageCropAspectRatio('1:1')
+                            ->imageResizeTargetWidth(400)
+                            ->imageResizeTargetHeight(400)
+                            ->helperText('Upload your stall logo (square format recommended)')
                             ->columnSpanFull(),
+                    ])
+                    ->columns(1),
 
+                Section::make('Contact & Hours')
+                    ->description('How customers can reach you and when you\'re open')
+                    ->schema([
                         TextInput::make('contact_number')
-                            ->label('Stall Contact Number')
                             ->tel()
                             ->maxLength(20)
                             ->placeholder('+63 912 345 6789')
-                            ->helperText('Customer contact number for your stall'),
+                            ->helperText('Customer service contact number'),
 
                         TimePicker::make('opening_time')
                             ->seconds(false)
-                            ->helperText('When do you start serving customers?'),
+                            ->helperText('When do you start serving?'),
 
                         TimePicker::make('closing_time')
                             ->seconds(false)
@@ -265,6 +284,7 @@ class TenantProfile extends Page implements HasForms
             'name' => $data['name'],
             'description' => $data['description'],
             'logo' => $data['logo'],
+            'cover_photo' => $data['cover_photo'], // Add this line
             'contact_number' => $data['contact_number'],
             'opening_time' => $data['opening_time'],
             'closing_time' => $data['closing_time'],

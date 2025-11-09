@@ -26,6 +26,7 @@ class Stall extends Model
         'is_active',
         'logo',
         'image',
+        'cover_photo',
         'contact_number',
         'opening_time',
         'closing_time',
