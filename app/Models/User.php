@@ -1,22 +1,22 @@
 <?php
 
-// 📁 app/Models/User.php (UPDATED - Safe merge with your existing model)
-
 namespace App\Models;
 
-use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Laravel\Sanctum\HasApiTokens;
-use Laravel\Jetstream\HasProfilePhoto;
-use Spatie\Permission\Traits\HasRoles;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Database\Eloquent\Relations\HasOne;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Support\Facades\Storage;
+use Laravel\Jetstream\HasProfilePhoto;
+use Laravel\Sanctum\HasApiTokens;
+use Spatie\Permission\Traits\HasRoles;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Filament\Models\Contracts\FilamentUser;
-
+use Filament\Panel;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 
 /**
@@ -46,22 +46,24 @@ class User extends Authenticatable implements MustVerifyEmail, FilamentUser
     use HasRoles;
     use Notifiable;
     use TwoFactorAuthenticatable;
+    use LogsActivity; // Add this for audit logging
 
     protected $fillable = [
-        // Your existing fields
         'name',
         'email',
         'password',
         'phone',
-        'type',
+        'type', // Keep for backward compatibility
         'is_active',
         'is_staff',
+        'daily_rate',
         'admin_stall_id',
         'verification_sent_at',
-
-        // New fields for canteen system (will be added via migration)
         'preferred_notification_channel',
         'profile_photo_path',
+        'profile_picture',
+        'is_guest',
+        'can_pay_onsite',
     ];
 
     protected $hidden = [
@@ -79,6 +81,8 @@ class User extends Authenticatable implements MustVerifyEmail, FilamentUser
             'password' => 'hashed',
             'is_active' => 'boolean',
             'is_staff' => 'boolean',
+            'is_guest' => 'boolean',
+            'can_pay_onsite' => 'boolean',
             'two_factor_confirmed_at' => 'datetime',
         ];
     }
@@ -87,23 +91,53 @@ class User extends Authenticatable implements MustVerifyEmail, FilamentUser
         'profile_photo_url',
     ];
 
+    // Activity Log Configuration
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly(['name', 'email', 'type', 'is_active'])
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs();
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Filament Access Control
+    |--------------------------------------------------------------------------
+    */
+
+    public function canAccessPanel(Panel $panel): bool
+    {
+        if (!$this->is_active) {
+            return false;
+        }
+
+        if ($panel->getId() === 'admin') {
+            return $this->hasRole('admin');
+        }
+
+        if ($panel->getId() === 'tenant') {
+            return $this->hasRole('tenant') && $this->hasEnabledTwoFactorAuthentication();
+        }
+
+        if ($panel->getId() === 'cashier') {
+            return $this->hasRole('cashier');
+        }
+
+        return false;
+    }
+
     /*
     |--------------------------------------------------------------------------
     | Two-Factor Authentication Methods
     |--------------------------------------------------------------------------
     */
 
-    /**
-     * Determine if two-factor authentication has been enabled.
-     */
     public function hasEnabledTwoFactorAuthentication(): bool
     {
         return !is_null($this->two_factor_secret) && !is_null($this->two_factor_confirmed_at);
     }
 
-    /**
-     * Get the QR code URL for two-factor authentication setup.
-     */
     public function twoFactorQrCodeUrl(): ?string
     {
         if (!$this->two_factor_secret) {
@@ -121,27 +155,6 @@ class User extends Authenticatable implements MustVerifyEmail, FilamentUser
         }
     }
 
-    /**
-     * Get formatted secret key for manual entry.
-     */
-    public function twoFactorFormattedSecret(): ?string
-    {
-        if (!$this->two_factor_secret) {
-            return null;
-        }
-
-        try {
-            $secret = decrypt($this->two_factor_secret);
-            $chunks = str_split($secret, 4);
-            return strtoupper(implode(' ', $chunks));
-        } catch (\Exception $e) {
-            return null;
-        }
-    }
-
-    /**
-     * Get recovery codes as array.
-     */
     public function getTwoFactorRecoveryCodes(): array
     {
         if (!$this->two_factor_recovery_codes) {
@@ -158,9 +171,6 @@ class User extends Authenticatable implements MustVerifyEmail, FilamentUser
         }
     }
 
-    /**
-     * Check if user has any recovery codes left.
-     */
     public function hasRecoveryCodes(): bool
     {
         return count($this->getTwoFactorRecoveryCodes()) > 0;
@@ -168,124 +178,98 @@ class User extends Authenticatable implements MustVerifyEmail, FilamentUser
 
     /*
     |--------------------------------------------------------------------------
-    | Your Existing Role Methods (preserved)
+    | 🔐 SECURE Role Methods - Use ONLY Spatie
     |--------------------------------------------------------------------------
     */
 
-    public function isAdmin()
+    public function isAdmin(): bool
     {
         return $this->hasRole('admin');
     }
 
-    public function isTenant()
+    public function isTenant(): bool
     {
         return $this->hasRole('tenant');
     }
 
-    public function isCashier()
+    public function isCashier(): bool
     {
         return $this->hasRole('cashier');
     }
 
-    public function isCustomer()
+    public function isCustomer(): bool
     {
         return $this->hasRole('customer');
     }
 
-    public function isStallAdmin()
+    public function isStallAdmin(): bool
     {
         return $this->hasRole('admin') && $this->admin_stall_id !== null;
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Your Existing Relationships (preserved)
-    |--------------------------------------------------------------------------
-    */
-
     /**
-     * Relationship: Stall assigned to tenant (your existing)
+     * Get user's primary role name
      */
-    public function assignedStall()
+    public function getPrimaryRole(): ?string
     {
-        return $this->hasOne(Stall::class, 'tenant_id');
-    }
-
-    public function stall(): HasOne
-    {
-        return $this->hasOne(Stall::class);
-    }
-
-    public function adminStall()
-    {
-        return $this->belongsTo(Stall::class, 'admin_stall_id');
-    }
-
-    public function orders()
-    {
-        return $this->hasMany(\App\Models\Order::class);
+        return $this->roles->first()?->name;
     }
 
     /**
-     * Relationship: Rental payments for tenant (your existing)
+     * Get user's primary role display name
      */
-    public function rentalPayments()
+    public function getPrimaryRoleLabel(): string
     {
-        return $this->hasMany(RentalPayment::class, 'tenant_id');
+        return match($this->getPrimaryRole()) {
+            'admin' => 'Administrator',
+            'tenant' => 'Stall Tenant',
+            'cashier' => 'Cashier',
+            'customer' => 'Customer',
+            default => 'Unknown',
+        };
     }
 
     /*
     |--------------------------------------------------------------------------
-    | New Relationships for Canteen System
+    | Auto-sync type field with Spatie role (for backward compatibility)
     |--------------------------------------------------------------------------
     */
 
-    /**
-     * Cart relationship
-     */
-    public function cart(): HasOne
+    protected static function booted()
     {
-        return $this->hasOne(Cart::class);
+        // After creating a user, sync type with role
+        static::created(function ($user) {
+            if ($user->roles->isNotEmpty()) {
+                $user->syncTypeWithRole();
+            }
+        });
+
+        // After updating roles, sync type
+        static::updated(function ($user) {
+            if ($user->wasChanged('type') && $user->roles->isNotEmpty()) {
+                $user->syncTypeWithRole();
+            }
+        });
     }
 
     /**
-     * Order groups (customer orders)
+     * Keep type field in sync with Spatie roles (cache only)
      */
-    public function orderGroups(): HasMany
+    public function syncTypeWithRole(): void
     {
-        return $this->hasMany(OrderGroup::class);
+        $primaryRole = $this->getPrimaryRole();
+        
+        if ($primaryRole && $this->type !== $primaryRole) {
+            $this->updateQuietly(['type' => $primaryRole]);
+        }
     }
-
-    /**
-     * Owned stall (for canteen system)
-     */
-    public function ownedStall(): HasOne
-    {
-        return $this->hasOne(Stall::class, 'owner_id');
-    }
-
-    /**
-     * Vendor orders (orders to fulfill)
-     */
-    public function vendorOrders(): HasMany
-    {
-        return $this->hasMany(Order::class, 'vendor_id');
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | Your Existing Methods (preserved and updated)
-    |--------------------------------------------------------------------------
-    */
 
     public function requiresTwoFactor(): bool
     {
-        // Check if user has any admin/tenant roles and has 2FA enabled
         try {
             $hasRequiredRole = $this->hasAnyRole(['admin', 'tenant']);
             return $hasRequiredRole && $this->hasEnabledTwoFactorAuthentication();
         } catch (\Exception $e) {
-            // Fallback if roles aren't set up yet
             return $this->hasEnabledTwoFactorAuthentication();
         }
     }
@@ -295,14 +279,10 @@ class User extends Authenticatable implements MustVerifyEmail, FilamentUser
         try {
             return $this->hasAnyRole(['admin', 'tenant']);
         } catch (\Exception $e) {
-            // Fallback if roles aren't set up yet - allow all users
             return true;
         }
     }
 
-    /**
-     * Check if 2FA is required but not set up.
-     */
     public function needsTwoFactorSetup(): bool
     {
         try {
@@ -315,117 +295,70 @@ class User extends Authenticatable implements MustVerifyEmail, FilamentUser
 
     /*
     |--------------------------------------------------------------------------
-    | New Methods for Canteen System
+    | Relationships
     |--------------------------------------------------------------------------
     */
 
-    /**
-     * Get notification preferences
-     */
-    public function prefersEmailNotifications(): bool
+    public function assignedStall(): HasOne
     {
-        $channel = $this->preferred_notification_channel ?? 'email';
-        return in_array($channel, ['email', 'both'], true);
+        return $this->hasOne(Stall::class, 'tenant_id');
     }
 
-    public function prefersSmsNotifications(): bool
+    public function stall(): HasOne
     {
-        $channel = $this->preferred_notification_channel ?? 'email';
-        return in_array($channel, ['sms', 'both'], true);
+        return $this->hasOne(Stall::class);
     }
 
-    public function getNotificationChannels(): array
+    public function adminStall(): BelongsTo
     {
-        $channels = [];
-
-        if ($this->prefersEmailNotifications() && $this->email) {
-            $channels[] = 'mail';
-        }
-
-        if ($this->prefersSmsNotifications() && $this->phone) {
-            $channels[] = 'sms';
-        }
-
-        return $channels;
+        return $this->belongsTo(Stall::class, 'admin_stall_id');
     }
 
-    /**
-     * Get the stall this user owns (works with multiple relationship types)
-     */
-    public function getOwnedStall(): ?Stall
+    public function orders(): HasMany
     {
-        // Try ownedStall first (new canteen system)
-        $stall = $this->ownedStall;
-        
-        if (!$stall) {
-            // Fallback to assignedStall (your existing system)
-            $stall = $this->assignedStall;
-        }
-
-        if (!$stall && $this->admin_stall_id) {
-            // Fallback to adminStall
-            $stall = $this->adminStall;
-        }
-
-        return $stall;
+        return $this->hasMany(Order::class);
     }
 
-    /**
-     * Check if user has a stall (any type)
-     */
-    public function hasStall(): bool
+    public function rentalPayments(): HasMany
     {
-        return $this->getOwnedStall() !== null;
+        return $this->hasMany(RentalPayment::class, 'tenant_id');
     }
 
-    /**
-     * Get user's stall ID (works with multiple relationship types)
-     */
-    public function getStallId(): ?int
+    public function cart(): HasOne
     {
-        $stall = $this->getOwnedStall();
-        return $stall?->id;
+        return $this->hasOne(Cart::class);
+    }
+
+    public function orderGroups(): HasMany
+    {
+        return $this->hasMany(OrderGroup::class);
+    }
+
+    public function ownedStall(): HasOne
+    {
+        return $this->hasOne(Stall::class, 'owner_id');
+    }
+
+    public function vendorOrders(): HasMany
+    {
+        return $this->hasMany(Order::class, 'vendor_id');
+    }
+
+    public function employeeWages(): HasMany
+    {
+        return $this->hasMany(EmployeeWage::class);
+    }
+
+    public function payrolls(): HasMany
+    {
+        return $this->hasMany(Payroll::class, 'employee_id');
     }
 
     public function getProfilePictureUrlAttribute()
-{
-    return $this->profile_photo_path 
-        ? Storage::url($this->profile_photo_path)
-        : null;
-}
-
-public function canResendVerification()
     {
-        if (!$this->verification_sent_at) {
-            return true;
+        if ($this->profile_picture) {
+            return asset('storage/' . $this->profile_picture);
         }
-        
-        return $this->verification_sent_at->diffInSeconds(now()) >= 60; // 60 second cooldown
+        return $this->profile_photo_url;
     }
-
-    public function markVerificationSent()
-    {
-        $this->update(['verification_sent_at' => now()]);
-    }
-
-    public function sendEmailVerificationNotification()
-    {
-    $this->notify(new \App\Notifications\CustomEmailVerification);
-    }
-
-    public function employeeWages()
-    {
-    return $this->hasMany(\App\Models\EmployeeWage::class);
-    }
-
-public function canAccessPanel(\Filament\Panel $panel): bool
-{
-    return $this->hasRole('admin') || $this->hasRole('cashier') || $this->hasRole('tenant');
-}
-
-    public function payrolls()
-    {
-        return $this->hasMany(Payroll::class);
-    }
-
 }

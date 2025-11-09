@@ -1,12 +1,13 @@
 <?php
 
-// app/Filament/Admin/Resources/UserResource/Pages/EditUser.php
 namespace App\Filament\Admin\Resources\UserResource\Pages;
 
 use App\Filament\Admin\Resources\UserResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Notifications\Notification;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
 
 class EditUser extends EditRecord
 {
@@ -35,11 +36,17 @@ class EditUser extends EditRecord
                 ])
                 ->action(function (array $data) {
                     $this->record->update([
-                        'password' => \Illuminate\Support\Facades\Hash::make($data['new_password'])
+                        'password' => Hash::make($data['new_password'])
                     ]);
                     
+                    // Log password change
+                    activity()
+                        ->performedOn($this->record)
+                        ->causedBy(auth()->user())
+                        ->log('Password reset by admin');
+                    
                     Notification::make()
-                        ->title('Password updated')
+                        ->title('Password Updated')
                         ->body('User password has been reset successfully.')
                         ->success()
                         ->send();
@@ -47,15 +54,31 @@ class EditUser extends EditRecord
                 
             Actions\DeleteAction::make()
                 ->requiresConfirmation()
+                ->before(function () {
+                    // Log deletion
+                    activity()
+                        ->performedOn($this->record)
+                        ->causedBy(auth()->user())
+                        ->log('User deleted by admin');
+                })
                 ->modalDescription('Are you sure you want to delete this user? This action cannot be undone.'),
         ];
     }
 
     protected function mutateFormDataBeforeFill(array $data): array
     {
-        // Add current role to form data
-        if ($this->record->roles->isNotEmpty()) {
-            $data['role'] = $this->record->roles->first()->name;
+        // Load current role from Spatie
+        $primaryRole = $this->record->getPrimaryRole();
+        if ($primaryRole) {
+            $data['type'] = $primaryRole;
+        }
+        
+        // Load assigned stall for tenants
+        if ($this->record->hasRole('tenant')) {
+            $stall = \App\Models\Stall::where('tenant_id', $this->record->id)->first();
+            if ($stall) {
+                $data['assigned_stall'] = $stall->id;
+            }
         }
         
         return $data;
@@ -63,31 +86,47 @@ class EditUser extends EditRecord
 
     protected function mutateFormDataBeforeSave(array $data): array
     {
-        // Handle role updates
-        if (isset($data['role'])) {
-            $newRole = $data['role'];
-            $currentRoles = $this->record->roles->pluck('name')->toArray();
+        return DB::transaction(function () use ($data) {
+            $oldRole = $this->record->getPrimaryRole();
             
-            // Only update roles if they changed
-            if (!in_array($newRole, $currentRoles)) {
-                $this->record->syncRoles([$newRole]);
-                
-                Notification::make()
-                    ->title('Role updated')
-                    ->body("User role changed to {$newRole}")
-                    ->success()
-                    ->send();
-            }
-            
-            // Remove role from data since it's not a database field
-            unset($data['role']);
-        }
+            // 🔐 SECURE: Sync Spatie roles when user type changes
+            $roleMapping = [
+                'tenant' => 'tenant',
+                'cashier' => 'cashier',
+                'staff' => 'customer',
+            ];
 
-        return $data;
+            if (isset($data['type']) && isset($roleMapping[$data['type']])) {
+                $newRole = $roleMapping[$data['type']];
+                
+                // Only update if role changed
+                if ($oldRole !== $newRole) {
+                    $this->record->syncRoles([$newRole]);
+                    
+                    // Log role change
+                    activity()
+                        ->performedOn($this->record)
+                        ->causedBy(auth()->user())
+                        ->withProperties([
+                            'old_role' => $oldRole,
+                            'new_role' => $newRole
+                        ])
+                        ->log('User role changed');
+                    
+                    Notification::make()
+                        ->title('Role Updated')
+                        ->body("User role changed from '{$oldRole}' to '{$newRole}'")
+                        ->success()
+                        ->send();
+                }
+            }
+
+            return $data;
+        });
     }
 
     protected function afterSave(): void
-{
-    UserResource::handleStallAssignment($this->record, $this->data);
-}
+    {
+        UserResource::handleStallAssignment($this->record, $this->data);
+    }
 }

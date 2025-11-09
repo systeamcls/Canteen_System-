@@ -18,11 +18,12 @@ class UserPolicy
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $currentUser, User $user): bool
+    public function view(User $currentUser, User $targetUser): bool
     {
-        // Admin can only view tenants and cashiers, not other admins or customers
+        // Admins can view tenants, cashiers, and customers (not other admins)
         return $currentUser->hasRole('admin') && 
-               ($user->hasRole('tenant') || $user->hasRole('cashier'));
+               $targetUser->hasAnyRole(['tenant', 'cashier', 'customer']) &&
+               !$targetUser->hasRole('admin');
     }
 
     /**
@@ -30,43 +31,45 @@ class UserPolicy
      */
     public function create(User $user): bool
     {
-        return $user->hasRole('admin') && $user->admin_stall_id !== null;
+        // Only admins can create users
+        return $user->hasRole('admin');
     }
 
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $currentUser, User $user): bool
+    public function update(User $currentUser, User $targetUser): bool
     {
-        // Admin can only update tenants and cashiers
+        // Admins can update tenants, cashiers, and customers (not other admins)
         return $currentUser->hasRole('admin') && 
-               ($user->hasRole('tenant') || $user->hasRole('cashier'));
+               $targetUser->hasAnyRole(['tenant', 'cashier', 'customer']) &&
+               !$targetUser->hasRole('admin');
     }
 
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $currentUser, User $user): bool
+    public function delete(User $currentUser, User $targetUser): bool
     {
-        // Admin can only delete tenants and cashiers, not themselves
+        // Admins can delete non-admin users, but not themselves
         return $currentUser->hasRole('admin') && 
-               $currentUser->id !== $user->id &&
-               ($user->hasRole('tenant') || $user->hasRole('cashier'));
+               $currentUser->id !== $targetUser->id &&
+               !$targetUser->hasRole('admin');
     }
 
     /**
      * Determine whether the user can restore the model.
      */
-    public function restore(User $currentUser, User $user): bool
+    public function restore(User $currentUser, User $targetUser): bool
     {
-        return $this->update($currentUser, $user);
+        return $this->update($currentUser, $targetUser);
     }
 
     /**
      * Determine whether the user can permanently delete the model.
      */
-    public function forceDelete(User $currentUser, User $user): bool
+    public function forceDelete(User $currentUser, User $targetUser): bool
     {
-        return $this->delete($currentUser, $user);
+        return $this->delete($currentUser, $targetUser);
     }
 }

@@ -343,10 +343,10 @@ namespace App\Models{
 namespace App\Models{
 /**
  * @property int $id
- * @property string|null $payer_type
+ * @property string $payer_type
  * @property int|null $user_id
  * @property string|null $guest_token
- * @property string|null $payment_method
+ * @property string $payment_method
  * @property string $payment_status
  * @property int $amount_total
  * @property string $currency
@@ -667,6 +667,7 @@ namespace App\Models{
  * @property string|null $description
  * @property string|null $logo
  * @property string|null $image
+ * @property string|null $cover_photo
  * @property string|null $logo_url
  * @property string|null $contact_number
  * @property \Illuminate\Support\Carbon|null $opening_time
@@ -699,6 +700,7 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Stall whereClosingTime($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Stall whereCommissionRate($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Stall whereContactNumber($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Stall whereCoverPhoto($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Stall whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Stall whereDeletedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Stall whereDescription($value)
@@ -781,6 +783,7 @@ namespace App\Models{
  * @property string $email
  * @property string $preferred_notification_channel
  * @property \Illuminate\Support\Carbon|null $email_verified_at
+ * @property string|null $terms_accepted_at
  * @property \Illuminate\Support\Carbon|null $verification_sent_at
  * @property string $password
  * @property string|null $two_factor_secret
@@ -850,6 +853,7 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereProfilePhotoPath($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereProfilePicture($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereRememberToken($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereTermsAcceptedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereTwoFactorConfirmedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereTwoFactorRecoveryCodes($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereTwoFactorSecret($value)

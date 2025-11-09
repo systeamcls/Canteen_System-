@@ -23,6 +23,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'verified' => \App\Http\Middleware\EnsureEmailIsVerified::class,
             'redirect.admin' => \App\Http\Middleware\RedirectIfAdmin::class,
             'role' => \App\Http\Middleware\CheckRole::class,
+            'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
+            'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
 
         ]);
 
