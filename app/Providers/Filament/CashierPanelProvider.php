@@ -42,6 +42,11 @@ class CashierPanelProvider extends PanelProvider
             ->maxContentWidth('full')
             ->sidebarCollapsibleOnDesktop()
             ->sidebarFullyCollapsibleOnDesktop()
+
+            ->resources([
+            \App\Filament\Cashier\Resources\CashierProductResource::class,
+            \App\Filament\Cashier\Resources\CashierOrderResource::class,
+        ])
             
             // Discovery paths for cashier resources
             ->discoverResources(

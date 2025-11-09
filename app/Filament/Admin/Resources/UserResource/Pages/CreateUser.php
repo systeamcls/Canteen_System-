@@ -32,6 +32,10 @@ class CreateUser extends CreateRecord
             // Create the user
             $user = User::create($data);
 
+            // 🔥 Auto-verify admin-created accounts
+            $user->update(['email_verified_at' => now()]);
+
+
             // 🔐 SECURE: Assign Spatie role based on type
             $this->assignSecureRole($user, $userType);
 
