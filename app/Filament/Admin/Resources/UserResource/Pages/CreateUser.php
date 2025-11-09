@@ -39,6 +39,17 @@ class CreateUser extends CreateRecord
             // 🔐 SECURE: Assign Spatie role based on type
             $this->assignSecureRole($user, $userType);
 
+            // 🔥 NEW: Auto-assign admin_stall_id for cashiers
+        if ($userType === 'cashier') {
+            // Get the admin's own stall (or first stall)
+            $adminStall = \App\Models\Stall::where('owner_id', auth()->id())->first() 
+                       ?? \App\Models\Stall::first();
+            
+            if ($adminStall) {
+                $user->update(['admin_stall_id' => $adminStall->id]);
+            }
+        }
+
             // Handle stall assignment for tenants
             if ($user->hasRole('tenant') && $assignedStall) {
                 $this->assignStallToTenant($user, $assignedStall);
