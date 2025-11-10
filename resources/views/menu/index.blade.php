@@ -861,9 +861,6 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const categoryButtons = document.querySelectorAll('.filter-category[data-category-id]');
-            const menuGrid = document.getElementById('menuGrid');
-            const categoryTitle = document.getElementById('category-title');
-            const itemsCount = document.getElementById('items-count');
 
             categoryButtons.forEach(button => {
                 button.addEventListener('click', function(e) {
@@ -874,7 +871,22 @@
                     const categoryName = this.textContent.trim();
 
                     // Update button states immediately
-                    updateButtonStates(categoryId, isActive, categoryName);
+                    updateButtonStates(categoryId, isActive);
+
+                    // Update title immediately
+                    const categoryTitle = document.getElementById('category-title');
+                    if (categoryTitle) {
+                        if (isActive && categoryId) {
+                            // Deselecting - back to "All Menu Items"
+                            categoryTitle.textContent = 'All Menu Items';
+                        } else if (categoryId) {
+                            // Selecting a category
+                            categoryTitle.textContent = categoryName;
+                        } else {
+                            // Clicked "All Items" button
+                            categoryTitle.textContent = 'All Menu Items';
+                        }
+                    }
 
                     // Build URL parameters
                     let params = new URLSearchParams();
@@ -902,9 +914,11 @@
                         .toString() : '');
 
                     // Show loading state
-                    if (menuGrid) {
-                        menuGrid.style.opacity = '0.5';
-                        menuGrid.style.pointerEvents = 'none';
+                    const productsSection = document.querySelector(
+                        'section[style*="padding: 0 0 80px"]');
+                    if (productsSection) {
+                        productsSection.style.opacity = '0.5';
+                        productsSection.style.pointerEvents = 'none';
                     }
 
                     // Fetch new content via AJAX
@@ -919,30 +933,34 @@
                             const parser = new DOMParser();
                             const doc = parser.parseFromString(html, 'text/html');
 
-                            // Get the parent section that contains both grid and "no results" message
-                            const currentSection = menuGrid.parentElement;
-                            const newSection = doc.querySelector('#menuGrid').parentElement;
+                            // Find the products section in both current page and fetched page
+                            const currentProductsSection = document.querySelector(
+                                'section[style*="padding: 0 0 80px"]');
+                            const newProductsSection = doc.querySelector(
+                                'section[style*="padding: 0 0 80px"]');
 
-                            if (currentSection && newSection) {
-                                // Replace entire section content (handles both grid and empty state)
-                                currentSection.innerHTML = newSection.innerHTML;
-                            }
+                            if (currentProductsSection && newProductsSection) {
+                                // Get just the container div inside the section
+                                const currentContainer = currentProductsSection.querySelector(
+                                    '.container');
+                                const newContainer = newProductsSection.querySelector(
+                                    '.container');
 
-                            // Update title with category name
-                            if (categoryTitle) {
-                                if (isActive && categoryId) {
-                                    // Deselecting - back to "All Menu Items"
-                                    categoryTitle.textContent = 'All Menu Items';
-                                } else if (categoryId) {
-                                    // Selecting a category
-                                    categoryTitle.textContent = categoryName;
-                                } else {
-                                    // Clicked "All Items" button
-                                    categoryTitle.textContent = 'All Menu Items';
+                                if (currentContainer && newContainer) {
+                                    // Replace the container content
+                                    currentContainer.innerHTML = newContainer.innerHTML;
+
+                                    // Fade in
+                                    setTimeout(() => {
+                                        currentProductsSection.style.opacity = '1';
+                                        currentProductsSection.style.pointerEvents =
+                                            'auto';
+                                    }, 100);
                                 }
                             }
 
                             // Update count
+                            const itemsCount = document.getElementById('items-count');
                             const newCount = doc.getElementById('items-count');
                             if (itemsCount && newCount) {
                                 itemsCount.textContent = newCount.textContent;
@@ -954,8 +972,10 @@
                             // Update data-is-active attributes for next click
                             updateDataAttributes(categoryId, isActive);
 
-                            // Re-attach event listeners to new "Add to Cart" buttons
-                            // (Livewire will handle this automatically)
+                            // Reinitialize Livewire components
+                            if (window.Livewire) {
+                                window.Livewire.rescan();
+                            }
                         })
                         .catch(error => {
                             console.error('Error loading products:', error);
@@ -965,7 +985,7 @@
                 });
             });
 
-            function updateButtonStates(categoryId, wasActive, categoryName) {
+            function updateButtonStates(categoryId, wasActive) {
                 categoryButtons.forEach(btn => {
                     const btnCategoryId = btn.dataset.categoryId;
 
