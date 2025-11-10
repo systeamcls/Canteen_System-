@@ -214,142 +214,78 @@
 }
 
 /* =============================================
-   BUTTON FIXES - THIS IS THE KEY SECTION!
+   MINIMAL BUTTON FIXES ONLY
    ============================================= */
 
-/* Primary Buttons - Fix text visibility */
-.fi-btn,
+/* Primary Buttons - Just fix text visibility */
 .fi-btn-primary,
 button[type="submit"] {
-    border-radius: 1rem;
-    font-weight: 600;
-    padding: 0.75rem 1.5rem;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    backdrop-filter: blur(10px);
     background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
     color: white !important;
-    /* Force white text */
     border: none;
 }
 
-.fi-btn:hover,
-.fi-btn-primary:hover,
-button[type="submit"]:hover {
-    transform: translateY(-2px) scale(1.05);
-    box-shadow: 0 8px 24px rgba(59, 130, 246, 0.2);
-    background: linear-gradient(135deg, #2563eb 0%, #1e3a8a 100%);
-}
-
-/* Make sure button text/icons are always visible */
-.fi-btn *,
 .fi-btn-primary *,
 button[type="submit"] * {
     color: white !important;
 }
 
-/* Secondary/Cancel Buttons */
-.fi-btn-secondary,
-button[type="button"] {
-    background: white !important;
-    color: #374151 !important;
-    border: 2px solid #e5e7eb !important;
-    border-radius: 1rem;
-    font-weight: 600;
-    padding: 0.75rem 1.5rem;
-    transition: all 0.3s ease;
-}
-
-.fi-btn-secondary:hover,
-button[type="button"]:hover {
-    background: #f9fafb !important;
-    border-color: #9ca3af !important;
-    transform: translateY(-2px);
-}
-
-/* Danger/Delete Buttons */
-.fi-btn-danger {
-    background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%) !important;
-    color: white !important;
-    border: none !important;
-}
-
-/* Fix dashboard card buttons (the black button issue) */
-.fi-section button,
-.fi-wi button,
-.fi-ta-actions button {
+/* Fix dashboard card action buttons */
+.fi-section button:not(.fi-icon-btn):not([role="tab"]),
+.fi-wi button:not(.fi-icon-btn):not([role="tab"]),
+.fi-ta-actions button:not(.fi-icon-btn) {
     background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%) !important;
     color: white !important;
-    border: none !important;
-    padding: 0.625rem 1.25rem !important;
-    border-radius: 0.75rem !important;
-    font-weight: 600 !important;
-    min-height: 2.5rem !important;
 }
 
-.fi-section button:hover,
-.fi-wi button:hover,
-.fi-ta-actions button:hover {
-    background: linear-gradient(135deg, #2563eb 0%, #1e3a8a 100%) !important;
-    transform: translateY(-2px);
-}
-
-/* Modal Buttons - Ensure proper visibility */
-.fi-modal-footer,
-.fi-modal-actions {
-    display: flex !important;
-    gap: 0.75rem !important;
-    justify-content: flex-end !important;
-    padding: 1rem 1.5rem !important;
-    border-top: 1px solid #e5e7eb !important;
-}
-
-.fi-modal-footer button,
-.fi-modal-actions button {
-    min-width: 100px !important;
-}
-
-/* Action Buttons in Dropdowns */
-.fi-dropdown-list-item button {
-    background: transparent !important;
-    color: #374151 !important;
-    text-align: left !important;
-    padding: 0.5rem 1rem !important;
-    width: 100%;
-    border-radius: 0.5rem !important;
-}
-
-.fi-dropdown-list-item button:hover {
-    background: #f3f4f6 !important;
-    color: #1e293b !important;
-}
-
-/* Form Submit Buttons - Make them stand out */
+/* Form submit buttons */
 .fi-form-actions button[type="submit"] {
     background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
     color: white !important;
-    font-size: 1rem !important;
-    padding: 0.875rem 2rem !important;
-    font-weight: 700 !important;
 }
 
-.fi-form-actions button[type="submit"]:hover {
-    background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
+/* =============================================
+   PROFILE HEADER TEXT FIX (Image 5 - Kath)
+   ============================================= */
+
+/* Fix text on dark banner backgrounds */
+.fi-simple-page header,
+.fi-page-header {
+    position: relative;
+    color: white !important;
 }
 
-/* Icon Buttons - Keep them subtle but visible */
-.fi-icon-btn {
-    background: rgba(59, 130, 246, 0.1) !important;
-    color: #3b82f6 !important;
-    border-radius: 0.75rem !important;
-    padding: 0.5rem !important;
-    transition: all 0.2s ease !important;
+.fi-simple-page header *,
+.fi-page-header * {
+    color: white !important;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8), 0 0 8px rgba(0, 0, 0, 0.6) !important;
 }
 
-.fi-icon-btn:hover {
-    background: rgba(59, 130, 246, 0.2) !important;
-    color: #1e40af !important;
-    transform: scale(1.1);
+/* Specifically for tenant profile pages */
+.fi-simple-page-heading {
+    color: white !important;
+    text-shadow:
+        2px 2px 4px rgba(0, 0, 0, 0.8),
+        0 0 8px rgba(0, 0, 0, 0.6),
+        0 0 16px rgba(0, 0, 0, 0.4) !important;
+}
+
+.fi-simple-page-subheading {
+    color: rgba(255, 255, 255, 0.95) !important;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8) !important;
+}
+
+/* Status badges - make readable */
+.fi-badge {
+    background: rgba(255, 255, 255, 0.95) !important;
+    color: #1e293b !important;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
+}
+
+.fi-badge.fi-color-success {
+    background: rgba(34, 197, 94, 0.95) !important;
+    color: white !important;
 }
 
 /* Charts */
@@ -429,12 +365,6 @@ button[type="button"]:hover {
     .fi-simple-page-header h1 {
         font-size: 2rem;
     }
-
-    /* Mobile button adjustments */
-    button {
-        font-size: 0.875rem !important;
-        padding: 0.625rem 1rem !important;
-    }
 }
 
 @media (max-width: 640px) {
@@ -484,176 +414,4 @@ button[type="button"]:hover {
 
 .fi-wi-stats-overview-stat:hover::before {
     opacity: 1;
-}
-
-/* =============================================
-   FIX TOGGLE SWITCHES (Blue Square Issue)
-   ============================================= */
-
-/* Hide the ugly blue square, show proper toggle */
-.fi-toggle {
-    position: relative;
-}
-
-.fi-toggle input[type="checkbox"] {
-    position: absolute;
-    opacity: 0;
-    width: 0;
-    height: 0;
-}
-
-/* Style the toggle label properly */
-.fi-toggle-wrapper {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.75rem;
-}
-
-/* Custom toggle switch */
-.fi-toggle input[type="checkbox"]+label {
-    position: relative;
-    display: inline-block;
-    width: 3rem;
-    height: 1.5rem;
-    background-color: #e5e7eb;
-    border-radius: 9999px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-.fi-toggle input[type="checkbox"]+label::after {
-    content: '';
-    position: absolute;
-    top: 0.125rem;
-    left: 0.125rem;
-    width: 1.25rem;
-    height: 1.25rem;
-    background-color: white;
-    border-radius: 50%;
-    transition: transform 0.3s ease;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-/* Checked state */
-.fi-toggle input[type="checkbox"]:checked+label {
-    background-color: #3b82f6;
-}
-
-.fi-toggle input[type="checkbox"]:checked+label::after {
-    transform: translateX(1.5rem);
-}
-
-/* =============================================
-   FIX STALL PROFILE TEXT (Image 5 - Kath issue)
-   ============================================= */
-
-/* Make text readable on dark backgrounds */
-.fi-tenant-profile-header,
-.stall-profile-header,
-[class*="profile-header"] {
-    position: relative;
-    z-index: 1;
-}
-
-/* Fix name/title text visibility */
-.fi-tenant-profile-header h1,
-.fi-tenant-profile-header h2,
-.stall-profile-header h1,
-.stall-profile-header h2,
-[class*="profile-header"] h1,
-[class*="profile-header"] h2 {
-    color: white !important;
-    text-shadow:
-        2px 2px 4px rgba(0, 0, 0, 0.8),
-        0 0 8px rgba(0, 0, 0, 0.6),
-        0 0 16px rgba(0, 0, 0, 0.4) !important;
-    font-weight: 700 !important;
-    font-size: 2.5rem !important;
-    margin-bottom: 0.5rem !important;
-}
-
-/* Fix subtitle/description text */
-.fi-tenant-profile-header p,
-.stall-profile-header p,
-[class*="profile-header"] p {
-    color: rgba(255, 255, 255, 0.95) !important;
-    text-shadow:
-        1px 1px 3px rgba(0, 0, 0, 0.8),
-        0 0 6px rgba(0, 0, 0, 0.5) !important;
-    font-weight: 500 !important;
-    font-size: 1.125rem !important;
-}
-
-/* Make all text on dark overlays readable */
-[style*="background"] h1,
-[style*="background"] h2,
-[style*="background"] p,
-[style*="background"] span {
-    color: white !important;
-    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7) !important;
-}
-
-/* Fix location/status badges on dark backgrounds */
-.fi-badge,
-[class*="badge"] {
-    background: rgba(255, 255, 255, 0.95) !important;
-    color: #1e293b !important;
-    padding: 0.5rem 1rem !important;
-    border-radius: 9999px !important;
-    font-weight: 600 !important;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
-}
-
-/* Active/Status indicators */
-.fi-badge[class*="success"],
-[class*="status-active"] {
-    background: rgba(34, 197, 94, 0.95) !important;
-    color: white !important;
-}
-
-/* =============================================
-   FIX FORM LABEL TEXT (Better Readability)
-   ============================================= */
-
-/* Make all form labels more prominent */
-.fi-fo-field-wrp-label,
-.fi-form-component-label,
-label {
-    font-size: 0.875rem !important;
-    font-weight: 600 !important;
-    color: #1e293b !important;
-    margin-bottom: 0.5rem !important;
-    letter-spacing: 0.025em !important;
-}
-
-/* Required field asterisk */
-.fi-fo-field-wrp-label::after,
-label.required::after {
-    content: ' *';
-    color: #dc2626 !important;
-}
-
-/* Helper text under fields */
-.fi-fo-field-wrp-hint,
-.fi-form-component-hint,
-.helper-text {
-    font-size: 0.75rem !important;
-    color: #6b7280 !important;
-    margin-top: 0.25rem !important;
-    font-style: italic;
-}
-
-/* Section headings */
-.fi-section-header h3,
-.fi-section-header-heading {
-    font-size: 1.125rem !important;
-    font-weight: 700 !important;
-    color: #1e293b !important;
-}
-
-.fi-section-header-description,
-.fi-section-description {
-    font-size: 0.875rem !important;
-    color: #64748b !important;
-    margin-top: 0.25rem !important;
 }
