@@ -26,6 +26,204 @@
     --glass-shadow: rgba(0, 0, 0, 0.1);
 }
 
+/* =============================================
+   YOUTUBE-INSPIRED GLASSMORPHISM SIDEBAR
+   100% Accurate - No Layout Breaks
+   ============================================= */
+
+/* Sidebar container - Glassmorphism base */
+.fi-sidebar {
+    background: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(20px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+    border-right: 1px solid rgba(0, 0, 0, 0.06) !important;
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.03) !important;
+    padding: 0.5rem 0.75rem !important;
+}
+
+/* Sidebar header/brand area */
+.fi-sidebar-header,
+.fi-topbar {
+    background: transparent !important;
+    border: none !important;
+    padding: 1rem 0.5rem 1.5rem 0.5rem !important;
+    margin-bottom: 0.5rem !important;
+}
+
+.fi-sidebar-header h2,
+.fi-topbar h2 {
+    color: #0f0f0f !important;
+    font-weight: 600 !important;
+    font-size: 1.125rem !important;
+}
+
+/* Navigation group wrapper */
+.fi-sidebar-nav {
+    padding: 0 !important;
+}
+
+.fi-sidebar-nav-groups {
+    gap: 0.25rem !important;
+}
+
+.fi-sidebar-nav-group {
+    margin-bottom: 1rem !important;
+}
+
+/* Navigation items - YouTube style */
+.fi-sidebar-nav-item {
+    margin-bottom: 0.25rem !important;
+}
+
+.fi-sidebar-nav-item-link {
+    display: flex !important;
+    align-items: center !important;
+    gap: 1rem !important;
+    padding: 0.625rem 0.75rem !important;
+    margin: 0 !important;
+    border-radius: 0.625rem !important;
+    color: #0f0f0f !important;
+    font-size: 0.875rem !important;
+    font-weight: 400 !important;
+    transition: all 0.15s ease !important;
+    background: transparent !important;
+    border: none !important;
+    position: relative !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+/* Hover state - subtle gray background */
+.fi-sidebar-nav-item-link:hover {
+    background: rgba(0, 0, 0, 0.05) !important;
+    color: #0f0f0f !important;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+/* Active state - YouTube red/pink style */
+.fi-sidebar-nav-item-link.fi-active {
+    background: rgba(255, 0, 0, 0.08) !important;
+    color: #0f0f0f !important;
+    font-weight: 500 !important;
+    box-shadow: none !important;
+    border: none !important;
+    transform: none !important;
+}
+
+/* Icons styling */
+.fi-sidebar-nav-item-link svg {
+    width: 1.5rem !important;
+    height: 1.5rem !important;
+    color: #0f0f0f !important;
+    flex-shrink: 0 !important;
+}
+
+.fi-sidebar-nav-item-link.fi-active svg {
+    color: #0f0f0f !important;
+}
+
+/* Label text */
+.fi-sidebar-nav-item-link-label {
+    font-size: 0.875rem !important;
+    line-height: 1.25rem !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+
+/* Badges - YouTube red notification style */
+.fi-sidebar-nav-item .fi-badge,
+.fi-sidebar-item-badge {
+    background: #cc0000 !important;
+    color: white !important;
+    font-size: 0.75rem !important;
+    font-weight: 600 !important;
+    padding: 0.125rem 0.5rem !important;
+    border-radius: 0.5rem !important;
+    min-width: 1.25rem !important;
+    height: 1.25rem !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin-left: auto !important;
+    box-shadow: none !important;
+}
+
+/* Divider between navigation groups */
+.fi-sidebar-nav-group+.fi-sidebar-nav-group::before {
+    content: '' !important;
+    display: block !important;
+    height: 1px !important;
+    background: rgba(0, 0, 0, 0.06) !important;
+    margin: 0.75rem 0.5rem !important;
+}
+
+/* Group labels (if any) */
+.fi-sidebar-group-label {
+    font-size: 0.75rem !important;
+    font-weight: 600 !important;
+    color: #606060 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+    padding: 0.5rem 0.75rem !important;
+    margin-top: 1rem !important;
+}
+
+/* Scrollbar styling - YouTube style */
+.fi-sidebar::-webkit-scrollbar {
+    width: 8px !important;
+}
+
+.fi-sidebar::-webkit-scrollbar-track {
+    background: transparent !important;
+}
+
+.fi-sidebar::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2) !important;
+    border-radius: 4px !important;
+}
+
+.fi-sidebar::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Fix for user menu at bottom if exists */
+.fi-sidebar-footer,
+.fi-user-menu {
+    padding: 1rem 0.5rem !important;
+    border-top: 1px solid rgba(0, 0, 0, 0.06) !important;
+    margin-top: auto !important;
+}
+
+/* Brand section - keep clean */
+.fi-sidebar-brand {
+    background: transparent !important;
+    margin: 0.5rem !important;
+    padding: 1rem !important;
+    border-radius: 0.75rem !important;
+    backdrop-filter: none !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+.fi-sidebar-brand h1 {
+    color: #0f0f0f !important;
+    font-weight: 600 !important;
+    font-size: 1.125rem !important;
+    margin-bottom: 0 !important;
+}
+
+.fi-sidebar-brand p {
+    color: #606060 !important;
+    opacity: 1 !important;
+    font-size: 0.75rem !important;
+}
+
+/* ============================================= */
+/* END OF SIDEBAR - MAIN CONTENT BELOW */
+/* ============================================= */
+
 /* Main Content Area */
 .fi-main {
     background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
@@ -209,15 +407,17 @@ button[type="submit"] * {
     text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8) !important;
 }
 
-/* Status badges - make readable */
-.fi-badge {
+/* Status badges - make readable (but not sidebar badges) */
+.fi-simple-page .fi-badge,
+.fi-page-header .fi-badge {
     background: rgba(255, 255, 255, 0.95) !important;
     color: #1e293b !important;
     backdrop-filter: blur(10px);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
 }
 
-.fi-badge.fi-color-success {
+.fi-simple-page .fi-badge.fi-color-success,
+.fi-page-header .fi-badge.fi-color-success {
     background: rgba(34, 197, 94, 0.95) !important;
     color: white !important;
 }
@@ -247,14 +447,6 @@ button[type="submit"] * {
     margin-bottom: 0.5rem;
 }
 
-/* Badges */
-.fi-badge {
-    border-radius: 0.75rem;
-    font-weight: 600;
-    padding: 0.375rem 1rem;
-    backdrop-filter: blur(10px);
-}
-
 /* Form Inputs */
 .fi-input,
 .fi-select,
@@ -276,9 +468,7 @@ button[type="submit"] * {
 /* Responsive Design */
 @media (max-width: 768px) {
     .fi-sidebar {
-        background: linear-gradient(145deg,
-                rgb(248, 250, 255) 0%,
-                rgb(219, 234, 254) 100%);
+        background: rgba(255, 255, 255, 0.98) !important;
     }
 
     .fi-wi-stats-overview {
@@ -304,11 +494,6 @@ button[type="submit"] * {
 @media (max-width: 640px) {
     .fi-wi-stats-overview-stat-value {
         font-size: 2rem;
-    }
-
-    .fi-sidebar-nav-item-link {
-        padding: 0.75rem 1rem;
-        margin: 0 0.75rem;
     }
 }
 
