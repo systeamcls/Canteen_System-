@@ -7,7 +7,7 @@
     --gradient-start: #f8faff;
     --gradient-middle: #e8f0fe;
     --gradient-end: #dbeafe;
-    
+
     /* Clean blue palette */
     --primary-50: #f0f9ff;
     --primary-100: #e0f2fe;
@@ -19,7 +19,7 @@
     --primary-700: #0369a1;
     --primary-800: #075985;
     --primary-900: #0c4a6e;
-    
+
     /* Glass morphism */
     --glass-bg: rgba(255, 255, 255, 0.1);
     --glass-border: rgba(255, 255, 255, 0.2);
@@ -28,13 +28,12 @@
 
 /* Enhanced Sidebar with Lighter Gradient */
 .fi-sidebar {
-    background: linear-gradient(145deg, 
-        rgb(248, 250, 255) 0%, 
-        rgb(232, 240, 254) 25%,
-        rgb(219, 234, 254) 50%,
-        rgb(191, 219, 254) 75%,
-        rgb(147, 197, 253) 100%
-    );
+    background: linear-gradient(145deg,
+            rgb(248, 250, 255) 0%,
+            rgb(232, 240, 254) 25%,
+            rgb(219, 234, 254) 50%,
+            rgb(191, 219, 254) 75%,
+            rgb(147, 197, 253) 100%);
     border-right: 1px solid rgba(59, 130, 246, 0.1);
     backdrop-filter: blur(20px);
     box-shadow: 4px 0 24px rgba(59, 130, 246, 0.08);
@@ -214,24 +213,143 @@
     transition: all 0.2s ease;
 }
 
-/* Buttons */
-.fi-btn {
+/* =============================================
+   BUTTON FIXES - THIS IS THE KEY SECTION!
+   ============================================= */
+
+/* Primary Buttons - Fix text visibility */
+.fi-btn,
+.fi-btn-primary,
+button[type="submit"] {
     border-radius: 1rem;
     font-weight: 600;
     padding: 0.75rem 1.5rem;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     backdrop-filter: blur(10px);
+    background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+    color: white !important;
+    /* Force white text */
+    border: none;
 }
 
-.fi-btn:hover {
+.fi-btn:hover,
+.fi-btn-primary:hover,
+button[type="submit"]:hover {
     transform: translateY(-2px) scale(1.05);
     box-shadow: 0 8px 24px rgba(59, 130, 246, 0.2);
+    background: linear-gradient(135deg, #2563eb 0%, #1e3a8a 100%);
 }
 
-.fi-btn-primary {
-    background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
-    border: none;
+/* Make sure button text/icons are always visible */
+.fi-btn *,
+.fi-btn-primary *,
+button[type="submit"] * {
+    color: white !important;
+}
+
+/* Secondary/Cancel Buttons */
+.fi-btn-secondary,
+button[type="button"] {
+    background: white !important;
+    color: #374151 !important;
+    border: 2px solid #e5e7eb !important;
+    border-radius: 1rem;
+    font-weight: 600;
+    padding: 0.75rem 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.fi-btn-secondary:hover,
+button[type="button"]:hover {
+    background: #f9fafb !important;
+    border-color: #9ca3af !important;
+    transform: translateY(-2px);
+}
+
+/* Danger/Delete Buttons */
+.fi-btn-danger {
+    background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%) !important;
+    color: white !important;
+    border: none !important;
+}
+
+/* Fix dashboard card buttons (the black button issue) */
+.fi-section button,
+.fi-wi button,
+.fi-ta-actions button {
+    background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%) !important;
+    color: white !important;
+    border: none !important;
+    padding: 0.625rem 1.25rem !important;
+    border-radius: 0.75rem !important;
+    font-weight: 600 !important;
+    min-height: 2.5rem !important;
+}
+
+.fi-section button:hover,
+.fi-wi button:hover,
+.fi-ta-actions button:hover {
+    background: linear-gradient(135deg, #2563eb 0%, #1e3a8a 100%) !important;
+    transform: translateY(-2px);
+}
+
+/* Modal Buttons - Ensure proper visibility */
+.fi-modal-footer,
+.fi-modal-actions {
+    display: flex !important;
+    gap: 0.75rem !important;
+    justify-content: flex-end !important;
+    padding: 1rem 1.5rem !important;
+    border-top: 1px solid #e5e7eb !important;
+}
+
+.fi-modal-footer button,
+.fi-modal-actions button {
+    min-width: 100px !important;
+}
+
+/* Action Buttons in Dropdowns */
+.fi-dropdown-list-item button {
+    background: transparent !important;
+    color: #374151 !important;
+    text-align: left !important;
+    padding: 0.5rem 1rem !important;
+    width: 100%;
+    border-radius: 0.5rem !important;
+}
+
+.fi-dropdown-list-item button:hover {
+    background: #f3f4f6 !important;
+    color: #1e293b !important;
+}
+
+/* Form Submit Buttons - Make them stand out */
+.fi-form-actions button[type="submit"] {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+    color: white !important;
+    font-size: 1rem !important;
+    padding: 0.875rem 2rem !important;
+    font-weight: 700 !important;
+}
+
+.fi-form-actions button[type="submit"]:hover {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
+}
+
+/* Icon Buttons - Keep them subtle but visible */
+.fi-icon-btn {
+    background: rgba(59, 130, 246, 0.1) !important;
+    color: #3b82f6 !important;
+    border-radius: 0.75rem !important;
+    padding: 0.5rem !important;
+    transition: all 0.2s ease !important;
+}
+
+.fi-icon-btn:hover {
+    background: rgba(59, 130, 246, 0.2) !important;
+    color: #1e40af !important;
+    transform: scale(1.1);
 }
 
 /* Charts */
@@ -268,14 +386,18 @@
 }
 
 /* Form Inputs */
-.fi-input {
+.fi-input,
+.fi-select,
+.fi-textarea {
     border-radius: 1rem;
-    border: 1px solid rgba(59, 130, 246, 0.2);
+    border: 2px solid rgba(59, 130, 246, 0.2);
     transition: all 0.3s ease;
     backdrop-filter: blur(10px);
 }
 
-.fi-input:focus {
+.fi-input:focus,
+.fi-select:focus,
+.fi-textarea:focus {
     border-color: #3b82f6;
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
     transform: scale(1.02);
@@ -284,29 +406,34 @@
 /* Responsive Design */
 @media (max-width: 768px) {
     .fi-sidebar {
-        background: linear-gradient(145deg, 
-            rgb(248, 250, 255) 0%, 
-            rgb(219, 234, 254) 100%
-        );
+        background: linear-gradient(145deg,
+                rgb(248, 250, 255) 0%,
+                rgb(219, 234, 254) 100%);
     }
-    
+
     .fi-wi-stats-overview {
         grid-template-columns: 1fr;
         gap: 1rem;
     }
-    
+
     .fi-wi-stats-overview-stat {
         padding: 1.5rem;
     }
-    
+
     .fi-section,
     .fi-wi {
         margin: 0.75rem;
         border-radius: 1.25rem;
     }
-    
+
     .fi-simple-page-header h1 {
         font-size: 2rem;
+    }
+
+    /* Mobile button adjustments */
+    button {
+        font-size: 0.875rem !important;
+        padding: 0.625rem 1rem !important;
     }
 }
 
@@ -314,7 +441,7 @@
     .fi-wi-stats-overview-stat-value {
         font-size: 2rem;
     }
-    
+
     .fi-sidebar-nav-item-link {
         padding: 0.75rem 1rem;
         margin: 0 0.75rem;
@@ -323,18 +450,22 @@
 
 /* Loading Animations */
 .fi-loading {
-    background: linear-gradient(90deg, 
-        rgba(59, 130, 246, 0.1) 25%, 
-        rgba(59, 130, 246, 0.2) 50%, 
-        rgba(59, 130, 246, 0.1) 75%
-    );
+    background: linear-gradient(90deg,
+            rgba(59, 130, 246, 0.1) 25%,
+            rgba(59, 130, 246, 0.2) 50%,
+            rgba(59, 130, 246, 0.1) 75%);
     background-size: 200% 100%;
     animation: shimmer 2s infinite;
 }
 
 @keyframes shimmer {
-    0% { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
 }
 
 /* Micro-interactions */
