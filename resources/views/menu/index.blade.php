@@ -197,93 +197,43 @@
             <!-- Desktop Category Pills -->
             <div class="category-desktop"
                 style="display: flex; justify-content: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
+
                 <!-- All Items -->
-                <button class="filter-category active" data-category="all"
-                    style="display: flex; align-items: center; gap: 8px; padding: 12px 24px; border-radius: 50px; text-decoration: none; font-weight: 500; transition: all 0.3s ease; border: 2px solid transparent; background: #1e293b; color: white; box-shadow: 0 4px 14px rgba(30, 41, 59, 0.3); cursor: pointer;"
-                    onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
-                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd"
-                            d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm0 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V8zm0 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1v-2z"
-                            clip-rule="evenodd" />
-                    </svg>
-                    All Items
-                </button>
+                <a href="{{ route('menu.index') }}" class="filter-category {{ !request('category_id') ? 'active' : '' }}"
+                    style="display: flex; align-items: center; gap: 8px; padding: 12px 24px; border-radius: 50px; 
+                      {{ !request('category_id') ? 'background: #1e293b; color: white; border: 2px solid #1e293b;' : 'background: white; color: #64748b; border: 2px solid #e2e8f0;' }}">
+                    🍽️ All Items
+                </a>
 
-                <!-- Fresh Meats -->
-                <button class="filter-category" data-category="fresh-meals"
-                    style="display: flex; align-items: center; gap: 8px; padding: 12px 24px; border-radius: 50px; text-decoration: none; font-weight: 500; transition: all 0.3s ease; border: 2px solid #e2e8f0; background: white; color: #64748b; cursor: pointer;"
-                    onmouseover="this.style.transform='translateY(-2px)'"
-                    onmouseout="this.style.transform='translateY(0)'">
-                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20">
-                        <path
-                            d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" />
-                    </svg>
-                    Fresh Meals
-                </button>
-
-                <!-- Sandwiches -->
-                <button class="filter-category" data-category="sandwiches"
-                    style="display: flex; align-items: center; gap: 8px; padding: 12px 24px; border-radius: 50px; text-decoration: none; font-weight: 500; transition: all 0.3s ease; border: 2px solid #e2e8f0; background: white; color: #64748b; cursor: pointer;"
-                    onmouseover="this.style.transform='translateY(-2px)'"
-                    onmouseout="this.style.transform='translateY(0)'">
-                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd"
-                            d="M3 5a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2h-2.22l.123.489.804.804A1 1 0 0113 18H7a1 1 0 01-.707-1.707l.804-.804L7.22 15H5a2 2 0 01-2-2V5zm5.771 7H5V5h10v7H8.771z"
-                            clip-rule="evenodd" />
-                    </svg>
-                    Sandwiches
-                </button>
-
-                <!-- Beverages -->
-                <button class="filter-category" data-category="beverages"
-                    style="display: flex; align-items: center; gap: 8px; padding: 12px 24px; border-radius: 50px; text-decoration: none; font-weight: 500; transition: all 0.3s ease; border: 2px solid #e2e8f0; background: white; color: #64748b; cursor: pointer;"
-                    onmouseover="this.style.transform='translateY(-2px)'"
-                    onmouseout="this.style.transform='translateY(0)'">
-                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd"
-                            d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V4a2 2 0 00-2-2H6zm1 2a1 1 0 000 2h6a1 1 0 100-2H7zm6 7a1 1 0 011 1v3a1 1 0 11-2 0v-3a1 1 0 011-1zm-3 3a1 1 0 100 2h.01a1 1 0 100-2H10zm-4 1a1 1 0 011-1h.01a1 1 0 110 2H7a1 1 0 01-1-1z"
-                            clip-rule="evenodd" />
-                    </svg>
-                    Beverages
-                </button>
-
-                <!-- Snacks -->
-                <button class="filter-category" data-category="snacks"
-                    style="display: flex; align-items: center; gap: 8px; padding: 12px 24px; border-radius: 50px; text-decoration: none; font-weight: 500; transition: all 0.3s ease; border: 2px solid #e2e8f0; background: white; color: #64748b; cursor: pointer;"
-                    onmouseover="this.style.transform='translateY(-2px)'"
-                    onmouseout="this.style.transform='translateY(0)'">
-                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20">
-                        <path
-                            d="M5 2a1 1 0 000 2h1.17l.313 1.249L8.58 10.52A1 1 0 009.553 11H16a1 1 0 00.894-1.447L18.618 6H16V4a2 2 0 00-2-2H5zM9 16a2 2 0 11-4 0 2 2 0 014 0zM19 16a2 2 0 11-4 0 2 2 0 014 0z" />
-                    </svg>
-                    Snacks
-                </button>
-
-                <!-- Desserts -->
-                <button class="filter-category" data-category="desserts"
-                    style="display: flex; align-items: center; gap: 8px; padding: 12px 24px; border-radius: 50px; text-decoration: none; font-weight: 500; transition: all 0.3s ease; border: 2px solid #e2e8f0; background: white; color: #64748b; cursor: pointer;"
-                    onmouseover="this.style.transform='translateY(-2px)'"
-                    onmouseout="this.style.transform='translateY(0)'">
-                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd"
-                            d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V4a2 2 0 00-2-2H6zm4 14a4 4 0 100-8 4 4 0 000 8z"
-                            clip-rule="evenodd" />
-                    </svg>
-                    Desserts
-                </button>
+                <!-- Dynamic Categories from Database -->
+                @foreach ($categories as $category)
+                    <a href="{{ route('menu.index', ['category_id' => $category->id]) }}"
+                        class="filter-category {{ request('category_id') == $category->id ? 'active' : '' }}"
+                        style="display: flex; align-items: center; gap: 8px; padding: 12px 24px; border-radius: 50px;
+                          {{ request('category_id') == $category->id ? 'background: #1e293b; color: white; border: 2px solid #1e293b;' : 'background: white; color: #64748b; border: 2px solid #e2e8f0;' }}">
+                        @if ($category->image)
+                            <img src="{{ asset('storage/' . $category->image) }}" alt="{{ $category->name }}"
+                                style="width: 20px; height: 20px; border-radius: 50%;">
+                        @endif
+                        {{ $category->name }}
+                    </a>
+                @endforeach
             </div>
 
             <!-- Mobile Category Dropdown -->
-            <div class="category-mobile" style="display: none; margin-bottom: 16px; text-align: center;">
-                <select id="category-dropdown"
-                    style="width: 100%; max-width: 300px; padding: 16px 20px; border: 2px solid #e2e8f0; border-radius: 16px; background: white; font-size: 16px; font-weight: 500; color: #1e293b; outline: none; cursor: pointer;">
-                    <option value="all">🍽️ All Items</option>
-                    <option value="fresh-meals">🥩 Fresh Meals</option>
-                    <option value="sandwiches">🥪 Sandwiches</option>
-                    <option value="beverages">🥤 Beverages</option>
-                    <option value="snacks">🍟 Snacks</option>
-                    <option value="desserts">🍰 Desserts</option>
-                </select>
+            <div class="category-mobile" style="display: none;">
+                <form action="{{ route('menu.index') }}" method="GET">
+                    <select name="category_id" onchange="this.form.submit()"
+                        style="width: 100%; padding: 12px 20px; border-radius: 12px; border: 2px solid #e2e8f0;">
+                        <option value="">🍽️ All Categories</option>
+                        @foreach ($categories as $category)
+                            <option value="{{ $category->id }}"
+                                {{ request('category_id') == $category->id ? 'selected' : '' }}>
+                                {{ $category->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </form>
             </div>
         </div>
     </section>
