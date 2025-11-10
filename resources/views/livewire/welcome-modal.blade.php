@@ -429,6 +429,9 @@
 </script>
 
 <script>
+    // ⭐ GUARD: Only initialize if welcome modal exists
+    const welcomeModalExists = () => document.querySelector('.welcome-modal') !== null;
+
     // Global widget IDs
     window.recaptchaWidgets = {
         guest: null,
@@ -441,6 +444,7 @@
 
     // Callback when reCAPTCHA API loads
     window.onRecaptchaLoadCallback = function() {
+        if (!welcomeModalExists()) return;
         console.log('✅ reCAPTCHA API loaded successfully');
         window.recaptchaReady = true;
         renderVisibleRecaptchas();
@@ -448,6 +452,8 @@
 
     // ⭐ MOVED UP: Define validation function BEFORE rendering reCAPTCHA
     function checkRegisterFormValidity() {
+        if (!welcomeModalExists()) return;
+
         const btn = document.getElementById('registerSubmitBtn');
         const termsCheckbox = document.getElementById('acceptTermsCheckbox');
 
@@ -481,8 +487,13 @@
         }
     }
 
-    // ⭐ MOVED UP: Attach terms listener function BEFORE rendering reCAPTCHA
+    // ⭐ FIXED: Attach terms listener with retry limit
     function attachTermsListener() {
+        if (!welcomeModalExists()) {
+            console.log('⏩ Welcome modal not present, skipping terms listener');
+            return;
+        }
+
         const termsCheckbox = document.getElementById('acceptTermsCheckbox');
         if (termsCheckbox) {
             // Check if listener already attached
@@ -504,14 +515,23 @@
             // Check validity immediately
             checkRegisterFormValidity();
         } else {
-            console.log('⚠️ Terms checkbox not found, will retry...');
-            // Retry after a short delay
-            setTimeout(attachTermsListener, 100);
+            // Retry with limit (max 5 attempts)
+            if (!window.termsRetryCount) window.termsRetryCount = 0;
+            window.termsRetryCount++;
+
+            if (window.termsRetryCount < 5) {
+                console.log('⏳ Terms checkbox not found, retry', window.termsRetryCount);
+                setTimeout(attachTermsListener, 100);
+            } else {
+                console.log('⛔ Terms checkbox not found after 5 retries, stopping');
+            }
         }
     }
 
     // Function to render any visible reCAPTCHA containers
     function renderVisibleRecaptchas() {
+        if (!welcomeModalExists()) return;
+
         if (!window.recaptchaReady || typeof grecaptcha === 'undefined') {
             console.log('⏳ reCAPTCHA not ready yet');
             return;
@@ -578,7 +598,6 @@
                     'sitekey': '{{ \App\Helpers\RecaptchaHelper::getV2SiteKey('checkbox') }}',
                     'callback': function(token) {
                         console.log('✅ Register reCAPTCHA completed');
-                        // ⭐ Now this works regardless of order
                         checkRegisterFormValidity();
                     },
                     'expired-callback': function() {
@@ -595,6 +614,8 @@
 
     // Re-render when Livewire updates the DOM
     document.addEventListener('livewire:init', () => {
+        if (!welcomeModalExists()) return;
+
         Livewire.hook('morph.updated', ({
             el,
             component
@@ -602,7 +623,6 @@
             console.log('🔄 Livewire updated - re-rendering reCAPTCHAs...');
             setTimeout(() => {
                 renderVisibleRecaptchas();
-                // Re-attach listener after Livewire updates
                 attachTermsListener();
             }, 100);
         });
@@ -610,7 +630,12 @@
 
     // Also try on DOMContentLoaded
     document.addEventListener('DOMContentLoaded', function() {
-        console.log('📄 DOM loaded - trying to render...');
+        if (!welcomeModalExists()) {
+            console.log('⏩ Welcome modal not on this page');
+            return;
+        }
+
+        console.log('📄 DOM loaded - initializing welcome modal...');
         setTimeout(() => {
             renderVisibleRecaptchas();
             attachTermsListener();
@@ -735,6 +760,7 @@
         });
     }
 </script>
+
 
 <script>
     // Password functions
