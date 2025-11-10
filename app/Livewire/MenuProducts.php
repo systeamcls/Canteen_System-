@@ -81,6 +81,7 @@ class MenuProducts extends Component
         }
 
         $products = $query->latest()->paginate(12);
+        
         $categories = Category::where('is_active', true)
             ->orderBy('sort_order')
             ->orderBy('name')
