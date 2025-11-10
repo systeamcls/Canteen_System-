@@ -204,11 +204,12 @@
 
                 <!-- All Items Button -->
                 <a href="{{ route('menu.index') }}" class="filter-category {{ !request('category_id') ? 'active' : '' }}"
+                    data-category-id=""
                     style="display: flex; align-items: center; gap: 8px; padding: 12px 24px; border-radius: 50px; text-decoration: none; font-weight: 500; transition: all 0.3s ease; cursor: pointer;
                       {{ !request('category_id') ? 'background: #1e293b; color: white; border: 2px solid #1e293b; box-shadow: 0 4px 14px rgba(30, 41, 59, 0.3);' : 'background: white; color: #64748b; border: 2px solid #e2e8f0;' }}"
                     onmouseover="if (!this.classList.contains('active')) { this.style.background='#f1f5f9'; this.style.transform='translateY(-2px)'; }"
                     onmouseout="if (!this.classList.contains('active')) { this.style.background='white'; this.style.transform='translateY(0)'; }">
-                    <span style="font-size: 18px;">🍽️</span>
+                    <span style="font-size: 20px;">🍽️</span>
                     All Items
                 </a>
 
@@ -216,22 +217,36 @@
                 @foreach ($categories as $category)
                     @php
                         $isActive = request('category_id') == $category->id;
-                        $href = $isActive ? route('menu.index') : route('menu.index', ['category_id' => $category->id]);
                     @endphp
 
-                    <a href="{{ $href }}" class="filter-category {{ $isActive ? 'active' : '' }}"
+                    <a href="javascript:void(0)" class="filter-category {{ $isActive ? 'active' : '' }}"
+                        data-category-id="{{ $category->id }}" data-is-active="{{ $isActive ? '1' : '0' }}"
                         style="display: flex; align-items: center; gap: 8px; padding: 12px 24px; border-radius: 50px; text-decoration: none; font-weight: 500; transition: all 0.3s ease; cursor: pointer;
                           {{ $isActive ? 'background: #1e293b; color: white; border: 2px solid #1e293b; box-shadow: 0 4px 14px rgba(30, 41, 59, 0.3);' : 'background: white; color: #64748b; border: 2px solid #e2e8f0;' }}"
                         onmouseover="if (!this.classList.contains('active')) { this.style.background='#f1f5f9'; this.style.transform='translateY(-2px)'; }"
                         onmouseout="if (!this.classList.contains('active')) { this.style.background='white'; this.style.transform='translateY(0)'; }">
-                        @if ($category->image)
-                            <img src="{{ Storage::url($category->image) }}" alt="{{ $category->name }}"
-                                style="width: 20px; height: 20px; border-radius: 50%; object-fit: cover;"
-                                onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
-                            <span style="font-size: 18px; display: none;">🏷️</span>
+
+                        @if ($category->image && file_exists(storage_path('app/public/' . $category->image)))
+                            {{-- Show actual uploaded image --}}
+                            <img src="{{ asset('storage/' . $category->image) }}" alt="{{ $category->name }}"
+                                style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover;"
+                                onerror="this.style.display='none';">
                         @else
-                            <span style="font-size: 18px;">🏷️</span>
+                            {{-- Fallback emoji based on category name --}}
+                            @php
+                                $emoji = match (strtolower($category->name)) {
+                                    'fresh meals' => '🍱',
+                                    'sandwiches' => '🥪',
+                                    'beverages' => '🥤',
+                                    'snacks' => '🍿',
+                                    'desserts' => '🍰',
+                                    'boxed meals' => '📦',
+                                    default => '🍽️',
+                                };
+                            @endphp
+                            <span style="font-size: 20px;">{{ $emoji }}</span>
                         @endif
+
                         {{ $category->name }}
                     </a>
                 @endforeach
@@ -239,7 +254,7 @@
 
             <!-- Mobile Category Dropdown -->
             <div class="category-mobile" style="display: none;">
-                <form action="{{ route('menu.index') }}" method="GET">
+                <form action="{{ route('menu.index') }}" method="GET" id="mobileFilterForm">
                     @if (request('search'))
                         <input type="hidden" name="search" value="{{ request('search') }}">
                     @endif
@@ -247,7 +262,7 @@
                         <input type="hidden" name="stall" value="{{ request('stall') }}">
                     @endif
 
-                    <select name="category_id" onchange="this.form.submit()"
+                    <select name="category_id" id="mobileCategorySelect"
                         style="width: 100%; padding: 12px 20px; border-radius: 12px; border: 2px solid #e2e8f0; background: white; font-weight: 500; cursor: pointer;">
                         <option value="">🍽️ All Categories</option>
                         @foreach ($categories as $category)
@@ -261,6 +276,7 @@
             </div>
         </div>
     </section>
+
 
     <!-- Section Title - Moved outside sticky area -->
     <section style="padding: 16px 0 0; background: #fafbfc;">
@@ -781,95 +797,61 @@
             setInterval(nextSlide, 3000);
         });
 
-        document.addEventListener('DOMContentLoaded', function() {
-            const categoryButtons = document.querySelectorAll('.filter-category');
-            const menuItems = document.querySelectorAll('.menu-item');
-            const categoryDropdown = document.getElementById('category-dropdown');
-            const categoryTitle = document.getElementById('category-title');
-            const itemsCount = document.getElementById('items-count');
+        <
+        script >
+            document.addEventListener('DOMContentLoaded', function() {
+                const categoryButtons = document.querySelectorAll('.filter-category[data-category-id]');
+                const currentCategoryId = "{{ request('category_id') }}";
 
-            // Category name mapping
-            const categoryNames = {
-                'all': 'All Menu Items',
-                'fresh-meals': 'Fresh Meals',
-                'sandwiches': 'Sandwiches',
-                'beverages': 'Beverages',
-                'snacks': 'Snacks',
-                'desserts': 'Desserts'
-            };
+                categoryButtons.forEach(button => {
+                    button.addEventListener('click', function(e) {
+                        e.preventDefault();
 
-            // Function to filter items
-            function filterItems(selectedCategory) {
-                let visibleCount = 0;
+                        const categoryId = this.dataset.categoryId;
+                        const isActive = this.dataset.isActive === '1';
 
-                menuItems.forEach(item => {
-                    if (selectedCategory === 'all' || item.dataset.category === selectedCategory) {
-                        item.style.display = 'block';
-                        item.style.opacity = '0';
-                        item.style.transform = 'translateY(20px)';
+                        // Build URL with current search and stall filters
+                        let url = "{{ route('menu.index') }}";
+                        let params = [];
 
-                        setTimeout(() => {
-                            item.style.opacity = '1';
-                            item.style.transform = 'translateY(0)';
-                        }, 50);
+                        // If clicking active category, deselect it (go to All Items)
+                        if (isActive && categoryId) {
+                            // Don't add category_id parameter
+                        } else if (categoryId) {
+                            // Add category_id parameter
+                            params.push('category_id=' + categoryId);
+                        }
 
-                        visibleCount++;
-                    } else {
-                        item.style.opacity = '0';
-                        item.style.transform = 'translateY(-20px)';
+                        // Preserve search filter
+                        const searchParam = "{{ request('search') }}";
+                        if (searchParam) {
+                            params.push('search=' + encodeURIComponent(searchParam));
+                        }
 
-                        setTimeout(() => {
-                            item.style.display = 'none';
-                        }, 300);
-                    }
+                        // Preserve stall filter
+                        const stallParam = "{{ request('stall') }}";
+                        if (stallParam) {
+                            params.push('stall=' + stallParam);
+                        }
+
+                        // Build final URL
+                        if (params.length > 0) {
+                            url += '?' + params.join('&');
+                        }
+
+                        // Navigate to URL
+                        window.location.href = url;
+                    });
                 });
 
-                // Update title and count
-                categoryTitle.textContent = categoryNames[selectedCategory] || 'All Menu Items';
-                itemsCount.textContent = visibleCount;
-            }
-
-            // Function to update button states
-            function updateButtonStates(selectedCategory) {
-                categoryButtons.forEach(btn => {
-                    if (btn.dataset.category === selectedCategory) {
-                        btn.style.background = '#1e293b';
-                        btn.style.color = 'white';
-                        btn.style.borderColor = '#1e293b';
-                        btn.style.boxShadow = '0 4px 14px rgba(30, 41, 59, 0.3)';
-                        btn.classList.add('active');
-                    } else {
-                        btn.style.background = 'white';
-                        btn.style.color = '#64748b';
-                        btn.style.borderColor = '#e2e8f0';
-                        btn.style.boxShadow = 'none';
-                        btn.classList.remove('active');
-                    }
-                });
-            }
-
-            // Desktop category button clicks
-            categoryButtons.forEach(button => {
-                button.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const selectedCategory = this.dataset.category;
-
-                    updateButtonStates(selectedCategory);
-                    filterItems(selectedCategory);
-
-                    // Update dropdown to match
-                    categoryDropdown.value = selectedCategory;
-                });
+                // Mobile dropdown handler
+                const mobileSelect = document.getElementById('mobileCategorySelect');
+                if (mobileSelect) {
+                    mobileSelect.addEventListener('change', function() {
+                        document.getElementById('mobileFilterForm').submit();
+                    });
+                }
             });
-
-            // Mobile dropdown change
-            categoryDropdown.addEventListener('change', function() {
-                const selectedCategory = this.value;
-
-                updateButtonStates(selectedCategory);
-                filterItems(selectedCategory);
-            });
-        });
     </script>
 
 
