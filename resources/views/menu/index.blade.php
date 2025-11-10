@@ -864,7 +864,6 @@
             const menuGrid = document.getElementById('menuGrid');
             const categoryTitle = document.getElementById('category-title');
             const itemsCount = document.getElementById('items-count');
-            const currentCategoryId = "{{ request('category_id') }}";
 
             categoryButtons.forEach(button => {
                 button.addEventListener('click', function(e) {
@@ -875,7 +874,7 @@
                     const categoryName = this.textContent.trim();
 
                     // Update button states immediately
-                    updateButtonStates(categoryId, isActive);
+                    updateButtonStates(categoryId, isActive, categoryName);
 
                     // Build URL parameters
                     let params = new URLSearchParams();
@@ -920,22 +919,27 @@
                             const parser = new DOMParser();
                             const doc = parser.parseFromString(html, 'text/html');
 
-                            // Update menu grid
-                            const newMenuGrid = doc.getElementById('menuGrid');
-                            if (menuGrid && newMenuGrid) {
-                                menuGrid.innerHTML = newMenuGrid.innerHTML;
+                            // Get the parent section that contains both grid and "no results" message
+                            const currentSection = menuGrid.parentElement;
+                            const newSection = doc.querySelector('#menuGrid').parentElement;
 
-                                // Fade in
-                                setTimeout(() => {
-                                    menuGrid.style.opacity = '1';
-                                    menuGrid.style.pointerEvents = 'auto';
-                                }, 100);
+                            if (currentSection && newSection) {
+                                // Replace entire section content (handles both grid and empty state)
+                                currentSection.innerHTML = newSection.innerHTML;
                             }
 
-                            // Update title
-                            const newTitle = doc.getElementById('category-title');
-                            if (categoryTitle && newTitle) {
-                                categoryTitle.textContent = newTitle.textContent;
+                            // Update title with category name
+                            if (categoryTitle) {
+                                if (isActive && categoryId) {
+                                    // Deselecting - back to "All Menu Items"
+                                    categoryTitle.textContent = 'All Menu Items';
+                                } else if (categoryId) {
+                                    // Selecting a category
+                                    categoryTitle.textContent = categoryName;
+                                } else {
+                                    // Clicked "All Items" button
+                                    categoryTitle.textContent = 'All Menu Items';
+                                }
                             }
 
                             // Update count
@@ -949,6 +953,9 @@
 
                             // Update data-is-active attributes for next click
                             updateDataAttributes(categoryId, isActive);
+
+                            // Re-attach event listeners to new "Add to Cart" buttons
+                            // (Livewire will handle this automatically)
                         })
                         .catch(error => {
                             console.error('Error loading products:', error);
@@ -958,7 +965,7 @@
                 });
             });
 
-            function updateButtonStates(categoryId, wasActive) {
+            function updateButtonStates(categoryId, wasActive, categoryName) {
                 categoryButtons.forEach(btn => {
                     const btnCategoryId = btn.dataset.categoryId;
 
