@@ -16,7 +16,7 @@ class CategoryResource extends Resource
     
     protected static ?string $navigationIcon = 'heroicon-o-tag';
     
-    protected static ?string $navigationLabel = 'Food Categories';
+    protected static ?string $navigationLabel = 'Canteen Categories';
     
     protected static ?string $navigationGroup = 'Canteen Management';
     
@@ -86,7 +86,8 @@ class CategoryResource extends Resource
                     ->disk('public')
                     ->size(50)
                     ->circular()
-                    ->defaultImageUrl(url('/images/placeholder-category.png')),
+                    ->defaultImageUrl(url('/images/placeholder-category.png'))
+                    ->visibility('public'), // ✅ Add this
                     
                 Tables\Columns\TextColumn::make('name')
                     ->searchable()

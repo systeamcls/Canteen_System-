@@ -6,6 +6,8 @@ use App\Models\Product;
 use App\Models\Stall;
 use App\Models\Category;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+
 
 class MenuController extends Controller
 {

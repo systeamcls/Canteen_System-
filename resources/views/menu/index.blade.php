@@ -189,6 +189,10 @@
         </div>
     </section>
 
+    @php
+        use Illuminate\Support\Facades\Storage;
+    @endphp
+
     <!-- Categories Section -->
     <section
         style="padding: 24px 0 16px; background: #fafbfc; position: sticky; top: 60px; z-index: 50; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
@@ -198,22 +202,35 @@
             <div class="category-desktop"
                 style="display: flex; justify-content: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
 
-                <!-- All Items -->
+                <!-- All Items Button -->
                 <a href="{{ route('menu.index') }}" class="filter-category {{ !request('category_id') ? 'active' : '' }}"
-                    style="display: flex; align-items: center; gap: 8px; padding: 12px 24px; border-radius: 50px; 
-                      {{ !request('category_id') ? 'background: #1e293b; color: white; border: 2px solid #1e293b;' : 'background: white; color: #64748b; border: 2px solid #e2e8f0;' }}">
-                    🍽️ All Items
+                    style="display: flex; align-items: center; gap: 8px; padding: 12px 24px; border-radius: 50px; text-decoration: none; font-weight: 500; transition: all 0.3s ease; cursor: pointer;
+                      {{ !request('category_id') ? 'background: #1e293b; color: white; border: 2px solid #1e293b; box-shadow: 0 4px 14px rgba(30, 41, 59, 0.3);' : 'background: white; color: #64748b; border: 2px solid #e2e8f0;' }}"
+                    onmouseover="if (!this.classList.contains('active')) { this.style.background='#f1f5f9'; this.style.transform='translateY(-2px)'; }"
+                    onmouseout="if (!this.classList.contains('active')) { this.style.background='white'; this.style.transform='translateY(0)'; }">
+                    <span style="font-size: 18px;">🍽️</span>
+                    All Items
                 </a>
 
                 <!-- Dynamic Categories from Database -->
                 @foreach ($categories as $category)
-                    <a href="{{ route('menu.index', ['category_id' => $category->id]) }}"
-                        class="filter-category {{ request('category_id') == $category->id ? 'active' : '' }}"
-                        style="display: flex; align-items: center; gap: 8px; padding: 12px 24px; border-radius: 50px;
-                          {{ request('category_id') == $category->id ? 'background: #1e293b; color: white; border: 2px solid #1e293b;' : 'background: white; color: #64748b; border: 2px solid #e2e8f0;' }}">
+                    @php
+                        $isActive = request('category_id') == $category->id;
+                        $href = $isActive ? route('menu.index') : route('menu.index', ['category_id' => $category->id]);
+                    @endphp
+
+                    <a href="{{ $href }}" class="filter-category {{ $isActive ? 'active' : '' }}"
+                        style="display: flex; align-items: center; gap: 8px; padding: 12px 24px; border-radius: 50px; text-decoration: none; font-weight: 500; transition: all 0.3s ease; cursor: pointer;
+                          {{ $isActive ? 'background: #1e293b; color: white; border: 2px solid #1e293b; box-shadow: 0 4px 14px rgba(30, 41, 59, 0.3);' : 'background: white; color: #64748b; border: 2px solid #e2e8f0;' }}"
+                        onmouseover="if (!this.classList.contains('active')) { this.style.background='#f1f5f9'; this.style.transform='translateY(-2px)'; }"
+                        onmouseout="if (!this.classList.contains('active')) { this.style.background='white'; this.style.transform='translateY(0)'; }">
                         @if ($category->image)
-                            <img src="{{ asset('storage/' . $category->image) }}" alt="{{ $category->name }}"
-                                style="width: 20px; height: 20px; border-radius: 50%;">
+                            <img src="{{ Storage::url($category->image) }}" alt="{{ $category->name }}"
+                                style="width: 20px; height: 20px; border-radius: 50%; object-fit: cover;"
+                                onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+                            <span style="font-size: 18px; display: none;">🏷️</span>
+                        @else
+                            <span style="font-size: 18px;">🏷️</span>
                         @endif
                         {{ $category->name }}
                     </a>
@@ -223,8 +240,15 @@
             <!-- Mobile Category Dropdown -->
             <div class="category-mobile" style="display: none;">
                 <form action="{{ route('menu.index') }}" method="GET">
+                    @if (request('search'))
+                        <input type="hidden" name="search" value="{{ request('search') }}">
+                    @endif
+                    @if (request('stall'))
+                        <input type="hidden" name="stall" value="{{ request('stall') }}">
+                    @endif
+
                     <select name="category_id" onchange="this.form.submit()"
-                        style="width: 100%; padding: 12px 20px; border-radius: 12px; border: 2px solid #e2e8f0;">
+                        style="width: 100%; padding: 12px 20px; border-radius: 12px; border: 2px solid #e2e8f0; background: white; font-weight: 500; cursor: pointer;">
                         <option value="">🍽️ All Categories</option>
                         @foreach ($categories as $category)
                             <option value="{{ $category->id }}"
@@ -726,6 +750,16 @@
 
             100% {
                 background-position: 40px 40px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .category-desktop {
+                display: none !important;
+            }
+
+            .category-mobile {
+                display: block !important;
             }
         }
     </style>
