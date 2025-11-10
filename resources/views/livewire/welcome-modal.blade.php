@@ -428,9 +428,16 @@
 <script src="https://www.google.com/recaptcha/api.js?onload=onRecaptchaLoadCallback&render=explicit" async defer>
 </script>
 
+<!-- FIRST SCRIPT SECTION: reCAPTCHA and Terms -->
 <script>
-    // ⭐ GUARD: Only initialize if welcome modal exists
-    const welcomeModalExists = () => document.querySelector('.welcome-modal') !== null;
+    // ⭐ BETTER GUARD: Check if we're on a page that should have auth modals
+    const isAuthPage = () => {
+        // Check if any auth-related elements exist
+        return document.getElementById('recaptcha-guest-container') !== null ||
+            document.getElementById('recaptcha-login-container') !== null ||
+            document.getElementById('recaptcha-register-container') !== null ||
+            document.querySelector('.welcome-modal') !== null;
+    };
 
     // Global widget IDs
     window.recaptchaWidgets = {
@@ -444,7 +451,6 @@
 
     // Callback when reCAPTCHA API loads
     window.onRecaptchaLoadCallback = function() {
-        if (!welcomeModalExists()) return;
         console.log('✅ reCAPTCHA API loaded successfully');
         window.recaptchaReady = true;
         renderVisibleRecaptchas();
@@ -452,8 +458,6 @@
 
     // ⭐ MOVED UP: Define validation function BEFORE rendering reCAPTCHA
     function checkRegisterFormValidity() {
-        if (!welcomeModalExists()) return;
-
         const btn = document.getElementById('registerSubmitBtn');
         const termsCheckbox = document.getElementById('acceptTermsCheckbox');
 
@@ -487,10 +491,11 @@
         }
     }
 
-    // ⭐ FIXED: Attach terms listener with retry limit
+    // ⭐ FIXED: Attach terms listener with better checking
     function attachTermsListener() {
-        if (!welcomeModalExists()) {
-            console.log('⏩ Welcome modal not present, skipping terms listener');
+        // Only check if register container exists (more specific)
+        if (!document.getElementById('recaptcha-register-container')) {
+            console.log('⏩ Register form not present, skipping terms listener');
             return;
         }
 
@@ -515,23 +520,21 @@
             // Check validity immediately
             checkRegisterFormValidity();
         } else {
-            // Retry with limit (max 5 attempts)
+            // Retry with limit (max 10 attempts for slower connections)
             if (!window.termsRetryCount) window.termsRetryCount = 0;
             window.termsRetryCount++;
 
-            if (window.termsRetryCount < 5) {
+            if (window.termsRetryCount < 10) {
                 console.log('⏳ Terms checkbox not found, retry', window.termsRetryCount);
-                setTimeout(attachTermsListener, 100);
+                setTimeout(attachTermsListener, 200);
             } else {
-                console.log('⛔ Terms checkbox not found after 5 retries, stopping');
+                console.log('⛔ Terms checkbox not found after 10 retries, stopping');
             }
         }
     }
 
     // Function to render any visible reCAPTCHA containers
     function renderVisibleRecaptchas() {
-        if (!welcomeModalExists()) return;
-
         if (!window.recaptchaReady || typeof grecaptcha === 'undefined') {
             console.log('⏳ reCAPTCHA not ready yet');
             return;
@@ -614,8 +617,6 @@
 
     // Re-render when Livewire updates the DOM
     document.addEventListener('livewire:init', () => {
-        if (!welcomeModalExists()) return;
-
         Livewire.hook('morph.updated', ({
             el,
             component
@@ -623,22 +624,23 @@
             console.log('🔄 Livewire updated - re-rendering reCAPTCHAs...');
             setTimeout(() => {
                 renderVisibleRecaptchas();
-                attachTermsListener();
+                // Only try to attach terms listener if register container exists
+                if (document.getElementById('recaptcha-register-container')) {
+                    attachTermsListener();
+                }
             }, 100);
         });
     });
 
     // Also try on DOMContentLoaded
     document.addEventListener('DOMContentLoaded', function() {
-        if (!welcomeModalExists()) {
-            console.log('⏩ Welcome modal not on this page');
-            return;
-        }
-
-        console.log('📄 DOM loaded - initializing welcome modal...');
+        console.log('📄 DOM loaded - initializing...');
         setTimeout(() => {
             renderVisibleRecaptchas();
-            attachTermsListener();
+            // Only try to attach terms listener if register container exists
+            if (document.getElementById('recaptcha-register-container')) {
+                attachTermsListener();
+            }
         }, 500);
     });
 
@@ -747,21 +749,13 @@
             @this.call('registerEmployee');
         }).catch((error) => {
             console.error('❌ Failed to set token:', error);
-
-            // Show modal again, hide loading
-            if (modal) {
-                modal.style.display = 'flex';
-            }
-            if (loadingOverlay) {
-                loadingOverlay.style.display = 'none';
-            }
-
             alert('An error occurred. Please try again.');
         });
     }
 </script>
 
 
+<!-- SECOND SCRIPT SECTION: Password and Legal Modal Functions -->
 <script>
     // Password functions
     function showPasswordRequirements() {
