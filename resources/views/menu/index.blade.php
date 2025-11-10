@@ -796,63 +796,65 @@
             // Change slide every 3 seconds
             setInterval(nextSlide, 3000);
         });
-
-        <
-        script >
-            document.addEventListener('DOMContentLoaded', function() {
-                const categoryButtons = document.querySelectorAll('.filter-category[data-category-id]');
-                const currentCategoryId = "{{ request('category_id') }}";
-
-                categoryButtons.forEach(button => {
-                    button.addEventListener('click', function(e) {
-                        e.preventDefault();
-
-                        const categoryId = this.dataset.categoryId;
-                        const isActive = this.dataset.isActive === '1';
-
-                        // Build URL with current search and stall filters
-                        let url = "{{ route('menu.index') }}";
-                        let params = [];
-
-                        // If clicking active category, deselect it (go to All Items)
-                        if (isActive && categoryId) {
-                            // Don't add category_id parameter
-                        } else if (categoryId) {
-                            // Add category_id parameter
-                            params.push('category_id=' + categoryId);
-                        }
-
-                        // Preserve search filter
-                        const searchParam = "{{ request('search') }}";
-                        if (searchParam) {
-                            params.push('search=' + encodeURIComponent(searchParam));
-                        }
-
-                        // Preserve stall filter
-                        const stallParam = "{{ request('stall') }}";
-                        if (stallParam) {
-                            params.push('stall=' + stallParam);
-                        }
-
-                        // Build final URL
-                        if (params.length > 0) {
-                            url += '?' + params.join('&');
-                        }
-
-                        // Navigate to URL
-                        window.location.href = url;
-                    });
-                });
-
-                // Mobile dropdown handler
-                const mobileSelect = document.getElementById('mobileCategorySelect');
-                if (mobileSelect) {
-                    mobileSelect.addEventListener('change', function() {
-                        document.getElementById('mobileFilterForm').submit();
-                    });
-                }
-            });
     </script>
 
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const categoryButtons = document.querySelectorAll('.filter-category[data-category-id]');
+            const currentCategoryId = "{{ request('category_id') }}";
 
+            categoryButtons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+
+                    const categoryId = this.dataset.categoryId;
+                    const isActive = this.dataset.isActive === '1';
+
+                    // Build URL with current search and stall filters
+                    let url = "{{ route('menu.index') }}";
+                    let params = [];
+
+                    // If clicking active category, deselect it (go to All Items)
+                    if (isActive && categoryId) {
+                        // Don't add category_id parameter (deselect)
+                        console.log('Deselecting category:', categoryId);
+                    } else if (categoryId) {
+                        // Add category_id parameter (select)
+                        params.push('category_id=' + categoryId);
+                        console.log('Selecting category:', categoryId);
+                    }
+
+                    // Preserve search filter
+                    const searchParam = "{{ request('search') }}";
+                    if (searchParam) {
+                        params.push('search=' + encodeURIComponent(searchParam));
+                    }
+
+                    // Preserve stall filter
+                    const stallParam = "{{ request('stall') }}";
+                    if (stallParam) {
+                        params.push('stall=' + stallParam);
+                    }
+
+                    // Build final URL
+                    if (params.length > 0) {
+                        url += '?' + params.join('&');
+                    }
+
+                    console.log('Navigating to:', url);
+
+                    // Navigate to URL
+                    window.location.href = url;
+                });
+            });
+
+            // Mobile dropdown handler
+            const mobileSelect = document.getElementById('mobileCategorySelect');
+            if (mobileSelect) {
+                mobileSelect.addEventListener('change', function() {
+                    document.getElementById('mobileFilterForm').submit();
+                });
+            }
+        });
+    </script>
 @endsection
