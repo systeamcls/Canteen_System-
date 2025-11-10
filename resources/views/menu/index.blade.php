@@ -778,6 +778,66 @@
                 display: block !important;
             }
         }
+
+        /* Smooth transitions for menu grid */
+        #menuGrid {
+            transition: opacity 0.3s ease;
+        }
+
+        .menu-item {
+            animation: fadeInUp 0.4s ease forwards;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Stagger animation for items */
+        .menu-item:nth-child(1) {
+            animation-delay: 0.05s;
+        }
+
+        .menu-item:nth-child(2) {
+            animation-delay: 0.1s;
+        }
+
+        .menu-item:nth-child(3) {
+            animation-delay: 0.15s;
+        }
+
+        .menu-item:nth-child(4) {
+            animation-delay: 0.2s;
+        }
+
+        .menu-item:nth-child(5) {
+            animation-delay: 0.25s;
+        }
+
+        .menu-item:nth-child(6) {
+            animation-delay: 0.3s;
+        }
+
+        .menu-item:nth-child(7) {
+            animation-delay: 0.35s;
+        }
+
+        .menu-item:nth-child(8) {
+            animation-delay: 0.4s;
+        }
+
+        /* Loading state */
+        #menuGrid.loading {
+            opacity: 0.5;
+            pointer-events: none;
+        }
     </style>
 
     <!-- JavaScript for Category Filtering -->
@@ -801,6 +861,9 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const categoryButtons = document.querySelectorAll('.filter-category[data-category-id]');
+            const menuGrid = document.getElementById('menuGrid');
+            const categoryTitle = document.getElementById('category-title');
+            const itemsCount = document.getElementById('items-count');
             const currentCategoryId = "{{ request('category_id') }}";
 
             categoryButtons.forEach(button => {
@@ -809,44 +872,148 @@
 
                     const categoryId = this.dataset.categoryId;
                     const isActive = this.dataset.isActive === '1';
+                    const categoryName = this.textContent.trim();
 
-                    // Build URL with current search and stall filters
-                    let url = "{{ route('menu.index') }}";
-                    let params = [];
+                    // Update button states immediately
+                    updateButtonStates(categoryId, isActive);
 
-                    // If clicking active category, deselect it (go to All Items)
+                    // Build URL parameters
+                    let params = new URLSearchParams();
+
+                    // If clicking active category, deselect it
                     if (isActive && categoryId) {
-                        // Don't add category_id parameter (deselect)
-                        console.log('Deselecting category:', categoryId);
+                        // Don't add category_id (show all)
                     } else if (categoryId) {
-                        // Add category_id parameter (select)
-                        params.push('category_id=' + categoryId);
-                        console.log('Selecting category:', categoryId);
+                        params.append('category_id', categoryId);
                     }
 
-                    // Preserve search filter
+                    // Preserve other filters
                     const searchParam = "{{ request('search') }}";
                     if (searchParam) {
-                        params.push('search=' + encodeURIComponent(searchParam));
+                        params.append('search', searchParam);
                     }
 
-                    // Preserve stall filter
                     const stallParam = "{{ request('stall') }}";
                     if (stallParam) {
-                        params.push('stall=' + stallParam);
+                        params.append('stall', stallParam);
                     }
 
-                    // Build final URL
-                    if (params.length > 0) {
-                        url += '?' + params.join('&');
+                    // Build URL
+                    const url = "{{ route('menu.index') }}" + (params.toString() ? '?' + params
+                        .toString() : '');
+
+                    // Show loading state
+                    if (menuGrid) {
+                        menuGrid.style.opacity = '0.5';
+                        menuGrid.style.pointerEvents = 'none';
                     }
 
-                    console.log('Navigating to:', url);
+                    // Fetch new content via AJAX
+                    fetch(url, {
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest'
+                            }
+                        })
+                        .then(response => response.text())
+                        .then(html => {
+                            // Parse the response
+                            const parser = new DOMParser();
+                            const doc = parser.parseFromString(html, 'text/html');
 
-                    // Navigate to URL
-                    window.location.href = url;
+                            // Update menu grid
+                            const newMenuGrid = doc.getElementById('menuGrid');
+                            if (menuGrid && newMenuGrid) {
+                                menuGrid.innerHTML = newMenuGrid.innerHTML;
+
+                                // Fade in
+                                setTimeout(() => {
+                                    menuGrid.style.opacity = '1';
+                                    menuGrid.style.pointerEvents = 'auto';
+                                }, 100);
+                            }
+
+                            // Update title
+                            const newTitle = doc.getElementById('category-title');
+                            if (categoryTitle && newTitle) {
+                                categoryTitle.textContent = newTitle.textContent;
+                            }
+
+                            // Update count
+                            const newCount = doc.getElementById('items-count');
+                            if (itemsCount && newCount) {
+                                itemsCount.textContent = newCount.textContent;
+                            }
+
+                            // Update URL without refresh
+                            window.history.pushState({}, '', url);
+
+                            // Update data-is-active attributes for next click
+                            updateDataAttributes(categoryId, isActive);
+                        })
+                        .catch(error => {
+                            console.error('Error loading products:', error);
+                            // Fallback to page refresh
+                            window.location.href = url;
+                        });
                 });
             });
+
+            function updateButtonStates(categoryId, wasActive) {
+                categoryButtons.forEach(btn => {
+                    const btnCategoryId = btn.dataset.categoryId;
+
+                    // If clicking active button, go back to "All Items" state
+                    if (wasActive && categoryId && btnCategoryId === categoryId) {
+                        // Deactivate this button
+                        btn.classList.remove('active');
+                        btn.style.background = 'white';
+                        btn.style.color = '#64748b';
+                        btn.style.borderColor = '#e2e8f0';
+                        btn.style.boxShadow = 'none';
+
+                        // Activate "All Items" button
+                        const allItemsBtn = document.querySelector('.filter-category[data-category-id=""]');
+                        if (allItemsBtn) {
+                            allItemsBtn.classList.add('active');
+                            allItemsBtn.style.background = '#1e293b';
+                            allItemsBtn.style.color = 'white';
+                            allItemsBtn.style.borderColor = '#1e293b';
+                            allItemsBtn.style.boxShadow = '0 4px 14px rgba(30, 41, 59, 0.3)';
+                        }
+                    } else {
+                        // Normal selection logic
+                        if (btnCategoryId === categoryId) {
+                            btn.classList.add('active');
+                            btn.style.background = '#1e293b';
+                            btn.style.color = 'white';
+                            btn.style.borderColor = '#1e293b';
+                            btn.style.boxShadow = '0 4px 14px rgba(30, 41, 59, 0.3)';
+                        } else {
+                            btn.classList.remove('active');
+                            btn.style.background = 'white';
+                            btn.style.color = '#64748b';
+                            btn.style.borderColor = '#e2e8f0';
+                            btn.style.boxShadow = 'none';
+                        }
+                    }
+                });
+            }
+
+            function updateDataAttributes(categoryId, wasActive) {
+                categoryButtons.forEach(btn => {
+                    const btnCategoryId = btn.dataset.categoryId;
+
+                    if (wasActive && categoryId && btnCategoryId === categoryId) {
+                        // This button was just deselected
+                        btn.dataset.isActive = '0';
+                    } else if (btnCategoryId === categoryId) {
+                        // This button was just selected
+                        btn.dataset.isActive = '1';
+                    } else {
+                        btn.dataset.isActive = '0';
+                    }
+                });
+            }
 
             // Mobile dropdown handler
             const mobileSelect = document.getElementById('mobileCategorySelect');
@@ -855,6 +1022,12 @@
                     document.getElementById('mobileFilterForm').submit();
                 });
             }
+
+            // Handle browser back/forward buttons
+            window.addEventListener('popstate', function() {
+                location.reload();
+            });
         });
     </script>
+
 @endsection
