@@ -9,18 +9,22 @@
                 style="display: flex; justify-content: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
 
                 <!-- All Items Button -->
-                <button wire:click="selectCategory(null)" type="button"
-                    class="{{ !$selectedCategoryId ? 'cat-active' : 'cat-inactive' }}"
-                    style="display: flex; align-items: center; gap: 8px; padding: 12px 24px; border-radius: 50px; font-weight: 500; transition: all 0.2s; cursor: pointer; border: 2px solid;">
+                <a href="{{ route('menu.index') }}" class="{{ !$selectedCategoryId ? 'cat-active' : 'cat-inactive' }}"
+                    style="display: flex; align-items: center; gap: 8px; padding: 12px 24px; border-radius: 50px; font-weight: 500; transition: all 0.2s; text-decoration: none; border: 2px solid;">
                     <span style="font-size: 20px;">🍽️</span>
                     All Items
-                </button>
+                </a>
 
                 <!-- Category Buttons -->
                 @foreach ($categories as $category)
-                    <button wire:click="selectCategory({{ $category->id }})" type="button"
-                        class="{{ $selectedCategoryId == $category->id ? 'cat-active' : 'cat-inactive' }}"
-                        style="display: flex; align-items: center; gap: 8px; padding: 12px 24px; border-radius: 50px; font-weight: 500; transition: all 0.2s; cursor: pointer; border: 2px solid;">
+                    @php
+                        $isActive = $selectedCategoryId == $category->id;
+                        // Toggle: if active, link removes filter; if inactive, adds filter
+                        $url = $isActive ? route('menu.index') : route('menu.index', ['category_id' => $category->id]);
+                    @endphp
+
+                    <a href="{{ $url }}" class="{{ $isActive ? 'cat-active' : 'cat-inactive' }}"
+                        style="display: flex; align-items: center; gap: 8px; padding: 12px 24px; border-radius: 50px; font-weight: 500; transition: all 0.2s; text-decoration: none; border: 2px solid;">
 
                         @if ($category->image && file_exists(storage_path('app/public/' . $category->image)))
                             <img src="{{ asset('storage/' . $category->image) }}" alt="{{ $category->name }}"
@@ -59,19 +63,24 @@
                         @endif
 
                         {{ $category->name }}
-                    </button>
+                    </a>
                 @endforeach
             </div>
 
             <!-- Mobile Dropdown -->
             <div class="category-mobile" style="display: none;">
-                <select wire:model.live="selectedCategoryId"
-                    style="width: 100%; padding: 12px 20px; border-radius: 12px; border: 2px solid #e2e8f0; background: white; font-weight: 500; cursor: pointer;">
-                    <option value="">🍽️ All Categories</option>
-                    @foreach ($categories as $category)
-                        <option value="{{ $category->id }}">{{ $category->name }}</option>
-                    @endforeach
-                </select>
+                <form action="{{ route('menu.index') }}" method="GET">
+                    <select name="category_id" onchange="this.form.submit()"
+                        style="width: 100%; padding: 12px 20px; border-radius: 12px; border: 2px solid #e2e8f0; background: white; font-weight: 500; cursor: pointer;">
+                        <option value="">🍽️ All Categories</option>
+                        @foreach ($categories as $category)
+                            <option value="{{ $category->id }}"
+                                {{ $selectedCategoryId == $category->id ? 'selected' : '' }}>
+                                {{ $category->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </form>
             </div>
         </div>
     </section>
@@ -93,18 +102,6 @@
     <!-- Products Grid -->
     <section style="padding: 0 0 80px; background: #fafbfc;">
         <div class="container" style="max-width: 1200px; margin: 0 auto; padding: 0 20px;">
-
-            <!-- Loading Overlay -->
-            <div wire:loading wire:target="selectCategory"
-                style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.8); z-index: 9999; display: flex; align-items: center; justify-content: center;">
-                <div style="text-align: center;">
-                    <div
-                        style="width: 50px; height: 50px; border: 4px solid #f3f3f3; border-top: 4px solid #FF6B35; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 10px;">
-                    </div>
-                    <p style="color: #64748b; font-weight: 600;">Loading...</p>
-                </div>
-            </div>
-
             @if ($products->count() > 0)
                 <div class="products-grid">
                     @foreach ($products as $product)
@@ -141,10 +138,10 @@
                     <p style="color: #64748b; margin-bottom: 32px; font-size: 1.125rem;">
                         Try browsing other categories or check back later.
                     </p>
-                    <button wire:click="selectCategory(null)" type="button"
-                        style="background: #FF6B35; color: white; padding: 16px 32px; border-radius: 16px; border: none; font-weight: 600; box-shadow: 0 4px 14px rgba(255, 107, 53, 0.3); cursor: pointer;">
+                    <a href="{{ route('menu.index') }}"
+                        style="display: inline-block; background: #FF6B35; color: white; padding: 16px 32px; border-radius: 16px; text-decoration: none; font-weight: 600; box-shadow: 0 4px 14px rgba(255, 107, 53, 0.3);">
                         View All Items
-                    </button>
+                    </a>
                 </div>
             @endif
         </div>
@@ -205,17 +202,6 @@
 
             .category-mobile {
                 display: block !important;
-            }
-        }
-
-        /* Loading Spinner */
-        @keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
-                transform: rotate(360deg);
             }
         }
     </style>
