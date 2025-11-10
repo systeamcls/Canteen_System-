@@ -18,8 +18,6 @@ class MenuProducts extends Component
 
     protected $queryString = [
         'selectedCategoryId' => ['except' => null, 'as' => 'category_id'],
-        'search' => ['except' => ''],
-        'stall' => ['except' => ''],
     ];
 
     public function mount()
@@ -27,22 +25,19 @@ class MenuProducts extends Component
         $this->selectedCategoryId = request('category_id');
         $this->search = request('search', '');
         $this->stall = request('stall', '');
-        
         $this->updateCategoryName();
     }
 
-    public function selectCategory($categoryId, $categoryName)
+    public function selectCategory($categoryId)
     {
-        // Toggle functionality: if clicking active category, deselect it
+        // Toggle: if clicking same category, deselect it
         if ($this->selectedCategoryId == $categoryId) {
             $this->selectedCategoryId = null;
-            $this->selectedCategoryName = 'All Menu Items';
         } else {
             $this->selectedCategoryId = $categoryId;
-            $this->selectedCategoryName = $categoryName;
         }
-
-        // Reset to first page when filtering
+        
+        $this->updateCategoryName();
         $this->resetPage();
     }
 
@@ -58,7 +53,8 @@ class MenuProducts extends Component
 
     public function render()
     {
-        $query = Product::with(['stall', 'category'])
+        $query = Product::query()
+            ->with(['stall', 'category'])
             ->where('is_available', true)
             ->where('is_published', true);
 
