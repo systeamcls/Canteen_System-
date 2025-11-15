@@ -17,6 +17,7 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Illuminate\Support\Facades\Auth;
 
 class TenantPanelProvider extends PanelProvider
 {
@@ -62,6 +63,25 @@ class TenantPanelProvider extends PanelProvider
             ->sidebarCollapsibleOnDesktop()
             ->globalSearchKeyBindings(['command+k', 'ctrl+k'])
             ->viteTheme('resources/css/filament/tenant/theme.css')
-            ->spa(); // Enable SPA mode for faster navigation
+            ->spa() // Enable SPA mode for faster navigation
+            ->homeUrl(function () {
+                $user = Auth::user();
+
+                if (!$user) {
+                    return '/login';
+                }
+
+                // Redirect based on user role
+                if ($user->hasRole('tenant') && $user->is_active) {
+                    return '/tenant';
+                } elseif ($user->hasRole('admin')) {
+                    return '/admin';
+                } elseif ($user->hasRole('cashier')) {
+                    return '/cashier';
+                } else {
+                    // Customers or users without panel access
+                    return '/home';
+                }
+            });
     }
 }

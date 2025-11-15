@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
 class EnsureWelcomeModalCompleted
@@ -12,19 +13,17 @@ class EnsureWelcomeModalCompleted
     /**
      * Handle an incoming request.
      *
-     * Ensures user completes welcome modal before accessing Filament panels.
-     * Prevents direct URL access to /admin, /tenant, /cashier without modal completion.
-     * Also validates user has permission to access the requested panel.
+     * Restricts panel access based on user roles and permissions.
+     * Prevents unauthorized access to /admin, /tenant, /cashier panels.
+     * Includes security logging for unauthorized access attempts.
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
     public function handle(Request $request, Closure $next): Response
     {
-        // Skip middleware for API routes, logout, and welcome modal itself
+        // Skip middleware for non-panel routes
         if ($request->is('api/*') ||
             $request->is('logout') ||
-            $request->is('welcome-modal') ||
-            $request->is('welcome-modal/*') ||
             $request->is('livewire/*')) {
             return $next($request);
         }
@@ -36,40 +35,66 @@ class EnsureWelcomeModalCompleted
 
         $user = Auth::user();
 
-        // Additional security: Check if user is trying to access a panel they don't have permission for
+        // Security: Check if user is trying to access a panel they don't have permission for
+
+        // Admin Panel Access Control
         if ($request->is('admin/*') || $request->is('admin')) {
             if (!$user->hasRole('admin') && !$user->hasRole('cashier')) {
+                $this->logUnauthorizedAccess($user, 'admin', $request);
                 Auth::logout();
-                session()->flash('error', 'You do not have permission to access the admin panel.');
+                session()->invalidate();
+                session()->regenerateToken();
+                session()->flash('error', 'Unauthorized access attempt. You do not have permission to access the admin panel.');
                 return redirect()->route('login');
             }
         }
 
+        // Tenant Panel Access Control
         if ($request->is('tenant/*') || $request->is('tenant')) {
             if (!$user->hasRole('tenant') || !$user->is_active) {
+                $this->logUnauthorizedAccess($user, 'tenant', $request);
                 Auth::logout();
-                session()->flash('error', 'You do not have permission to access the tenant panel.');
+                session()->invalidate();
+                session()->regenerateToken();
+                session()->flash('error', 'Unauthorized access attempt. You do not have permission to access the tenant panel.');
                 return redirect()->route('login');
             }
         }
 
+        // Cashier Panel Access Control
         if ($request->is('cashier/*') || $request->is('cashier')) {
             if (!$user->hasRole('cashier') && !$user->hasRole('admin')) {
+                $this->logUnauthorizedAccess($user, 'cashier', $request);
                 Auth::logout();
-                session()->flash('error', 'You do not have permission to access the cashier panel.');
+                session()->invalidate();
+                session()->regenerateToken();
+                session()->flash('error', 'Unauthorized access attempt. You do not have permission to access the cashier panel.');
                 return redirect()->route('login');
             }
-        }
-
-        // Check if user has completed the welcome modal this session
-        if (!session()->has('welcome_modal_completed')) {
-            // Store intended URL to redirect back after modal completion
-            session()->put('intended_panel_url', $request->fullUrl());
-
-            // Redirect to welcome modal
-            return redirect()->route('welcome.modal');
         }
 
         return $next($request);
+    }
+
+    /**
+     * Log unauthorized panel access attempts for security monitoring.
+     *
+     * @param  \App\Models\User  $user
+     * @param  string  $panel
+     * @param  \Illuminate\Http\Request  $request
+     * @return void
+     */
+    private function logUnauthorizedAccess($user, string $panel, Request $request): void
+    {
+        Log::warning('Unauthorized panel access attempt', [
+            'user_id' => $user->id,
+            'user_email' => $user->email,
+            'user_roles' => $user->roles->pluck('name')->toArray(),
+            'attempted_panel' => $panel,
+            'url' => $request->fullUrl(),
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'timestamp' => now()->toDateTimeString(),
+        ]);
     }
 }

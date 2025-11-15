@@ -15,6 +15,7 @@ use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Filament\Navigation\NavigationGroup;
+use Illuminate\Support\Facades\Auth;
 
 class CashierPanelProvider extends PanelProvider
 {
@@ -102,8 +103,24 @@ class CashierPanelProvider extends PanelProvider
             // Global search configuration
             ->globalSearch()
             ->globalSearchKeyBindings(['command+k', 'ctrl+k'])
-            
-            // Custom home URL
-            ->homeUrl('/cashier');
+
+            // Custom home URL with role-based redirect
+            ->homeUrl(function () {
+                $user = Auth::user();
+
+                if (!$user) {
+                    return '/login';
+                }
+
+                // Redirect based on user role
+                if ($user->hasRole('cashier') || $user->hasRole('admin')) {
+                    return '/cashier';
+                } elseif ($user->hasRole('tenant') && $user->is_active) {
+                    return '/tenant';
+                } else {
+                    // Customers or users without panel access
+                    return '/home';
+                }
+            });
     }
 }
