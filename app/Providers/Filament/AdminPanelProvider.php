@@ -94,6 +94,7 @@ class AdminPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
                 \App\Http\Middleware\FilamentTwoFactorAuth::class,
+                \App\Http\Middleware\EnsureWelcomeModalCompleted::class,
             ])
             // CRITICAL: Redirect after login based on role
             ->loginRouteSlug('login')

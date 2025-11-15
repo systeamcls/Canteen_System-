@@ -95,6 +95,7 @@ class CashierPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
                 \App\Http\Middleware\CheckCashierAccess::class,
+                \App\Http\Middleware\EnsureWelcomeModalCompleted::class,
                 // Removed 2FA middleware for now to avoid issues
             ])
             

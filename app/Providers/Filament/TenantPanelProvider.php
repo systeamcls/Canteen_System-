@@ -56,6 +56,7 @@ class TenantPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
                 //\App\Http\Middleware\EnsureTwoFactorAuthenticated::class,
+                \App\Http\Middleware\EnsureWelcomeModalCompleted::class,
             ])
             ->authGuard('web')
             ->sidebarCollapsibleOnDesktop()

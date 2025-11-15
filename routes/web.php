@@ -19,6 +19,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\EmailVerificationController;
 use App\Http\Controllers\FinancialReportController;
 use App\Http\Controllers\LegalController;
+use App\Http\Controllers\WelcomeModalController;
 
 
 // Welcome page - first entry point
@@ -134,6 +135,14 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/email/verified', [EmailVerificationController::class, 'success'])
         ->name('verification.success');
+});
+
+// ========================================
+// 🎯 WELCOME MODAL (Panel Selection)
+// ========================================
+Route::middleware(['auth'])->group(function () {
+    Route::get('/welcome-modal', [WelcomeModalController::class, 'show'])->name('welcome.modal');
+    Route::post('/welcome-modal/complete', [WelcomeModalController::class, 'complete'])->name('welcome.complete');
 });
 
 // ========================================
