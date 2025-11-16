@@ -155,34 +155,34 @@ class LiveOrdersWidget extends BaseWidget
                             ]),
                             
                         Section::make('Order Items')
-                            ->schema([
-                                Repeater::make('orderItems')
-                                    ->relationship()
-                                    ->schema([
-                                        Grid::make(4)
-                                            ->schema([
-                                                Placeholder::make('product_name')
-                                                    ->label('Product')
-                                                    ->content(fn ($record) => $record->product_name),
-                                                    
-                                                Placeholder::make('quantity')
-                                                    ->label('Quantity')
-                                                    ->content(fn ($record) => $record->quantity),
-                                                    
-                                                Placeholder::make('unit_price')
-                                                    ->label('Unit Price')
-                                                    ->content(fn ($record) => '₱' . number_format($record->unit_price, 2)),
-                                                    
-                                                Placeholder::make('subtotal')
-                                                    ->label('Subtotal')
-                                                    ->content(fn ($record) => '₱' . number_format($record->subtotal, 2)),
-                                            ]),
-                                    ])
-                                    ->disabled()
-                                    ->addable(false)
-                                    ->deletable(false)
-                                    ->reorderable(false),
-                            ]),
+    ->schema([
+        Repeater::make('orderItems')
+            ->relationship()
+            ->schema([
+                Grid::make(4)
+                    ->schema([
+                        Placeholder::make('product_name')
+                            ->label('Product')
+                            ->content(fn ($record) => $record?->product_name ?? $record?->product?->name ?? 'Unknown Product'),
+                            
+                        Placeholder::make('quantity')
+                            ->label('Quantity')
+                            ->content(fn ($record) => $record?->quantity ?? 0),
+                            
+                        Placeholder::make('unit_price')
+                            ->label('Unit Price')
+                            ->content(fn ($record) => '₱' . number_format($record?->unit_price ?? 0, 2)),
+                            
+                        Placeholder::make('subtotal')
+                            ->label('Subtotal')
+                            ->content(fn ($record) => '₱' . number_format($record?->subtotal ?? 0, 2)),
+                    ]),
+            ])
+            ->disabled()
+            ->addable(false)
+            ->deletable(false)
+            ->reorderable(false),
+    ]),
                     ])
                     ->modalActions([
                         Action::make('start_processing')
