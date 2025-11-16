@@ -123,4 +123,24 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    // Add to the return array in config/app.php
+
+/*
+|--------------------------------------------------------------------------
+| Panel Route Prefixes
+|--------------------------------------------------------------------------
+*/
+'admin_prefix' => env('ADMIN_PREFIX', 'admin'),
+'tenant_prefix' => env('TENANT_PREFIX', 'tenant'),
+'cashier_prefix' => env('CASHIER_PREFIX', 'cashier'),
+
+/*
+|--------------------------------------------------------------------------
+| Two-Factor Authentication
+|--------------------------------------------------------------------------
+*/
+'two_factor_enabled' => env('TWO_FACTOR_ENABLED', true),
+
 ];
+
+

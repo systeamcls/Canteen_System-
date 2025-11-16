@@ -24,8 +24,8 @@ class TenantPanelProvider extends PanelProvider
     {
         return $panel
             ->id('tenant')
-            ->path('tenant')
-            ->login()
+            ->path(config('app.tenant_prefix', 'tenant')) // 🔥 Use .env prefix
+            ->login(false) // 🔥 Disable default login (we use WelcomeModal)
             ->brandName('Tenant Dashboard')
             ->colors([
                 'primary' => Color::Blue,
@@ -52,15 +52,16 @@ class TenantPanelProvider extends PanelProvider
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
+                \App\Http\Middleware\EnsurePanelAccess::class . ':tenant',  // 🔥 Add role-based access control
             ])
             ->authMiddleware([
                 Authenticate::class,
-                //\App\Http\Middleware\EnsureTwoFactorAuthenticated::class,
+                \App\Http\Middleware\FilamentTenantTwoFactorAuth::class, // 🔥 FIXED: Enable Tenant 2FA with new middleware
             ])
             ->authGuard('web')
             ->sidebarCollapsibleOnDesktop()
             ->globalSearchKeyBindings(['command+k', 'ctrl+k'])
             ->viteTheme('resources/css/filament/tenant/theme.css')
-            ->spa(); // Enable SPA mode for faster navigation
+            ->spa();
     }
 }

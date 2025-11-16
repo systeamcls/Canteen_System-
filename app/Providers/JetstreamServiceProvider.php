@@ -3,9 +3,9 @@
 namespace App\Providers;
 
 use App\Actions\Jetstream\DeleteUser;
-use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Jetstream\Jetstream;
+use Laravel\Fortify\Fortify;
 
 class JetstreamServiceProvider extends ServiceProvider
 {
@@ -24,9 +24,17 @@ class JetstreamServiceProvider extends ServiceProvider
     {
         $this->configurePermissions();
 
-        Jetstream::deleteUsersUsing(DeleteUser::class);
+        // 🔥 OVERRIDE: Redirect all Fortify login attempts to WelcomeModal
+        Fortify::loginView(function () {
+            return redirect()->route('welcome')->with('showModal', true);
+        });
+        
+        // 🔥 OVERRIDE: Redirect all Fortify register attempts to WelcomeModal
+        Fortify::registerView(function () {
+            return redirect()->route('welcome')->with('showModal', true);
+        });
 
-        Vite::prefetch(concurrency: 3);
+        Jetstream::deleteUsersUsing(DeleteUser::class);
     }
 
     /**

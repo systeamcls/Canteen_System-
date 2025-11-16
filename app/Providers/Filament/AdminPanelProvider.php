@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Filament\Admin\Pages\TwoFactorChallenge;
 
 
+
 class AdminPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
@@ -25,15 +26,14 @@ class AdminPanelProvider extends PanelProvider
         return $panel
             ->default()
             ->id('admin')
-            ->path('admin')
-            ->login()
+            ->path(config('app.admin_prefix', 'admin')) // 🔥 Use .env prefix
+            ->login(false) // 🔥 Disable default login (we use WelcomeModal)
             ->authGuard('web')
             ->colors([
-    'primary' => Color::Red,    
-])
+            'primary' => Color::Red,    
+        ])
             ->darkMode()
             ->brandName('Canteen Admin')
-            // Add these sidebar configurations
             ->maxContentWidth('full')
             ->sidebarCollapsibleOnDesktop()
             ->sidebarFullyCollapsibleOnDesktop()
@@ -50,10 +50,6 @@ class AdminPanelProvider extends PanelProvider
             TwoFactorChallenge::class,
             \App\Filament\Admin\Pages\FinancialDashboard::class,
             ])
-            //->discoverWidgets(
-            //    in: app_path('Filament/Admin/Widgets'),
-            //    for: 'App\\Filament\\Admin\\Widgets'
-            //)
             ->widgets([
                 
                 \App\Filament\Admin\Widgets\SalesAnalyticsWidget::class,
@@ -90,27 +86,26 @@ class AdminPanelProvider extends PanelProvider
                 ShareErrorsFromSession::class,
                 VerifyCsrfToken::class,
                 SubstituteBindings::class,
+                \App\Http\Middleware\EnsurePanelAccess::class . ':admin',
             ])
             ->authMiddleware([
                 Authenticate::class,
-                \App\Http\Middleware\FilamentTwoFactorAuth::class,
+                \App\Http\Middleware\FilamentTwoFactorAuth::class, // ✅ Keep 2FA for Admin
             ])
-            // CRITICAL: Redirect after login based on role
             ->loginRouteSlug('login')
             ->homeUrl(function () {
                 /** @var \App\Models\User $user */
                 $user = Auth::user();
 
-                if (!$user) return '/login';
+                if (!$user) return '/';
                 
                 if ($user->hasRole('admin') || $user->hasRole('cashier')) {
                     return '/admin';
                 } elseif ($user->hasRole('tenant')) {
                     return '/tenant';
                 } else {
-                    // Unauthorized users get logged out and redirected
                     Auth::logout();
-                    return '/login';
+                    return '/';
                 }
             });
     }

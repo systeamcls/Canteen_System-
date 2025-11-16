@@ -26,6 +26,19 @@ Route::get('/', function () {
     return view('welcome');
 })->name('welcome');
 
+// 🔥 DISABLE /login - redirect to welcome page with modal
+Route::get('/login', function () {
+    session()->flash('showModal', true);
+    session()->flash('loginMessage', 'Please use the login modal to access your account.');
+    return redirect()->route('welcome');
+})->name('login');
+
+// 🔥 SECURITY: Override /register route - redirect to WelcomeModal
+Route::get('/register', function () {
+    session()->flash('showModal', true);
+    return redirect()->route('welcome');
+})->name('register');
+
 
 // Public routes accessible to both guests and employees
 Route::middleware(['web', 'redirect.admin'])->group(function () {

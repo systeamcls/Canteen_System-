@@ -22,8 +22,8 @@ class CashierPanelProvider extends PanelProvider
     {
         return $panel
             ->id('cashier')
-            ->path('cashier')
-            ->login()
+            ->path(config('app.cashier_prefix', 'cashier')) // 🔥 Use .env prefix
+            ->login(false) // 🔥 Disable default login (we use WelcomeModal)
             ->authGuard('web')
             ->colors([
                 'primary' => Color::Emerald,
@@ -89,6 +89,7 @@ class CashierPanelProvider extends PanelProvider
                 ShareErrorsFromSession::class,
                 VerifyCsrfToken::class,
                 SubstituteBindings::class,
+                \App\Http\Middleware\EnsurePanelAccess::class . ':cashier', // 🔥 Use class reference
             ])
             
             // Auth middleware with cashier access check

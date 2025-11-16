@@ -25,6 +25,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => \App\Http\Middleware\CheckRole::class,
             'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
             'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
+            'panel.access' => \App\Http\Middleware\EnsurePanelAccess::class,
+            'tenant.2fa' => \App\Http\Middleware\FilamentTenantTwoFactorAuth::class,
 
         ]);
 
