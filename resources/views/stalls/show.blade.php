@@ -3,99 +3,147 @@
 @section('title', $stall->name . ' - LTO Canteen Central')
 
 @section('content')
-    <!-- Toned Down Stall Header -->
-    <section style="padding: 40px 0; background: #f8fafc;">
+    <!-- Breadcrumb -->
+    <div style="padding: 24px 0 0; background: #f8fafc;">
+        <div class="container" style="max-width: 1200px; margin: 0 auto; padding: 0 20px;">
+            <div style="display: flex; align-items: center; gap: 8px; font-size: 14px; color: #64748b; margin-bottom: 24px;">
+                <a href="/" style="color: #64748b; text-decoration: none; transition: color 0.2s;"
+                    onmouseover="this.style.color='#f97316'" onmouseout="this.style.color='#64748b'">Store</a>
+                <span>▸</span>
+                <span style="color: #1e293b; font-weight: 500;">{{ $stall->name }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🔥 REDUCED HEIGHT Hero Section -->
+    <section style="padding: 0 0 32px; background: #f8fafc;">
         <div class="container" style="max-width: 1200px; margin: 0 auto; padding: 0 20px;">
             <div
-                style="background: linear-gradient(135deg, #f97316 0%, #ea580c 50%, #dc2626 100%); border-radius: 24px; padding: 48px; color: white; position: relative; overflow: hidden; box-shadow: 0 20px 40px rgba(220, 38, 38, 0.12);">
-                <!-- Content -->
-                <div style="position: relative; z-index: 2; max-width: 900px;">
+                style="position: relative; border-radius: 24px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
+                        background: linear-gradient(135deg, rgba(50, 50, 70, 0.95) 0%, rgba(70, 70, 90, 0.95) 100%);">
+
+                <!-- Background Image -->
+                @if ($stall->image)
                     <div
-                        style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 24px; flex-wrap: wrap; gap: 20px;">
-                        <h1
-                            style="font-size: clamp(2.5rem, 5vw, 4rem); margin: 0; font-weight: 800; line-height: 1.1; text-shadow: 2px 2px 4px rgba(0,0,0,0.1);">
-                            {{ $stall->name }}
-                        </h1>
-                        <span
-                            style="background: {{ $stall->is_active ? 'rgba(34, 197, 94, 0.9)' : 'rgba(107, 114, 128, 0.9)' }}; color: white; padding: 12px 24px; border-radius: 25px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
-                            {{ $stall->is_active ? 'Open Now' : 'Closed' }}
-                        </span>
+                        style="position: absolute; inset: 0; background-image: url('{{ asset('storage/' . $stall->image) }}'); 
+                                background-size: cover; background-position: center; opacity: 0.3;">
                     </div>
-
-                    <p style="font-size: 1.25rem; margin-bottom: 32px; opacity: 0.95; line-height: 1.6; max-width: 600px;">
-                        {{ $stall->description ?: 'Delicious food made with love and quality ingredients.' }}
-                    </p>
-
-                    <div
-                        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 24px; margin-bottom: 32px;">
-                        <div style="display: flex; align-items: center; gap: 12px;">
-                            <div
-                                style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.2);">
-                                <span style="font-size: 20px;">📍</span>
-                            </div>
-                            <span style="font-weight: 500;">{{ $stall->location ?: 'Main Canteen' }}</span>
+                @else
+                    <!-- Decorative background -->
+                    <div style="position: absolute; inset: 0; opacity: 0.15;">
+                        <div
+                            style="position: absolute; right: 15%; top: 20%; width: 120px; height: 120px; border-radius: 50%; 
+                                    background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);">
                         </div>
-
-                        <div style="display: flex; align-items: center; gap: 12px;">
-                            <div
-                                style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.2);">
-                                <span style="font-size: 20px;">⭐</span>
-                            </div>
-                            <span style="font-weight: 500;">4.{{ rand(6, 9) }} ({{ rand(20, 150) }} reviews)</span>
+                        <div
+                            style="position: absolute; left: 20%; top: 30%; width: 80px; height: 80px; border-radius: 50%; 
+                                    background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 70%);">
                         </div>
-
-                        <div style="display: flex; align-items: center; gap: 12px;">
-                            <div
-                                style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.2);">
-                                <span style="font-size: 20px;">👥</span>
-                            </div>
-                            <span style="font-weight: 500;">{{ $stall->products->count() }} menu items</span>
-                        </div>
-
-                        <div style="display: flex; align-items: center; gap: 12px;">
-                            <div
-                                style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.2);">
-                                <span style="font-size: 20px;">🕐</span>
-                            </div>
-                            <span
-                                style="font-weight: 500;">{{ $stall->is_active ? '8:00 AM - 6:00 PM' : 'Closed for today' }}</span>
+                        <div
+                            style="position: absolute; right: 35%; bottom: 25%; width: 100px; height: 100px; border-radius: 50%; 
+                                    background: radial-gradient(circle, rgba(255,255,255,0.25) 0%, transparent 70%);">
                         </div>
                     </div>
+                @endif
 
-                    @if ($stall->is_active)
-                        <div style="display: flex; gap: 16px; flex-wrap: wrap;">
-                            <a href="#menu"
-                                style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); color: white; padding: 16px 32px; border-radius: 25px; text-decoration: none; font-weight: 600; border: 2px solid rgba(255,255,255,0.2); transition: all 0.3s; box-shadow: 0 4px 15px rgba(0,0,0,0.1);"
-                                onmouseover="this.style.background='rgba(255,255,255,0.25)'; this.style.transform='translateY(-2px)'"
-                                onmouseout="this.style.background='rgba(255,255,255,0.15)'; this.style.transform='translateY(0)'">
-                                View Menu
-                            </a>
-                            <a href="/menu?stall={{ $stall->id }}"
-                                style="background: white; color: #f97316; padding: 16px 32px; border-radius: 25px; text-decoration: none; font-weight: 600; transition: all 0.3s; box-shadow: 0 4px 15px rgba(0,0,0,0.2);"
-                                onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(0,0,0,0.3)'"
-                                onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(0,0,0,0.2)'">
-                                Order Now
-                            </a>
-                        </div>
-                    @endif
-                </div>
-
-                <!-- Subtle Background Pattern -->
+                <!-- Content - REDUCED PADDING -->
                 <div
-                    style="position: absolute; top: -50%; right: -50%; width: 100%; height: 100%; background: radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px); background-size: 40px 40px; opacity: 0.4;">
+                    style="position: relative; display: flex; align-items: center; justify-content: space-between; 
+                            padding: 36px 40px; gap: 40px; flex-wrap: wrap;">
+
+                    <!-- Left Section - Logo and Title -->
+                    <div style="display: flex; align-items: center; gap: 20px; flex: 1; min-width: 300px;">
+                        <!-- Logo - SLIGHTLY SMALLER -->
+                        <div
+                            style="width: 70px; height: 70px; border-radius: 50%; flex-shrink: 0;
+                                    background: {{ $stall->logo ? 'white' : 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)' }}; 
+                                    display: flex; align-items: center; justify-content: center; 
+                                    box-shadow: 0 8px 20px rgba(0,0,0,0.2); overflow: hidden;">
+                            @if ($stall->logo)
+                                <img src="{{ asset('storage/' . $stall->logo) }}" alt="{{ $stall->name }}"
+                                    style="width: 100%; height: 100%; object-fit: cover;">
+                            @else
+                                <div style="text-align: center;">
+                                    <div style="font-size: 13px; font-weight: 700; color: #1e293b; letter-spacing: 0.5px;">
+                                        {{ strtoupper(substr($stall->name, 0, 4)) }}
+                                    </div>
+                                    <div style="width: 35px; height: 2px; background: #1e293b; margin: 3px auto;"></div>
+                                    <div style="font-size: 9px; font-weight: 600; color: #1e293b; font-style: italic;">
+                                        STALL
+                                    </div>
+                                </div>
+                            @endif
+                        </div>
+
+                        <!-- Title and Subtitle -->
+                        <div>
+                            <h1
+                                style="font-size: clamp(1.5rem, 3.5vw, 2rem); font-weight: 700; color: white; 
+                                       margin: 0 0 6px 0; line-height: 1.2;">
+                                {{ $stall->name }}
+                            </h1>
+                            <p style="font-size: 13px; color: rgba(255,255,255,0.85); margin: 0; line-height: 1.4;">
+                                {{ $stall->description ?: 'Fresh & healthy food recipe' }}
+                            </p>
+                            <div style="margin-top: 10px;">
+                                <span style="font-size: 11px; color: rgba(255,255,255,0.7);">
+                                    {{ $stall->tenant ? 'Operated by:' : '' }}
+                                </span>
+                                <span style="font-size: 12px; color: #fbbf24; font-weight: 600; margin-left: 4px;">
+                                    {{ $stall->tenant?->name ?? "Admin's Store" }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Section - Stats - SMALLER -->
+                    <div style="display: flex; align-items: center; gap: 32px; flex-wrap: wrap;">
+                        <!-- Total Items -->
+                        <div style="text-align: center;">
+                            <div
+                                style="font-size: 2rem; font-weight: 700; color: #fbbf24; margin-bottom: 4px; line-height: 1;">
+                                {{ str_pad($stall->products->count(), 2, '0', STR_PAD_LEFT) }}
+                            </div>
+                            <div style="font-size: 11px; color: rgba(255,255,255,0.75); font-weight: 500;">
+                                Total Items
+                            </div>
+                        </div>
+
+                        <!-- Categories -->
+                        <div style="text-align: center;">
+                            <div
+                                style="font-size: 2rem; font-weight: 700; color: #fbbf24; margin-bottom: 4px; line-height: 1;">
+                                {{ str_pad($stall->products->filter(fn($p) => $p->category)->pluck('category_id')->unique()->count(), 2, '0', STR_PAD_LEFT) }}
+                            </div>
+                            <div style="font-size: 11px; color: rgba(255,255,255,0.75); font-weight: 500;">
+                                Categories
+                            </div>
+                        </div>
+
+                        <!-- Available Today -->
+                        <div style="text-align: center;">
+                            <div
+                                style="font-size: 2rem; font-weight: 700; color: #fbbf24; margin-bottom: 4px; line-height: 1;">
+                                {{ str_pad($stall->products->where('is_available', true)->count(), 2, '0', STR_PAD_LEFT) }}
+                            </div>
+                            <div style="font-size: 11px; color: rgba(255,255,255,0.75); font-weight: 500;">
+                                Available
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Improved Categories Section with Better Spacing -->
+    <!-- Categories Section -->
     @php
-        // Get unique categories from products - FIXED: Remove duplicates properly
-        $uniqueCategories = $stall->products
-            ->whereNotNull('category_id')
-            ->pluck('category.name')
-            ->filter()
+        // 🔥 Get categories from the stall's products
+$uniqueCategories = $stall->products
+    ->filter(fn($p) => $p->category)
+    ->pluck('category.name')
             ->unique()
+            ->sort()
             ->values();
     @endphp
 
@@ -108,12 +156,15 @@
                 </div>
                 <div
                     style="display: flex; gap: 12px; flex-wrap: nowrap; justify-content: center; align-items: center; overflow-x: auto; padding: 0 10px; scrollbar-width: none; -ms-overflow-style: none;">
+
+                    <!-- All Items Button -->
                     <button class="filter-category active" data-category="all"
                         style="display: flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 25px; background: #f97316; color: white; border: none; text-decoration: none; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s; box-shadow: 0 2px 8px rgba(249, 115, 22, 0.25); white-space: nowrap; flex-shrink: 0;">
                         <span style="font-size: 16px;">🍽️</span>
                         <span>All Items</span>
                     </button>
 
+                    <!-- 🔥 DYNAMIC Categories from Database -->
                     @foreach ($uniqueCategories as $categoryName)
                         <button class="filter-category"
                             data-category="{{ strtolower(str_replace(' ', '-', $categoryName)) }}"
@@ -146,7 +197,7 @@
         </section>
     @endif
 
-    <!-- Modern Menu Section -->
+    <!-- Menu Section -->
     <section id="menu" style="padding: 60px 0; background: #f8fafc;">
         <div class="container" style="max-width: 1200px; margin: 0 auto; padding: 0 20px;">
             <div style="text-align: center; margin-bottom: 48px;">
@@ -160,7 +211,7 @@
                 id="menuGrid">
                 @forelse($stall->products->unique('id') as $product)
                     <div class="menu-item"
-                        data-category="{{ $product->category ? strtolower(str_replace(' ', '-', $product->category)) : 'all' }}"
+                        data-category="{{ $product->category ? strtolower(str_replace(' ', '-', $product->category->name)) : 'all' }}"
                         style="opacity: 1; transform: translateY(0); transition: all 0.3s ease;">
                         @livewire(
                             'add-to-cart-button',
@@ -186,7 +237,7 @@
         </div>
     </section>
 
-    <!-- Modern About Section -->
+    <!-- About Section -->
     <section style="padding: 80px 0; background: white;">
         <div class="container" style="max-width: 1200px; margin: 0 auto; padding: 0 20px;">
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center;">
@@ -232,8 +283,8 @@
                 <div>
                     <div
                         style="background: linear-gradient(135deg, #FFF5F5, #FFF0E6); border: 1px solid #FFE4CC; border-radius: 20px; padding: 40px; text-align: center;">
-                        <h3 style="color: #1e293b; margin-bottom: 32px; font-size: 24px; font-weight: 700;">Stall
-                            Statistics</h3>
+                        <h3 style="color: #1e293b; margin-bottom: 32px; font-size: 24px; font-weight: 700;">Stall Statistics
+                        </h3>
 
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px;">
                             <div style="text-align: center;">
@@ -283,17 +334,13 @@
 
                     // Update active button
                     categoryButtons.forEach(btn => {
-                        btn.style.background = '#f8fafc';
-                        btn.style.color = '#64748b';
-                        btn.style.borderColor = '#e2e8f0';
-                        btn.style.boxShadow = 'none';
+                        btn.querySelector('div').style.transform = 'scale(1)';
+                        btn.querySelector('div').style.boxShadow = 'none';
                         btn.classList.remove('active');
                     });
 
-                    this.style.background = '#f97316';
-                    this.style.color = 'white';
-                    this.style.borderColor = '#f97316';
-                    this.style.boxShadow = '0 2px 8px rgba(249, 115, 22, 0.25)';
+                    this.querySelector('div').style.transform = 'scale(1.1)';
+                    this.querySelector('div').style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
                     this.classList.add('active');
 
                     // Filter menu items
@@ -327,16 +374,22 @@
     </script>
 
     <style>
-        /* Hide scrollbar for category buttons */
-        div[style*="overflow-x: auto"]::-webkit-scrollbar {
-            display: none;
+        @media (min-width: 768px) {
+            .categories-section .container>div:last-child {
+                grid-template-columns: repeat(6, 1fr) !important;
+            }
+        }
+
+        .filter-category:hover div {
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
 
         /* Responsive adjustments */
         @media (max-width: 768px) {
-            #categories-section {
-                padding: 20px 0 !important;
-                margin-top: -8px !important;
+            .categories-section {
+                padding: 2rem 0 !important;
+                margin-top: -32px !important;
             }
 
             .container>div[style*="grid-template-columns: 1fr 1fr"] {
@@ -345,17 +398,13 @@
             }
 
             h1[style*="clamp"] {
-                font-size: 2.5rem !important;
+                font-size: 1.5rem !important;
             }
         }
 
         @media (max-width: 480px) {
             .container>div[style*="grid-template-columns: repeat(auto-fill"] {
                 grid-template-columns: 1fr !important;
-            }
-
-            #categories-section div[style*="flex-wrap: nowrap"] {
-                justify-content: flex-start !important;
             }
         }
     </style>
