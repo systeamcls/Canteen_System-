@@ -141,8 +141,8 @@
         }
 
         /* ========================================
-                                           IMPROVED HERO SECTION - Replace in your index.blade.php
-                                           ======================================== */
+                                                   IMPROVED HERO SECTION - Replace in your index.blade.php
+                                                   ======================================== */
 
         /* Hero Section with Curved Wave Shape */
         .hero-section {
@@ -463,8 +463,8 @@
 
 
         /* ========================================
-                                           POPULAR ITEMS GRID - THIS WAS MISSING!
-                                           ======================================== */
+                                                   POPULAR ITEMS GRID - THIS WAS MISSING!
+                                                   ======================================== */
 
         .popular-grid {
             display: grid;
@@ -491,8 +491,8 @@
         }
 
         /* ========================================
-                                           IMPROVED PRODUCT CARD STYLES - HOMEPAGE
-                                           ======================================== */
+                                                   IMPROVED PRODUCT CARD STYLES - HOMEPAGE
+                                                   ======================================== */
 
         .product-card-improved {
             background: white;
@@ -1173,7 +1173,10 @@
                                 @if ($category->image)
                                     {{-- Show uploaded image from admin --}}
                                     <img src="{{ $category->image_url }}" alt="{{ $category->name }}"
-                                        style="width: 65%; height: 65%; object-fit: contain; filter: brightness(0) invert(1);">
+                                        style="width: 70%; 
+                height: 70%; 
+                object-fit: contain; 
+                filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));">
                                 @else
                                     {{-- Fallback to Font Awesome icon --}}
                                     <i class="fas fa-{{ $category->getIconClass() }}"
