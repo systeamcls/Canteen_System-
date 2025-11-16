@@ -42,4 +42,52 @@ class Category extends Model
     {
         return $this->products()->where('is_available', true)->count();
     }
+
+    /**
+     * 🔥 NEW: Get Font Awesome icon class based on category name (fallback)
+     */
+    public function getIconClass(): string
+    {
+        $iconMap = [
+            'fresh meals' => 'utensils',
+            'sandwiches' => 'bread-slice',
+            'beverages' => 'mug-hot',
+            'snacks' => 'cookie',
+            'boxed meals' => 'box',
+            'desserts' => 'ice-cream',
+            'breakfast' => 'egg',
+            'lunch' => 'bowl-rice',
+            'dinner' => 'drumstick-bite',
+            'coffee' => 'coffee',
+            'drinks' => 'glass-water',
+            'pizza' => 'pizza-slice',
+            'burger' => 'burger',
+            'noodles' => 'bowl-food',
+        ];
+
+        $name = strtolower($this->name);
+        
+        // Try exact match first
+        if (isset($iconMap[$name])) {
+            return $iconMap[$name];
+        }
+
+        // Try partial match
+        foreach ($iconMap as $keyword => $icon) {
+            if (str_contains($name, $keyword)) {
+                return $icon;
+            }
+        }
+
+        // Default icon
+        return 'utensils';
+    }
+
+    /**
+     * 🔥 NEW: Get full image URL
+     */
+    public function getImageUrlAttribute(): ?string
+    {
+        return $this->image ? asset('storage/' . $this->image) : null;
+    }
 }

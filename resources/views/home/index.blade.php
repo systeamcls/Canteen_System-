@@ -141,8 +141,8 @@
         }
 
         /* ========================================
-                                       IMPROVED HERO SECTION - Replace in your index.blade.php
-                                       ======================================== */
+                                           IMPROVED HERO SECTION - Replace in your index.blade.php
+                                           ======================================== */
 
         /* Hero Section with Curved Wave Shape */
         .hero-section {
@@ -463,8 +463,8 @@
 
 
         /* ========================================
-                                       POPULAR ITEMS GRID - THIS WAS MISSING!
-                                       ======================================== */
+                                           POPULAR ITEMS GRID - THIS WAS MISSING!
+                                           ======================================== */
 
         .popular-grid {
             display: grid;
@@ -491,8 +491,8 @@
         }
 
         /* ========================================
-                                       IMPROVED PRODUCT CARD STYLES - HOMEPAGE
-                                       ======================================== */
+                                           IMPROVED PRODUCT CARD STYLES - HOMEPAGE
+                                           ======================================== */
 
         .product-card-improved {
             background: white;
@@ -1148,7 +1148,7 @@
             </div>
         </section>
 
-        {{-- Categories Section (Around line 365-463 based on your CSS) --}}
+        {{-- Categories Section --}}
         <section class="categories-section">
             <div class="container">
                 <div class="section-header">
@@ -1160,7 +1160,7 @@
                     {{-- All Items (Always First) --}}
                     <a href="{{ route('menu.index') }}" class="category-item">
                         <div class="category-icon" style="background: linear-gradient(135deg, #ef4444, #f59e0b);">
-                            <i class="fas fa-shopping-cart"></i>
+                            <i class="fas fa-shopping-cart" style="font-size: 2.5rem; color: white;"></i>
                         </div>
                         <span class="category-name">All Items</span>
                     </a>
@@ -1169,25 +1169,15 @@
                     @foreach ($categories as $category)
                         <a href="{{ route('menu.index', ['category_id' => $category->id]) }}" class="category-item">
                             <div class="category-icon"
-                                style="background: linear-gradient(135deg, #{{ sprintf('%06X', mt_rand(0, 0xee4444)) }}, #f59e0b);">
-                                @if ($category->icon)
-                                    {{-- If category has custom icon --}}
-                                    <img src="{{ asset('storage/' . $category->icon) }}" alt="{{ $category->name }}"
-                                        style="width: 50%; height: 50%; object-fit: contain;">
+                                style="background: linear-gradient(135deg, #{{ sprintf('%02x%02x%02x', rand(200, 255), rand(100, 180), rand(50, 150)) }}, #f59e0b);">
+                                @if ($category->image)
+                                    {{-- Show uploaded image from admin --}}
+                                    <img src="{{ $category->image_url }}" alt="{{ $category->name }}"
+                                        style="width: 65%; height: 65%; object-fit: contain; filter: brightness(0) invert(1);">
                                 @else
-                                    {{-- Default Font Awesome icons based on category name --}}
-                                    <i
-                                        class="fas fa-{{ strtolower(str_replace(' ', '-', $category->name)) === 'fresh-meals'
-                                            ? 'utensils'
-                                            : (strtolower(str_replace(' ', '-', $category->name)) === 'sandwiches'
-                                                ? 'bread-slice'
-                                                : (strtolower(str_replace(' ', '-', $category->name)) === 'beverages'
-                                                    ? 'mug-hot'
-                                                    : (strtolower(str_replace(' ', '-', $category->name)) === 'snacks'
-                                                        ? 'cookie'
-                                                        : (strtolower(str_replace(' ', '-', $category->name)) === 'boxed-meals'
-                                                            ? 'box'
-                                                            : 'utensils')))) }}"></i>
+                                    {{-- Fallback to Font Awesome icon --}}
+                                    <i class="fas fa-{{ $category->getIconClass() }}"
+                                        style="font-size: 2.5rem; color: white;"></i>
                                 @endif
                             </div>
                             <span class="category-name">{{ $category->name }}</span>
