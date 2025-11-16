@@ -211,7 +211,7 @@ $uniqueCategories = $stall->products
                 id="menuGrid">
                 @forelse($stall->products->unique('id') as $product)
                     <div class="menu-item"
-                        data-category="{{ $product->category ? strtolower(str_replace(' ', '-', $product->category->name)) : 'all' }}"
+                        data-category="{{ optional($product->category)->name ? strtolower(str_replace(' ', '-', optional($product->category)->name)) : 'all' }}"
                         style="opacity: 1; transform: translateY(0); transition: all 0.3s ease;">
                         @livewire(
                             'add-to-cart-button',
