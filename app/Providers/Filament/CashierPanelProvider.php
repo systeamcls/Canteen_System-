@@ -1,5 +1,4 @@
 <?php
-// app/Providers/Filament/CashierPanelProvider.php - FIXED VERSION
 
 namespace App\Providers\Filament;
 
@@ -22,8 +21,8 @@ class CashierPanelProvider extends PanelProvider
     {
         return $panel
             ->id('cashier')
-            ->path(config('app.cashier_prefix', 'cashier')) // 🔥 Use .env prefix
-            ->login(false) // 🔥 Disable default login (we use WelcomeModal)
+            ->path(config('app.cashier_prefix', 'cashier'))
+            ->login(false)
             ->authGuard('web')
             ->colors([
                 'primary' => Color::Emerald,
@@ -36,19 +35,12 @@ class CashierPanelProvider extends PanelProvider
             ->darkMode()
             ->brandName('💰Cashier Panel')
             ->favicon(asset('favicon.ico'))
-            
-            // Basic panel configuration
             ->font('Inter')
             ->maxContentWidth('full')
             ->sidebarCollapsibleOnDesktop()
             ->sidebarFullyCollapsibleOnDesktop()
-
-            ->resources([
-            \App\Filament\Cashier\Resources\CashierProductResource::class,
-            \App\Filament\Cashier\Resources\CashierOrderResource::class,
-        ])
             
-            // Discovery paths for cashier resources
+            // 🔥 ONLY use discovery, remove explicit resources
             ->discoverResources(
                 in: app_path('Filament/Cashier/Resources'),
                 for: 'App\\Filament\\Cashier\\Resources'
@@ -80,7 +72,6 @@ class CashierPanelProvider extends PanelProvider
                     ->collapsed(true),
             ])
             
-            // Middleware stack
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
@@ -89,21 +80,16 @@ class CashierPanelProvider extends PanelProvider
                 ShareErrorsFromSession::class,
                 VerifyCsrfToken::class,
                 SubstituteBindings::class,
-                \App\Http\Middleware\EnsurePanelAccess::class . ':cashier', // 🔥 Use class reference
+                \App\Http\Middleware\EnsurePanelAccess::class . ':cashier',
             ])
             
-            // Auth middleware with cashier access check
             ->authMiddleware([
                 Authenticate::class,
                 \App\Http\Middleware\CheckCashierAccess::class,
-                // Removed 2FA middleware for now to avoid issues
             ])
             
-            // Global search configuration
             ->globalSearch()
             ->globalSearchKeyBindings(['command+k', 'ctrl+k'])
-            
-            // Custom home URL
             ->homeUrl('/cashier');
     }
 }
