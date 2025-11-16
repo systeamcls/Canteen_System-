@@ -17,8 +17,7 @@ use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
-
-
+use Illuminate\Database\Eloquent\SoftDeletes;
 /**
  * App\Models\User
  *
@@ -47,6 +46,7 @@ class User extends Authenticatable implements MustVerifyEmail, FilamentUser
     use Notifiable;
     use TwoFactorAuthenticatable;
     use LogsActivity; // Add this for audit logging
+    use SoftDeletes; // 🔥 Add this
 
     protected $fillable = [
         'name',
@@ -98,6 +98,42 @@ class User extends Authenticatable implements MustVerifyEmail, FilamentUser
             ->logOnly(['name', 'email', 'type', 'is_active'])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs();
+    }
+
+    /**
+     * 🔥 ADD THIS METHOD - Check if user can resend verification email
+     */
+    public function canResendVerification(): bool
+    {
+        // Can resend if:
+        // 1. Email is not verified yet
+        // 2. Last verification was sent more than 60 seconds ago (throttling)
+        
+        if ($this->hasVerifiedEmail()) {
+            return false; // Already verified, no need to resend
+        }
+        
+        // If verification_sent_at doesn't exist or is null, allow resend
+        if (!$this->verification_sent_at) {
+            return true;
+        }
+        
+        // Allow resend only if 60 seconds have passed since last send
+        return $this->verification_sent_at->addSeconds(60)->isPast();
+    }
+
+    /**
+     * 🔥 ALSO ADD THIS - Override the email verification notification
+     */
+    public function sendEmailVerificationNotification()
+    {
+        // Update verification_sent_at timestamp
+        $this->forceFill([
+            'verification_sent_at' => now(),
+        ])->save();
+        
+        // Send the notification
+        $this->notify(new \Illuminate\Auth\Notifications\VerifyEmail);
     }
 
     /*
