@@ -12,9 +12,10 @@ class ProductPolicy
      * Determine whether the user can view any models.
      */
     public function viewAny(User $user): bool
-    {
-        return $user->hasRole('admin') && $user->admin_stall_id !== null;
-    }
+{
+    // Allow both admin AND cashier roles
+    return $user->hasAnyRole(['admin', 'cashier']);
+}
 
     /**
      * Determine whether the user can view the model.
@@ -69,4 +70,6 @@ class ProductPolicy
     {
         return $this->delete($user, $product);
     }
+
+    
 }
