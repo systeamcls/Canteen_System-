@@ -537,24 +537,6 @@
                             </form>
                         </div>
                     </div>
-
-                    <!-- Category Filter -->
-                    <div class="category-filters">
-                        <a href="{{ route('stalls.index') }}"
-                            class="category-btn {{ !request('search') && !request('category') ? 'active' : '' }}">All</a>
-                        <a href="{{ route('stalls.index', ['category' => 'Filipino']) }}"
-                            class="category-btn {{ request('category') === 'Filipino' ? 'active' : '' }}">Filipino</a>
-                        <a href="{{ route('stalls.index', ['category' => 'Chinese-Filipino']) }}"
-                            class="category-btn {{ request('category') === 'Chinese-Filipino' ? 'active' : '' }}">Chinese-Filipino</a>
-                        <a href="{{ route('stalls.index', ['category' => 'Fresh Market']) }}"
-                            class="category-btn {{ request('category') === 'Fresh Market' ? 'active' : '' }}">Fresh
-                            Market</a>
-                        <a href="{{ route('stalls.index', ['category' => 'Services']) }}"
-                            class="category-btn {{ request('category') === 'Services' ? 'active' : '' }}">Services</a>
-                        <a href="{{ route('stalls.index', ['category' => 'Snacks & Beverages']) }}"
-                            class="category-btn {{ request('category') === 'Snacks & Beverages' ? 'active' : '' }}">Snacks
-                            & Beverages</a>
-                    </div>
                 </div>
             </div>
         </section>
