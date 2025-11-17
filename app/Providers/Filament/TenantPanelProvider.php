@@ -61,7 +61,6 @@ class TenantPanelProvider extends PanelProvider
             ->authGuard('web')
             ->sidebarCollapsibleOnDesktop()
             ->globalSearchKeyBindings(['command+k', 'ctrl+k'])
-            ->viteTheme('resources/css/filament/tenant/theme.css')
             ->spa();
     }
 }

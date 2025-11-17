@@ -20,7 +20,8 @@ class MenuController extends Controller
         // Query products with relationships
         $query = Product::with(['stall', 'category'])
             ->where('is_available', true)
-            ->where('is_published', true);
+            ->where('is_published', true)
+            ->where('stock_quantity', '>', 0);
 
         // Filter by category (using database category_id)
         if ($categoryId) {
