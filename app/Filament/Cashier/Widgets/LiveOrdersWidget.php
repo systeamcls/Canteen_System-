@@ -176,50 +176,51 @@ class LiveOrdersWidget extends BaseWidget
             ]),
             
         Section::make('Order Items')
-            ->schema([
-                Placeholder::make('items_list')
-    ->label('')
-    ->content(function ($state) {
-        $orderItems = $state;
-        
-        if (!$orderItems || $orderItems->isEmpty()) {
-            return 'No items found';
-        }
-        
-        $html = '<div class="space-y-2">';
-        foreach ($orderItems as $item) {
-            $productName = $item->product_name ?? $item->product?->name ?? 'Unknown Product';
-            
-            // Convert centavos to pesos by dividing by 100
-            $unitPrice = $item->unit_price / 100;
-            $subtotal = $item->subtotal / 100;
-            
-            $html .= '
-                <div class="grid grid-cols-4 gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                    <div>
-                        <div class="text-xs text-gray-500 dark:text-gray-400">Product</div>
-                        <div class="font-medium">' . htmlspecialchars($productName) . '</div>
-                    </div>
-                    <div>
-                        <div class="text-xs text-gray-500 dark:text-gray-400">Quantity</div>
-                        <div class="font-medium">' . $item->quantity . '</div>
-                    </div>
-                    <div>
-                        <div class="text-xs text-gray-500 dark:text-gray-400">Unit Price</div>
-                        <div class="font-medium">₱' . number_format($unitPrice, 2) . '</div>
-                    </div>
-                    <div>
-                        <div class="text-xs text-gray-500 dark:text-gray-400">Subtotal</div>
-                        <div class="font-semibold text-green-600 dark:text-green-400">₱' . number_format($subtotal, 2) . '</div>
-                    </div>
-                </div>
-            ';
-        }
-        $html .= '</div>';
-        
-        return new \Illuminate\Support\HtmlString($html);
-    }),
-            ]),
+    ->schema([
+        Placeholder::make('items_list')
+            ->label('')
+            ->content(function ($state) {
+                $orderItems = $state;
+                
+                // Fix: Check if it's an array and empty, or a collection and empty
+                if (!$orderItems || (is_array($orderItems) && empty($orderItems)) || (is_object($orderItems) && method_exists($orderItems, 'isEmpty') && $orderItems->isEmpty())) {
+                    return 'No items found';
+                }
+                
+                $html = '<div class="space-y-2">';
+                foreach ($orderItems as $item) {
+                    $productName = $item->product_name ?? $item->product?->name ?? 'Unknown Product';
+                    
+                    // Convert centavos to pesos by dividing by 100
+                    $unitPrice = ($item->unit_price ?? 0) / 100;
+                    $subtotal = ($item->subtotal ?? 0) / 100;
+                    
+                    $html .= '
+                        <div class="grid grid-cols-4 gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <div>
+                                <div class="text-xs text-gray-500 dark:text-gray-400">Product</div>
+                                <div class="font-medium">' . htmlspecialchars($productName) . '</div>
+                            </div>
+                            <div>
+                                <div class="text-xs text-gray-500 dark:text-gray-400">Quantity</div>
+                                <div class="font-medium">' . ($item->quantity ?? 0) . '</div>
+                            </div>
+                            <div>
+                                <div class="text-xs text-gray-500 dark:text-gray-400">Unit Price</div>
+                                <div class="font-medium">₱' . number_format($unitPrice, 2) . '</div>
+                            </div>
+                            <div>
+                                <div class="text-xs text-gray-500 dark:text-gray-400">Subtotal</div>
+                                <div class="font-semibold text-green-600 dark:text-green-400">₱' . number_format($subtotal, 2) . '</div>
+                            </div>
+                        </div>
+                    ';
+                }
+                $html .= '</div>';
+                
+                return new \Illuminate\Support\HtmlString($html);
+            }),
+    ]),
     ])
     ->modalActions(function ($record) {
         return [
