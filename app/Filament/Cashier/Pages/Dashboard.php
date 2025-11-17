@@ -50,7 +50,7 @@ class Dashboard extends BaseDashboard
             ->icon('heroicon-o-calculator')
             ->color('success')
             ->size('lg')
-            ->url('/cashier/pos-system')  // This should work
+            ->url('/cashier/p-o-s-system')  // This should work
             ->openUrlInNewTab(false)  // Try without opening new tab
             ->tooltip('Open Point of Sale system'),
             

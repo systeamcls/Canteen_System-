@@ -72,6 +72,28 @@ class CashierProductResource extends Resource
                             ->columnSpanFull(),
                     ]),
 
+                Forms\Components\Section::make('Stock Management')
+                    ->description('Manage stock levels and alerts')
+                    ->schema([
+                        Forms\Components\Grid::make(2)
+                            ->schema([
+                                Forms\Components\TextInput::make('stock_quantity')
+                                    ->label('Current Stock')
+                                    ->numeric()
+                                    ->minValue(0)
+                                    ->required()
+                                    ->live()
+                                    ->helperText('Available quantity in inventory'),
+                                    
+                                Forms\Components\TextInput::make('low_stock_alert')
+                                    ->label('Low Stock Alert Level')
+                                    ->numeric()
+                                    ->minValue(0)
+                                    ->default(10)
+                                    ->helperText('Get notified when stock falls below this number'),
+                            ]),
+                    ]),
+
                 Forms\Components\Section::make('Operational Settings')
                     ->description('Manage daily availability and operational notes')
                     ->schema([
@@ -139,7 +161,7 @@ class CashierProductResource extends Resource
                                         </div>
                                         <div class="bg-green-50 dark:bg-green-900/20 p-3 rounded-lg">
                                             <div class="text-sm font-medium text-green-600 dark:text-green-400">Revenue Today</div>
-                                            <div class="text-2xl font-bold text-green-900 dark:text-green-100">₱' . number_format($todayRevenue, 2) . '</div>
+                                            <div class="text-2xl font-bold text-green-900 dark:text-green-100">₱' . number_format($todayRevenue / 100, 2) . '</div>
                                         </div>
                                     </div>
                                 ');
@@ -188,6 +210,31 @@ class CashierProductResource extends Resource
                     ->weight(FontWeight::SemiBold)
                     ->color('success'),
 
+                // Stock Quantity Column with color-coded badges
+                Tables\Columns\TextColumn::make('stock_quantity')
+                    ->label('Stock')
+                    ->badge()
+                    ->sortable()
+                    ->color(function ($record) {
+                        if ($record->stock_quantity <= 0) return 'danger';
+                        if ($record->stock_quantity <= ($record->low_stock_alert ?? 10)) return 'warning';
+                        return 'success';
+                    })
+                    ->formatStateUsing(function ($record) {
+                        if ($record->stock_quantity <= 0) {
+                            return '🚫 Out of Stock';
+                        } elseif ($record->stock_quantity <= ($record->low_stock_alert ?? 10)) {
+                            return "⚠️ {$record->stock_quantity} (Low)";
+                        } else {
+                            return "✅ {$record->stock_quantity}";
+                        }
+                    })
+                    ->icon(fn ($record) => match(true) {
+                        $record->stock_quantity <= 0 => 'heroicon-m-x-circle',
+                        $record->stock_quantity <= ($record->low_stock_alert ?? 10) => 'heroicon-m-exclamation-triangle',
+                        default => 'heroicon-m-check-circle',
+                    }),
+
                 // Availability status (editable)
                 Tables\Columns\ToggleColumn::make('is_available')
                     ->label('Available')
@@ -195,6 +242,7 @@ class CashierProductResource extends Resource
                     ->offColor('danger')
                     ->onIcon('heroicon-m-check')
                     ->offIcon('heroicon-m-x-mark')
+                    ->disabled(fn ($record) => $record->stock_quantity <= 0)
                     ->afterStateUpdated(function ($record, $state) {
                         $status = $state ? 'available' : 'unavailable';
                         Notification::make()
@@ -229,7 +277,7 @@ class CashierProductResource extends Resource
                                       ->where('status', 'completed');
                             })
                             ->sum('subtotal');
-                        return '₱' . number_format($revenue, 2);
+                        return '₱' . number_format($revenue / 100, 2);
                     })
                     ->color('success')
                     ->weight(FontWeight::SemiBold),
@@ -251,6 +299,25 @@ class CashierProductResource extends Resource
                     ->placeholder('All items')
                     ->trueLabel('Available only')
                     ->falseLabel('Out of stock only'),
+
+                // Stock Status Filter
+                Tables\Filters\SelectFilter::make('stock_status')
+                    ->label('Stock Level')
+                    ->options([
+                        'in_stock' => '✅ In Stock',
+                        'low_stock' => '⚠️ Low Stock',
+                        'out_of_stock' => '🚫 Out of Stock',
+                    ])
+                    ->query(function (Builder $query, array $data) {
+                        return $query->when($data['value'], function ($query, $status) {
+                            return match ($status) {
+                                'out_of_stock' => $query->where('stock_quantity', '<=', 0),
+                                'low_stock' => $query->whereColumn('stock_quantity', '<=', 'low_stock_alert')
+                                                     ->where('stock_quantity', '>', 0),
+                                'in_stock' => $query->whereColumn('stock_quantity', '>', 'low_stock_alert'),
+                            };
+                        });
+                    }),
 
                 Tables\Filters\Filter::make('popular_today')
                     ->label('🔥 Popular Today')
@@ -297,11 +364,102 @@ class CashierProductResource extends Resource
                     Tables\Actions\ViewAction::make(),
                     Tables\Actions\EditAction::make(),
                     
+                    // Stock Management Action
+                    Tables\Actions\Action::make('manage_stock')
+                        ->label('📦 Manage Stock')
+                        ->icon('heroicon-o-cube')
+                        ->color('primary')
+                        ->form([
+                            Forms\Components\Section::make('Stock Management')
+                                ->description('Update stock levels for this product')
+                                ->schema([
+                                    Forms\Components\Grid::make(2)
+                                        ->schema([
+                                            Forms\Components\TextInput::make('current_stock')
+                                                ->label('Current Stock')
+                                                ->default(fn ($record) => $record->stock_quantity)
+                                                ->disabled()
+                                                ->dehydrated(false),
+                                                
+                                            Forms\Components\TextInput::make('low_stock_alert')
+                                                ->label('Low Stock Alert Level')
+                                                ->default(fn ($record) => $record->low_stock_alert ?? 10)
+                                                ->numeric()
+                                                ->minValue(0)
+                                                ->maxValue(100)
+                                                ->helperText('Get notified when stock falls below this number'),
+                                        ]),
+                                        
+                                    Forms\Components\Grid::make(3)
+                                        ->schema([
+                                            Forms\Components\TextInput::make('add_stock')
+                                                ->label('➕ Add Stock')
+                                                ->numeric()
+                                                ->minValue(0)
+                                                ->placeholder('e.g., 50')
+                                                ->helperText('Increase stock quantity'),
+                                                
+                                            Forms\Components\TextInput::make('remove_stock')
+                                                ->label('➖ Remove Stock')
+                                                ->numeric()
+                                                ->minValue(0)
+                                                ->placeholder('e.g., 10')
+                                                ->helperText('Decrease stock quantity'),
+                                                
+                                            Forms\Components\TextInput::make('set_stock')
+                                                ->label('🎯 Set Exact Stock')
+                                                ->numeric()
+                                                ->minValue(0)
+                                                ->placeholder('e.g., 100')
+                                                ->helperText('Override current stock'),
+                                        ]),
+                                ]),
+                        ])
+                        ->action(function ($record, $data) {
+                            $originalStock = $record->stock_quantity;
+                            
+                            // Update low stock alert
+                            if (isset($data['low_stock_alert'])) {
+                                $record->update(['low_stock_alert' => $data['low_stock_alert']]);
+                            }
+                            
+                            // Handle stock changes
+                            if (!empty($data['add_stock'])) {
+                                $newStock = $originalStock + $data['add_stock'];
+                                $record->update(['stock_quantity' => $newStock]);
+                                $action = "Added {$data['add_stock']} units";
+                            } elseif (!empty($data['remove_stock'])) {
+                                $newStock = max(0, $originalStock - $data['remove_stock']);
+                                $record->update(['stock_quantity' => $newStock]);
+                                $action = "Removed {$data['remove_stock']} units";
+                            } elseif (isset($data['set_stock'])) {
+                                $record->update(['stock_quantity' => $data['set_stock']]);
+                                
+                                // Auto-enable/disable based on stock
+                                if ($data['set_stock'] > 0 && !$record->is_available) {
+                                    $record->update(['is_available' => true]);
+                                } elseif ($data['set_stock'] <= 0) {
+                                    $record->update(['is_available' => false]);
+                                }
+                                
+                                $action = "Set stock to {$data['set_stock']} (was {$originalStock})";
+                            } else {
+                                $action = "Updated stock settings";
+                            }
+                            
+                            Notification::make()
+                                ->title('Stock Updated Successfully! 📦')
+                                ->body("{$record->name}: {$action}. Current stock: {$record->fresh()->stock_quantity}")
+                                ->success()
+                                ->duration(5000)
+                                ->send();
+                        }),
+                    
                     Tables\Actions\Action::make('view_orders')
                         ->label('📋 View Orders')
                         ->icon('heroicon-o-list-bullet')
                         ->color('info')
-                        ->url(fn ($record) => "/cashier/orders?filter[items_product_id]={$record->id}"),
+                        ->url(fn ($record) => "/cashier/cashier-orders?tableFilters[product_id][value]={$record->id}"),
 
                     Tables\Actions\Action::make('quick_note')
                         ->label('📝 Add Note')
@@ -314,7 +472,6 @@ class CashierProductResource extends Resource
                                 ->required()
                         ])
                         ->action(function ($record, array $data) {
-                            // You could store this in a notes table or session
                             Notification::make()
                                 ->title('Note Added')
                                 ->body("Note added for {$record->name}")
@@ -384,13 +541,14 @@ class CashierProductResource extends Resource
     {
         return false;
     }
+    
     public static function canEdit($record): bool
-{
-    return true; // Allow cashiers to edit orders
-}
+    {
+        return true; // Allow cashiers to edit products
+    }
 
-public static function canView($record): bool
-{
-    return true;
-}
+    public static function canView($record): bool
+    {
+        return true;
+    }
 }
