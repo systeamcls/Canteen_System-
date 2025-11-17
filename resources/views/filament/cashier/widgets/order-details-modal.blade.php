@@ -54,35 +54,39 @@
         </div>
     </div>
 
-    <!-- Order Items -->
+    <!-- Order Items - Simple List Format -->
     <div>
-        <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Order Items</h3>
-        <div class="space-y-2">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Items Ordered</h3>
+        <div class="space-y-3">
             @forelse($order->items as $item)
-                <div class="grid grid-cols-4 gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                    <div>
-                        <div class="text-xs text-gray-500 dark:text-gray-400">Product</div>
-                        <div class="font-medium">
+                <div class="flex justify-between items-start py-2 border-b border-gray-200 dark:border-gray-700">
+                    <div class="flex-1">
+                        <p class="font-semibold text-gray-900 dark:text-gray-100">
                             {{ $item->product_name ?? ($item->product?->name ?? 'Unknown Product') }}
-                        </div>
+                        </p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">
+                            ₱{{ number_format(($item->unit_price ?? 0) / 100, 2) }} × {{ $item->quantity ?? 0 }}
+                        </p>
                     </div>
-                    <div>
-                        <div class="text-xs text-gray-500 dark:text-gray-400">Quantity</div>
-                        <div class="font-medium">{{ $item->quantity ?? 0 }}</div>
-                    </div>
-                    <div>
-                        <div class="text-xs text-gray-500 dark:text-gray-400">Unit Price</div>
-                        <div class="font-medium">₱{{ number_format(($item->unit_price ?? 0) / 100, 2) }}</div>
-                    </div>
-                    <div>
-                        <div class="text-xs text-gray-500 dark:text-gray-400">Subtotal</div>
-                        <div class="font-semibold text-green-600 dark:text-green-400">
-                            ₱{{ number_format(($item->subtotal ?? 0) / 100, 2) }}</div>
+                    <div class="text-right">
+                        <p class="font-semibold text-gray-900 dark:text-gray-100">
+                            ₱{{ number_format(($item->subtotal ?? 0) / 100, 2) }}
+                        </p>
                     </div>
                 </div>
             @empty
-                <p class="text-center text-gray-500 py-4">No items found</p>
+                <p class="text-center text-gray-500 py-8">No items found</p>
             @endforelse
+        </div>
+
+        <!-- Total -->
+        <div class="mt-4 pt-4 border-t-2 border-gray-300 dark:border-gray-600">
+            <div class="flex justify-between items-center">
+                <p class="text-lg font-bold text-gray-900 dark:text-gray-100">Total</p>
+                <p class="text-xl font-bold text-green-600 dark:text-green-400">
+                    ₱{{ number_format($order->total_amount / 100, 2) }}
+                </p>
+            </div>
         </div>
     </div>
 </div>
