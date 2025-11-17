@@ -101,130 +101,154 @@ class LiveOrdersWidget extends BaseWidget
             ])
             ->actions([
                 Action::make('view_details')
-                    ->label('Details')
-                    ->icon('heroicon-m-eye')
-                    ->color('gray')
-                    ->size('sm')
-                    ->modalHeading(fn ($record) => "Order Details - {$record->order_number}")
-                    ->modalWidth(MaxWidth::FourExtraLarge)
-                    ->form(function ($record) {
-                        // Load the order items eagerly
-                        $orderItems = $record->items()->with('product')->get();
-                        
-                        return [
-                            Grid::make(2)
-                                ->schema([
-                                    Section::make('Customer Information')
-                                        ->schema([
-                                            Placeholder::make('customer_name')
-                                                ->label('Customer Name')
-                                                ->content($record->customer_name ?: 'Walk-in Customer'),
-                                                
-                                            Placeholder::make('customer_phone')
-                                                ->label('Phone')
-                                                ->content($record->customer_phone ?: 'Not provided'),
-                                                
-                                            Placeholder::make('customer_email')
-                                                ->label('Email')
-                                                ->content($record->customer_email ?: 'Not provided'),
-                                        ]),
-                                        
-                                    Section::make('Order Information')
-                                        ->schema([
-                                            Placeholder::make('order_number')
-                                                ->label('Order Number')
-                                                ->content($record->order_number),
-                                                
-                                            Placeholder::make('status')
-                                                ->label('Status')
-                                                ->content(ucfirst($record->status)),
-                                                
-                                            Placeholder::make('order_type')
-                                                ->label('Order Type')
-                                                ->content(ucfirst($record->order_type)),
-                                                
-                                            Placeholder::make('payment_method')
-                                                ->label('Payment Method')
-                                                ->content(ucfirst($record->payment_method ?? 'Not set')),
-                                                
-                                            Placeholder::make('total_amount')
-                                                ->label('Total Amount')
-                                                ->content('₱' . number_format($record->total_amount, 2)),
-                                                
-                                            Placeholder::make('created_at')
-                                                ->label('Order Date')
-                                                ->content($record->created_at->format('M d, Y h:i A')),
-                                        ]),
-                                ]),
-                                
-                            Section::make('Order Items')
-                                ->schema([
-                                    Placeholder::make('items_list')
-                                        ->label('')
-                                        ->content(function () use ($orderItems) {
-                                            if ($orderItems->isEmpty()) {
-                                                return 'No items found';
-                                            }
-                                            
-                                            $html = '<div class="space-y-2">';
-                                            foreach ($orderItems as $item) {
-                                                $productName = $item->product_name ?? $item->product?->name ?? 'Unknown Product';
-                                                $html .= '
-                                                    <div class="grid grid-cols-4 gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                                                        <div>
-                                                            <div class="text-xs text-gray-500 dark:text-gray-400">Product</div>
-                                                            <div class="font-medium">' . htmlspecialchars($productName) . '</div>
-                                                        </div>
-                                                        <div>
-                                                            <div class="text-xs text-gray-500 dark:text-gray-400">Quantity</div>
-                                                            <div class="font-medium">' . $item->quantity . '</div>
-                                                        </div>
-                                                        <div>
-                                                            <div class="text-xs text-gray-500 dark:text-gray-400">Unit Price</div>
-                                                            <div class="font-medium">₱' . number_format($item->unit_price, 2) . '</div>
-                                                        </div>
-                                                        <div>
-                                                            <div class="text-xs text-gray-500 dark:text-gray-400">Subtotal</div>
-                                                            <div class="font-semibold text-green-600 dark:text-green-400">₱' . number_format($item->subtotal, 2) . '</div>
-                                                        </div>
-                                                    </div>
-                                                ';
-                                            }
-                                            $html .= '</div>';
-                                            
-                                            return new \Illuminate\Support\HtmlString($html);
-                                        }),
-                                ]),
-                        ];
-                    })
-                    ->modalActions(function ($record) {
-                        return [
-                            Action::make('start_processing')
-                                ->label('Start Processing')
-                                ->icon('heroicon-m-play')
-                                ->color('primary')
-                                ->visible($record->status === 'pending')
-                                ->action(function () use ($record) {
-                                    $record->update(['status' => 'processing']);
-                                    $this->dispatch('$refresh');
-                                }),
-                                
-                            Action::make('complete')
-                                ->label('Mark Completed')
-                                ->icon('heroicon-m-check')
-                                ->color('success')
-                                ->visible($record->status === 'processing')
-                                ->action(function () use ($record) {
-                                    $record->update(['status' => 'completed']);
-                                    $this->dispatch('$refresh');
-                                }),
-                                
-                            Action::make('close')
-                                ->label('Close')
-                                ->color('gray')
-                                ->close(),
-                        ];
-                    }),
+    ->label('Details')
+    ->icon('heroicon-m-eye')
+    ->color('gray')
+    ->size('sm')
+    ->modalHeading(fn ($record) => "Order Details - {$record->order_number}")
+    ->modalWidth(MaxWidth::FourExtraLarge)
+    ->fillForm(function ($record) {
+        // Load the order items eagerly
+        if (!$record) {
+            return [];
+        }
+        
+        $orderItems = $record->items()->with('product')->get();
+        
+        // Return form data
+        return [
+            'customer_name' => $record->customer_name,
+            'customer_phone' => $record->customer_phone,
+            'customer_email' => $record->customer_email,
+            'order_number' => $record->order_number,
+            'status' => $record->status,
+            'order_type' => $record->order_type,
+            'payment_method' => $record->payment_method,
+            'total_amount' => $record->total_amount,
+            'created_at' => $record->created_at,
+            'items_list' => $orderItems,
+        ];
+    })
+    ->form([
+        Grid::make(2)
+            ->schema([
+                Section::make('Customer Information')
+                    ->schema([
+                        Placeholder::make('customer_name')
+                            ->label('Customer Name')
+                            ->content(fn ($state) => $state ?: 'Walk-in Customer'),
+                            
+                        Placeholder::make('customer_phone')
+                            ->label('Phone')
+                            ->content(fn ($state) => $state ?: 'Not provided'),
+                            
+                        Placeholder::make('customer_email')
+                            ->label('Email')
+                            ->content(fn ($state) => $state ?: 'Not provided'),
+                    ]),
+                    
+                Section::make('Order Information')
+                    ->schema([
+                        Placeholder::make('order_number')
+                            ->label('Order Number')
+                            ->content(fn ($state) => $state),
+                            
+                        Placeholder::make('status')
+                            ->label('Status')
+                            ->content(fn ($state) => ucfirst($state)),
+                            
+                        Placeholder::make('order_type')
+                            ->label('Order Type')
+                            ->content(fn ($state) => ucfirst($state)),
+                            
+                        Placeholder::make('payment_method')
+                            ->label('Payment Method')
+                            ->content(fn ($state) => ucfirst($state ?? 'Not set')),
+                            
+                        Placeholder::make('total_amount')
+                            ->label('Total Amount')
+                            ->content(fn ($state) => '₱' . number_format($state, 2)),
+                            
+                        Placeholder::make('created_at')
+                            ->label('Order Date')
+                            ->content(fn ($state) => $state ? $state->format('M d, Y h:i A') : ''),
+                    ]),
+            ]),
+            
+        Section::make('Order Items')
+            ->schema([
+                Placeholder::make('items_list')
+    ->label('')
+    ->content(function ($state) {
+        $orderItems = $state;
+        
+        if (!$orderItems || $orderItems->isEmpty()) {
+            return 'No items found';
+        }
+        
+        $html = '<div class="space-y-2">';
+        foreach ($orderItems as $item) {
+            $productName = $item->product_name ?? $item->product?->name ?? 'Unknown Product';
+            
+            // Convert centavos to pesos by dividing by 100
+            $unitPrice = $item->unit_price / 100;
+            $subtotal = $item->subtotal / 100;
+            
+            $html .= '
+                <div class="grid grid-cols-4 gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <div>
+                        <div class="text-xs text-gray-500 dark:text-gray-400">Product</div>
+                        <div class="font-medium">' . htmlspecialchars($productName) . '</div>
+                    </div>
+                    <div>
+                        <div class="text-xs text-gray-500 dark:text-gray-400">Quantity</div>
+                        <div class="font-medium">' . $item->quantity . '</div>
+                    </div>
+                    <div>
+                        <div class="text-xs text-gray-500 dark:text-gray-400">Unit Price</div>
+                        <div class="font-medium">₱' . number_format($unitPrice, 2) . '</div>
+                    </div>
+                    <div>
+                        <div class="text-xs text-gray-500 dark:text-gray-400">Subtotal</div>
+                        <div class="font-semibold text-green-600 dark:text-green-400">₱' . number_format($subtotal, 2) . '</div>
+                    </div>
+                </div>
+            ';
+        }
+        $html .= '</div>';
+        
+        return new \Illuminate\Support\HtmlString($html);
+    }),
+            ]),
+    ])
+    ->modalActions(function ($record) {
+        return [
+            Action::make('start_processing')
+                ->label('Start Processing')
+                ->icon('heroicon-m-play')
+                ->color('primary')
+                ->visible($record->status === 'pending')
+                ->action(function () use ($record) {
+                    $record->update(['status' => 'processing']);
+                    $this->dispatch('$refresh');
+                }),
+                
+            Action::make('complete')
+                ->label('Mark Completed')
+                ->icon('heroicon-m-check')
+                ->color('success')
+                ->visible($record->status === 'processing')
+                ->action(function () use ($record) {
+                    $record->update(['status' => 'completed']);
+                    $this->dispatch('$refresh');
+                }),
+                
+            Action::make('close')
+                ->label('Close')
+                ->color('gray')
+                ->close(),
+        ];
+    }),
                     
                 Action::make('start_processing')
                     ->label('Start')
