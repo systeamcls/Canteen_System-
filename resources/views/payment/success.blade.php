@@ -299,11 +299,12 @@
                 <div class="order-info">
                     <div class="order-info-row">
                         <span class="order-info-label">Order Number:</span>
-                        <span class="order-info-value">#{{ $orderGroup->order_number ?? 'N/A' }}</span>
+                        <span class="order-info-value">#{{ $orderGroup->id ?? 'N/A' }}</span>
                     </div>
                     <div class="order-info-row">
                         <span class="order-info-label">Date:</span>
-                        <span class="order-info-value">{{ now()->format('F d, Y h:i A') }}</span>
+                        <span
+                            class="order-info-value">{{ $orderGroup->created_at ? $orderGroup->created_at->format('F d, Y h:i A') : now()->format('F d, Y h:i A') }}</span>
                     </div>
                     <div class="order-info-row">
                         <span class="order-info-label">Payment Method:</span>
@@ -311,7 +312,11 @@
                     </div>
                     <div class="order-info-row">
                         <span class="order-info-label">Order Type:</span>
-                        <span class="order-info-value">{{ ucfirst($orderGroup->order_type ?? 'Pickup') }}</span>
+                        <span class="order-info-value">{{ ucfirst($orderGroup->payment_method ?? 'Online') }}</span>
+                    </div>
+                    <div class="order-info-row">
+                        <span class="order-info-label">Customer:</span>
+                        <span class="order-info-value">{{ $orderGroup->billing_contact['name'] ?? 'Guest' }}</span>
                     </div>
                 </div>
 
@@ -320,18 +325,35 @@
                     <h3>Items Ordered</h3>
                     @if ($orderGroup->orders && $orderGroup->orders->count() > 0)
                         @foreach ($orderGroup->orders as $order)
-                            @foreach ($order->orderItems as $item)
-                                <div class="item-row">
-                                    <div class="item-details">
-                                        <div class="item-name">{{ $item->product_name }}</div>
-                                        <div class="item-meta">₱{{ number_format($item->unit_price / 100, 2) }} ×
-                                            {{ $item->quantity }}</div>
+                            @if ($order->items && $order->items->count() > 0)
+                                @foreach ($order->items as $item)
+                                    <div class="item-row">
+                                        <div class="item-details">
+                                            <div class="item-name">{{ $item->product_name ?? 'Unknown Product' }}</div>
+                                            <div class="item-meta">
+                                                ₱{{ number_format(($item->unit_price ?? 0) / 100, 2) }} ×
+                                                {{ $item->quantity ?? 0 }}</div>
+                                        </div>
+                                        <div class="item-price">
+                                            ₱{{ number_format(($item->subtotal ?? $item->unit_price * $item->quantity) / 100, 2) }}
+                                        </div>
                                     </div>
-                                    <div class="item-price">
-                                        ₱{{ number_format($item->subtotal / 100, 2) }}
-                                    </div>
+                                @endforeach
+                            @endif
+                        @endforeach
+                    @elseif(!empty($orderGroup->cart_snapshot))
+                        {{-- Fallback: Use cart snapshot if order items not found --}}
+                        @foreach ($orderGroup->cart_snapshot as $item)
+                            <div class="item-row">
+                                <div class="item-details">
+                                    <div class="item-name">{{ $item['product_name'] ?? 'Unknown Product' }}</div>
+                                    <div class="item-meta">₱{{ number_format(($item['unit_price'] ?? 0) / 100, 2) }} ×
+                                        {{ $item['quantity'] ?? 0 }}</div>
                                 </div>
-                            @endforeach
+                                <div class="item-price">
+                                    ₱{{ number_format(($item['line_total'] ?? 0) / 100, 2) }}
+                                </div>
+                            </div>
                         @endforeach
                     @else
                         <p style="text-align: center; color: #6b7280; padding: 20px;">No items found</p>
@@ -341,7 +363,7 @@
                     <div class="total-section">
                         <div class="total-row">
                             <span>Total Amount</span>
-                            <span>₱{{ number_format($orderGroup->amount_total / 100, 2) }}</span>
+                            <span>₱{{ number_format(($orderGroup->amount_total ?? 0) / 100, 2) }}</span>
                         </div>
                     </div>
                 </div>
