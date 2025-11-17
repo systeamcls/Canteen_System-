@@ -15,6 +15,7 @@ use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Placeholder;
 use Filament\Support\Enums\MaxWidth;
+use Filament\Support\Enums\FontWeight;
 
 class LiveOrdersWidget extends BaseWidget
 {
@@ -72,9 +73,11 @@ class LiveOrdersWidget extends BaseWidget
                     ->sortable(),
                     
                 Tables\Columns\TextColumn::make('total_amount')
-                    ->label('Amount')
-                    ->money('PHP')
-                    ->weight('bold'),
+    ->label('Amount')
+    ->formatStateUsing(fn ($state) => '₱' . number_format(($state ?? 0) / 100, 2))
+    ->sortable()
+    ->weight(FontWeight::Bold)
+    ->color('success'),
                     
                 Tables\Columns\TextColumn::make('admin_items')
                     ->label('Your Items')

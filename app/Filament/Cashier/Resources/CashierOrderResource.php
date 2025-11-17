@@ -81,10 +81,10 @@ class CashierOrderResource extends Resource
                                     }),
 
                                 Forms\Components\TextInput::make('total_amount')
-                                    ->label('Total Amount')
-                                    ->disabled()
-                                    ->prefix('₱')
-                                    ->formatStateUsing(fn ($state) => number_format($state, 2)),
+    ->label('Total Amount')
+    ->disabled()
+    ->prefix('₱')
+    ->formatStateUsing(fn ($state) => number_format(($state ?? 0) / 100, 2)),
                             ]),
 
                         Forms\Components\Textarea::make('notes')
@@ -107,17 +107,16 @@ class CashierOrderResource extends Resource
                                 $itemsHtml = '<div class="space-y-2">';
                                 foreach ($record->items as $item) {
                                     $itemsHtml .= '
-                                        <div class="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                                            <div class="flex items-center space-x-3">
-                                                <span class="font-semibold text-sm bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded">' 
-                                                    . $item->quantity . 'x</span>
-                                                <span class="font-medium">' . ($item->product->name ?? $item->product_name) . '</span>
-                                            </div>
-                                            <div class="text-right">
-                                                <div class="font-semibold">₱' . number_format($item->subtotal, 2) . '</div>
-                                                <div class="text-xs text-gray-500">₱' . number_format($item->unit_price, 2) . ' each</div>
-                                            </div>
-                                        </div>';
+    <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e5e7eb;">
+        <div style="flex: 1;">
+            <div class="text-sm text-gray-500">' . $item->quantity . '× @ ₱' . number_format(($item->unit_price ?? 0) / 100, 2) . '</div>
+            <span class="font-medium">' . ($item->product->name ?? $item->product_name) . '</span>
+        </div>
+        <div class="text-right">
+            <div class="font-semibold">₱' . number_format(($item->subtotal ?? 0) / 100, 2) . '</div>
+            <div class="text-xs text-gray-500">₱' . number_format(($item->unit_price ?? 0) / 100, 2) . ' each</div>
+        </div>
+    </div>';
                                 }
                                 $itemsHtml .= '</div>';
 
@@ -510,4 +509,6 @@ class CashierOrderResource extends Resource
     {
         return false; // Orders are created through POS or customer orders
     }
+
+    
 }
