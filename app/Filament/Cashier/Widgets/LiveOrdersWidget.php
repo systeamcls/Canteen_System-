@@ -14,7 +14,6 @@ use Illuminate\Database\Eloquent\Collection;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Placeholder;
-use Filament\Forms\Components\Repeater;
 use Filament\Support\Enums\MaxWidth;
 
 class LiveOrdersWidget extends BaseWidget
@@ -30,8 +29,8 @@ class LiveOrdersWidget extends BaseWidget
         return $table
             ->query(
                 Order::query()
-                    ->with(['orderItems', 'orderItems.product', 'orderGroup'])
-                    ->whereHas('orderItems.product', function ($query) use ($adminStallId) {
+                    ->with(['items', 'items.product', 'user'])
+                    ->whereHas('items.product', function ($query) use ($adminStallId) {
                         $query->where('stall_id', $adminStallId);
                     })
                     ->whereDate('created_at', today())
@@ -80,7 +79,7 @@ class LiveOrdersWidget extends BaseWidget
                 Tables\Columns\TextColumn::make('admin_items')
                     ->label('Your Items')
                     ->formatStateUsing(function ($record) use ($adminStallId) {
-                        $adminItems = $record->orderItems->filter(function ($item) use ($adminStallId) {
+                        $adminItems = $record->items->filter(function ($item) use ($adminStallId) {
                             return $item->product && $item->product->stall_id == $adminStallId;
                         });
                         
@@ -108,108 +107,124 @@ class LiveOrdersWidget extends BaseWidget
                     ->size('sm')
                     ->modalHeading(fn ($record) => "Order Details - {$record->order_number}")
                     ->modalWidth(MaxWidth::FourExtraLarge)
-                    ->form([
-                        Grid::make(2)
-                            ->schema([
-                                Section::make('Customer Information')
-                                    ->schema([
-                                        Placeholder::make('customer_name')
-                                            ->label('Customer Name')
-                                            ->content(fn ($record) => $record->customer_name ?: 'Walk-in Customer'),
+                    ->form(function ($record) {
+                        // Load the order items eagerly
+                        $orderItems = $record->items()->with('product')->get();
+                        
+                        return [
+                            Grid::make(2)
+                                ->schema([
+                                    Section::make('Customer Information')
+                                        ->schema([
+                                            Placeholder::make('customer_name')
+                                                ->label('Customer Name')
+                                                ->content($record->customer_name ?: 'Walk-in Customer'),
+                                                
+                                            Placeholder::make('customer_phone')
+                                                ->label('Phone')
+                                                ->content($record->customer_phone ?: 'Not provided'),
+                                                
+                                            Placeholder::make('customer_email')
+                                                ->label('Email')
+                                                ->content($record->customer_email ?: 'Not provided'),
+                                        ]),
+                                        
+                                    Section::make('Order Information')
+                                        ->schema([
+                                            Placeholder::make('order_number')
+                                                ->label('Order Number')
+                                                ->content($record->order_number),
+                                                
+                                            Placeholder::make('status')
+                                                ->label('Status')
+                                                ->content(ucfirst($record->status)),
+                                                
+                                            Placeholder::make('order_type')
+                                                ->label('Order Type')
+                                                ->content(ucfirst($record->order_type)),
+                                                
+                                            Placeholder::make('payment_method')
+                                                ->label('Payment Method')
+                                                ->content(ucfirst($record->payment_method ?? 'Not set')),
+                                                
+                                            Placeholder::make('total_amount')
+                                                ->label('Total Amount')
+                                                ->content('₱' . number_format($record->total_amount, 2)),
+                                                
+                                            Placeholder::make('created_at')
+                                                ->label('Order Date')
+                                                ->content($record->created_at->format('M d, Y h:i A')),
+                                        ]),
+                                ]),
+                                
+                            Section::make('Order Items')
+                                ->schema([
+                                    Placeholder::make('items_list')
+                                        ->label('')
+                                        ->content(function () use ($orderItems) {
+                                            if ($orderItems->isEmpty()) {
+                                                return 'No items found';
+                                            }
                                             
-                                        Placeholder::make('customer_phone')
-                                            ->label('Phone')
-                                            ->content(fn ($record) => $record->customer_phone ?: 'Not provided'),
+                                            $html = '<div class="space-y-2">';
+                                            foreach ($orderItems as $item) {
+                                                $productName = $item->product_name ?? $item->product?->name ?? 'Unknown Product';
+                                                $html .= '
+                                                    <div class="grid grid-cols-4 gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                                                        <div>
+                                                            <div class="text-xs text-gray-500 dark:text-gray-400">Product</div>
+                                                            <div class="font-medium">' . htmlspecialchars($productName) . '</div>
+                                                        </div>
+                                                        <div>
+                                                            <div class="text-xs text-gray-500 dark:text-gray-400">Quantity</div>
+                                                            <div class="font-medium">' . $item->quantity . '</div>
+                                                        </div>
+                                                        <div>
+                                                            <div class="text-xs text-gray-500 dark:text-gray-400">Unit Price</div>
+                                                            <div class="font-medium">₱' . number_format($item->unit_price, 2) . '</div>
+                                                        </div>
+                                                        <div>
+                                                            <div class="text-xs text-gray-500 dark:text-gray-400">Subtotal</div>
+                                                            <div class="font-semibold text-green-600 dark:text-green-400">₱' . number_format($item->subtotal, 2) . '</div>
+                                                        </div>
+                                                    </div>
+                                                ';
+                                            }
+                                            $html .= '</div>';
                                             
-                                        Placeholder::make('customer_email')
-                                            ->label('Email')
-                                            ->content(fn ($record) => $record->customer_email ?: 'Not provided'),
-                                    ]),
-                                    
-                                Section::make('Order Information')
-                                    ->schema([
-                                        Placeholder::make('order_number')
-                                            ->label('Order Number')
-                                            ->content(fn ($record) => $record->order_number),
-                                            
-                                        Placeholder::make('status')
-                                            ->label('Status')
-                                            ->content(fn ($record) => ucfirst($record->status)),
-                                            
-                                        Placeholder::make('order_type')
-                                            ->label('Order Type')
-                                            ->content(fn ($record) => ucfirst($record->order_type)),
-                                            
-                                        Placeholder::make('payment_method')
-                                            ->label('Payment Method')
-                                            ->content(fn ($record) => ucfirst($record->payment_method ?? 'Not set')),
-                                            
-                                        Placeholder::make('total_amount')
-                                            ->label('Total Amount')
-                                            ->content(fn ($record) => '₱' . number_format($record->total_amount, 2)),
-                                            
-                                        Placeholder::make('created_at')
-                                            ->label('Order Date')
-                                            ->content(fn ($record) => $record->created_at->format('M d, Y h:i A')),
-                                    ]),
-                            ]),
-                            
-                        Section::make('Order Items')
-    ->schema([
-        Repeater::make('orderItems')
-            ->relationship()
-            ->schema([
-                Grid::make(4)
-                    ->schema([
-                        Placeholder::make('product_name')
-                            ->label('Product')
-                            ->content(fn ($record) => $record?->product_name ?? $record?->product?->name ?? 'Unknown Product'),
-                            
-                        Placeholder::make('quantity')
-                            ->label('Quantity')
-                            ->content(fn ($record) => $record?->quantity ?? 0),
-                            
-                        Placeholder::make('unit_price')
-                            ->label('Unit Price')
-                            ->content(fn ($record) => '₱' . number_format($record?->unit_price ?? 0, 2)),
-                            
-                        Placeholder::make('subtotal')
-                            ->label('Subtotal')
-                            ->content(fn ($record) => '₱' . number_format($record?->subtotal ?? 0, 2)),
-                    ]),
-            ])
-            ->disabled()
-            ->addable(false)
-            ->deletable(false)
-            ->reorderable(false),
-    ]),
-                    ])
-                    ->modalActions([
-                        Action::make('start_processing')
-                            ->label('Start Processing')
-                            ->icon('heroicon-m-play')
-                            ->color('primary')
-                            ->visible(fn ($record) => $record->status === 'pending')
-                            ->action(function ($record) {
-                                $record->update(['status' => 'processing']);
-                                $this->dispatch('$refresh');
-                            }),
-                            
-                        Action::make('complete')
-                            ->label('Mark Completed')
-                            ->icon('heroicon-m-check')
-                            ->color('success')
-                            ->visible(fn ($record) => $record->status === 'processing')
-                            ->action(function ($record) {
-                                $record->update(['status' => 'completed']);
-                                $this->dispatch('$refresh');
-                            }),
-                            
-                        Action::make('close')
-                            ->label('Close')
-                            ->color('gray')
-                            ->close(),
-                    ]),
+                                            return new \Illuminate\Support\HtmlString($html);
+                                        }),
+                                ]),
+                        ];
+                    })
+                    ->modalActions(function ($record) {
+                        return [
+                            Action::make('start_processing')
+                                ->label('Start Processing')
+                                ->icon('heroicon-m-play')
+                                ->color('primary')
+                                ->visible($record->status === 'pending')
+                                ->action(function () use ($record) {
+                                    $record->update(['status' => 'processing']);
+                                    $this->dispatch('$refresh');
+                                }),
+                                
+                            Action::make('complete')
+                                ->label('Mark Completed')
+                                ->icon('heroicon-m-check')
+                                ->color('success')
+                                ->visible($record->status === 'processing')
+                                ->action(function () use ($record) {
+                                    $record->update(['status' => 'completed']);
+                                    $this->dispatch('$refresh');
+                                }),
+                                
+                            Action::make('close')
+                                ->label('Close')
+                                ->color('gray')
+                                ->close(),
+                        ];
+                    }),
                     
                 Action::make('start_processing')
                     ->label('Start')
