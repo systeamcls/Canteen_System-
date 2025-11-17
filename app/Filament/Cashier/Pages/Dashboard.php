@@ -43,32 +43,33 @@ class Dashboard extends BaseDashboard
     }
 
     public function getHeaderActions(): array
-    {
-        return [
-            \Filament\Actions\Action::make('open_pos')
-                ->label('🛒 Open POS')
-                ->icon('heroicon-o-calculator')
-                ->color('success')
-                ->size('lg')
-                ->url('/cashier/pos-system')
-                ->openUrlInNewTab()
-                ->tooltip('Open Point of Sale system'),
-                
-            \Filament\Actions\Action::make('view_orders')
-                ->label('📋 All Orders')
-                ->icon('heroicon-o-shopping-bag')
-                ->color('primary')
-                ->url('/cashier/orders')
-                ->tooltip('View all orders'),
-                
-            \Filament\Actions\Action::make('refresh_data')
-                ->label('🔄 Refresh')
-                ->icon('heroicon-o-arrow-path')
-                ->color('gray')
-                ->action('refreshData')
-                ->tooltip('Refresh dashboard data'),
-        ];
-    }
+{
+    return [
+        \Filament\Actions\Action::make('open_pos')
+            ->label('🛒 Open POS')
+            ->icon('heroicon-o-calculator')
+            ->color('success')
+            ->size('lg')
+            ->url('/cashier/pos-system')  // This should work
+            ->openUrlInNewTab(false)  // Try without opening new tab
+            ->tooltip('Open Point of Sale system'),
+            
+        \Filament\Actions\Action::make('view_orders')
+            ->label('📋 All Orders')
+            ->icon('heroicon-o-shopping-bag')
+            ->color('primary')
+            ->size('lg')
+            ->url(route('filament.cashier.resources.cashier-orders.index'))  // Use route helper
+            ->tooltip('View all orders'),
+            
+        \Filament\Actions\Action::make('refresh_data')
+            ->label('🔄 Refresh')
+            ->icon('heroicon-o-arrow-path')
+            ->color('gray')
+            ->action('refreshData')
+            ->tooltip('Refresh dashboard data'),
+    ];
+}
 
     public function refreshData(): void
     {
@@ -100,14 +101,15 @@ class Dashboard extends BaseDashboard
     }
 
     private function getTimeBasedGreeting(): string
-    {
-        $hour = now()->hour;
-        
-        return match (true) {
-            $hour >= 5 && $hour < 12 => 'Good Morning',
-            $hour >= 12 && $hour < 17 => 'Good Afternoon',
-            $hour >= 17 && $hour < 21 => 'Good Evening',
-            default => 'Good Night'
-        };
-    }
+{
+    // Use Philippines timezone (or your timezone)
+    $hour = now()->timezone('Asia/Manila')->hour;
+    
+    return match (true) {
+        $hour >= 5 && $hour < 12 => 'Good Morning',
+        $hour >= 12 && $hour < 17 => 'Good Afternoon',
+        $hour >= 17 && $hour < 21 => 'Good Evening',
+        default => 'Good Night'
+    };
+}
 }
