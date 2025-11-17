@@ -86,7 +86,7 @@ class CheckoutController extends Controller
 
     // Load the order with all related data for the receipt
     $orderGroup->load([
-        'orders.orderItems.product',  // Load order items with product details
+        'orders.items.product',  // Load order items with product details
         'orders.stall',          // Load stall information if needed
         'user'                   // Load user if authenticated
     ]);

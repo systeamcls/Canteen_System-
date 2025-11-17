@@ -320,7 +320,7 @@
                     <h3>Items Ordered</h3>
                     @if ($orderGroup->orders && $orderGroup->orders->count() > 0)
                         @foreach ($orderGroup->orders as $order)
-                            @foreach ($order->items as $item)
+                            @foreach ($order->orderItems as $item)
                                 <div class="item-row">
                                     <div class="item-details">
                                         <div class="item-name">{{ $item->product_name }}</div>
