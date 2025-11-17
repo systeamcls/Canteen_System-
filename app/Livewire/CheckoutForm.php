@@ -538,16 +538,22 @@ class CheckoutForm extends Component
     
     $orderGroupId = (int) $orderGroup->id;
     
+    // Save to session as fallback
+    session(['last_order_group_id' => $orderGroupId]);
+    
     logger()->info('Cash payment - dispatching order-completed', [
         'order_group_id' => $orderGroupId,
         'order_group_exists' => $orderGroup->exists,
+        'dispatching_event' => true
     ]);
 
-    // ⭐ Fixed: Use array format for Livewire event
+    // Dispatch event with array format for JavaScript
     $this->dispatch('order-completed', [
         'orderGroupId' => $orderGroupId,
         'paymentMethod' => 'cash'
     ]);
+    
+    logger()->info('Event dispatched successfully');
 }
 
     private function handleOnlinePayment(array $paymentResult): void

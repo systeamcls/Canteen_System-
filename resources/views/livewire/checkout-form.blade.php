@@ -1475,35 +1475,39 @@
 
 <script>
     document.addEventListener('livewire:init', () => {
-        console.log('Livewire initialized for checkout');
+        console.log('✅ Livewire initialized for checkout');
 
         // Handle successful order completion
         Livewire.on('order-completed', (event) => {
-            console.log('=== ORDER COMPLETED EVENT ===');
+            console.log('=== ORDER COMPLETED EVENT RECEIVED ===');
             console.log('Raw event:', event);
+            console.log('Event type:', typeof event);
+            console.log('Is array?', Array.isArray(event));
 
             // Handle both array and object formats
             let orderGroupId, paymentMethod;
 
             if (Array.isArray(event) && event.length > 0) {
-                // Livewire 3 format: array of objects
+                console.log('Processing as array, first element:', event[0]);
                 orderGroupId = event[0].orderGroupId || event[0];
                 paymentMethod = event[1] || event[0].paymentMethod;
-            } else if (typeof event === 'object') {
-                // Object format
+            } else if (typeof event === 'object' && event !== null) {
+                console.log('Processing as object');
                 orderGroupId = event.orderGroupId;
                 paymentMethod = event.paymentMethod;
             } else {
-                console.error('Unexpected event format:', event);
-                alert('Error: Invalid order data received. Please contact support with order details.');
+                console.error('❌ Unexpected event format:', event);
+                alert('Error: Invalid order data received. Please contact support.');
                 return;
             }
 
-            console.log('Parsed - OrderGroupId:', orderGroupId, 'PaymentMethod:', paymentMethod);
+            console.log('Parsed values:');
+            console.log('- OrderGroupId:', orderGroupId);
+            console.log('- PaymentMethod:', paymentMethod);
 
             // Validate orderGroupId
             if (!orderGroupId || orderGroupId === 'undefined' || orderGroupId === null) {
-                console.error('Invalid orderGroupId:', orderGroupId);
+                console.error('❌ Invalid orderGroupId:', orderGroupId);
                 alert('Error: Order was created but redirect failed. Please check your order history.');
                 return;
             }
@@ -1512,14 +1516,15 @@
             orderGroupId = parseInt(orderGroupId, 10);
 
             if (isNaN(orderGroupId)) {
-                console.error('orderGroupId is not a number:', orderGroupId);
+                console.error('❌ orderGroupId is not a number:', orderGroupId);
                 alert('Error: Invalid order ID. Please check your order history.');
                 return;
             }
 
-            console.log('Redirecting to success page for order:', orderGroupId);
+            console.log('✅ Valid order ID:', orderGroupId);
+            console.log('🚀 Redirecting to:', '/payment/success/' + orderGroupId);
 
-            // Redirect immediately (remove the setTimeout delay)
+            // Redirect immediately
             window.location.href = '/payment/success/' + orderGroupId;
         });
 

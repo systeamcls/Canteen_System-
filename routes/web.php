@@ -20,7 +20,7 @@ use App\Http\Controllers\EmailVerificationController;
 use App\Http\Controllers\FinancialReportController;
 use App\Http\Controllers\LegalController;
 use App\Models\OrderGroup;
-
+use Illuminate\Support\Facades\Log;
 
 // Welcome page - first entry point
 Route::get('/', function () {
@@ -176,9 +176,39 @@ Route::middleware(['webhook.security'])->group(function () {
         ->name('webhook.test');
 });
 
+// PayMongo callback handler - redirects to proper success page with order ID
+Route::get('/payment/callback/success', function () {
+    // Get the last order from session
+    $orderGroupId = session('last_order_group_id');
+    
+    if (!$orderGroupId) {
+        Log::warning('PayMongo callback: No order ID in session');
+        return redirect()->route('home.index')->with('error', 'Order not found. Please check your order history.');
+    }
+    
+    Log::info('PayMongo callback: Redirecting to success page', ['order_id' => $orderGroupId]);
+    
+    // Redirect to the proper success page with order ID
+    return redirect()->route('payment.success', ['orderGroup' => $orderGroupId]);
+})->name('payment.callback.success');
+
 // Payment redirect routes (accessible to all users)
-// ⭐ RECOMMENDED
-Route::get('/payment/success/{orderGroup}', function (OrderGroup $orderGroup) {
+Route::get('/payment/success/{orderGroup?}', function (OrderGroup $orderGroup = null) {
+    // If no order group provided, try to get from session
+    if (!$orderGroup) {
+        $orderGroupId = session('last_order_group_id');
+        
+        if (!$orderGroupId) {
+            return redirect()->route('home.index')->with('error', 'Order not found. Please check your order history.');
+        }
+        
+        $orderGroup = OrderGroup::find($orderGroupId);
+        
+        if (!$orderGroup) {
+            return redirect()->route('home.index')->with('error', 'Order not found.');
+        }
+    }
+    
     // Security check
     if (Auth::check()) {
         if ($orderGroup->user_id !== Auth::id()) {
@@ -190,10 +220,10 @@ Route::get('/payment/success/{orderGroup}', function (OrderGroup $orderGroup) {
         }
     }
     
-    // Load relationships
+    // Load relationships - use 'items' not 'orderItems'
     $orderGroup->load([
-        'orders.orderItems.product',
-        'orders.stall',
+        'orders.items.product',
+        'orders.vendor',
         'user'
     ]);
     

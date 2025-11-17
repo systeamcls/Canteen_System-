@@ -74,6 +74,8 @@ class PayMongoGateway implements PaymentGatewayInterface
                 'provider_response' => $paymentIntent,
             ]);
 
+            session(['last_order_group_id' => $orderGroup->id]);
+
             // Create checkout URL based on payment method
             $checkoutUrl = $this->createCheckoutUrl($paymentIntent, $paymentMethod, $customerData);
 

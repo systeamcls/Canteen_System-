@@ -56,7 +56,7 @@ return [
     |--------------------------------------------------------------------------
     */
     'redirect_urls' => [
-        'success' => env('APP_URL') . '/payment/success',
+        'success' => env('APP_URL') . '/payment/callback/success',
         'failed' => env('APP_URL') . '/payment/failed',
         'cancelled' => env('APP_URL') . '/payment/cancelled',
     ],
