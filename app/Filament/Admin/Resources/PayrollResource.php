@@ -20,8 +20,12 @@ class PayrollResource extends Resource
     protected static ?string $model = Payroll::class;
     protected static ?string $navigationIcon = 'heroicon-o-currency-dollar';
     protected static ?string $navigationGroup = 'Financial Management';
-    protected static ?int $navigationSort = 4;
     protected static ?string $navigationLabel = 'Payroll';
+    public static function shouldRegisterNavigation(): bool
+{
+    return false;
+}
+    
 
     public static function form(Form $form): Form
     {
