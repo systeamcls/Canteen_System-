@@ -37,11 +37,12 @@
                     <div class="mt-6">
                         <h3 class="text-sm font-medium text-gray-500 mb-4">Order Items</h3>
                         <div class="space-y-4">
-                            @foreach($order->items as $item)
+                            @foreach ($order->orderItems as $item)
                                 <div class="flex justify-between">
                                     <div>
                                         <p class="font-medium">{{ $item->product->name }}</p>
-                                        <p class="text-sm text-gray-500">{{ $item->quantity }} x ₱{{ number_format($item->unit_price, 2) }}</p>
+                                        <p class="text-sm text-gray-500">{{ $item->quantity }} x
+                                            ₱{{ number_format($item->unit_price, 2) }}</p>
                                     </div>
                                     <p class="font-medium">₱{{ number_format($item->subtotal, 2) }}</p>
                                 </div>
@@ -54,11 +55,11 @@
             <!-- Actions -->
             <div class="mt-8 space-x-4">
                 <a href="{{ route('menu.index') }}"
-                   class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                    class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
                     Order More
                 </a>
                 <a href="{{ route('orders') }}"
-                   class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                    class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
                     View Orders
                 </a>
             </div>

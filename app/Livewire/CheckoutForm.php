@@ -518,37 +518,37 @@ class CheckoutForm extends Component
     }
 
     private function handleCashPayment(OrderGroup $orderGroup): void
-    {
-        $this->clearCart();
-        
-        $this->successMessage = "Order placed successfully! You can pay cash when you collect your order.";
-        
-        // Ensure order group is saved and has an ID
-        if (!$orderGroup->exists || !$orderGroup->id) {
-            logger()->error('Order group not saved!', [
-                'exists' => $orderGroup->exists,
-                'id' => $orderGroup->id,
-                'attributes' => $orderGroup->getAttributes()
-            ]);
-            throw new \Exception('Order was not saved properly. Please try again.');
-        }
-
-        // Force refresh from database to ensure ID is set
-        $orderGroup->refresh();
-        
-        $orderGroupId = (int) $orderGroup->id;
-        
-        logger()->info('Cash payment - redirecting to success', [
-            'order_group_id' => $orderGroupId,
-            'order_group_exists' => $orderGroup->exists,
+{
+    $this->clearCart();
+    
+    $this->successMessage = "Order placed successfully! You can pay cash when you collect your order.";
+    
+    // Ensure order group is saved and has an ID
+    if (!$orderGroup->exists || !$orderGroup->id) {
+        logger()->error('Order group not saved!', [
+            'exists' => $orderGroup->exists,
+            'id' => $orderGroup->id,
+            'attributes' => $orderGroup->getAttributes()
         ]);
-
-        // Dispatch event with explicit integer ID
-        $this->dispatch('order-completed', 
-            orderGroupId: $orderGroupId,
-            paymentMethod: 'cash'
-        );
+        throw new \Exception('Order was not saved properly. Please try again.');
     }
+
+    // Force refresh from database to ensure ID is set
+    $orderGroup->refresh();
+    
+    $orderGroupId = (int) $orderGroup->id;
+    
+    logger()->info('Cash payment - dispatching order-completed', [
+        'order_group_id' => $orderGroupId,
+        'order_group_exists' => $orderGroup->exists,
+    ]);
+
+    // ⭐ Fixed: Use array format for Livewire event
+    $this->dispatch('order-completed', [
+        'orderGroupId' => $orderGroupId,
+        'paymentMethod' => 'cash'
+    ]);
+}
 
     private function handleOnlinePayment(array $paymentResult): void
     {

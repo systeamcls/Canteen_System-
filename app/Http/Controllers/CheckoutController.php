@@ -72,23 +72,30 @@ class CheckoutController extends Controller
      * Display order confirmation/success page
      */
     public function success(OrderGroup $orderGroup)
-    {
-        // Security: Only show order to the person who created it
-        if (Auth::check()) {
-            if ($orderGroup->user_id !== Auth::id()) {
-                abort(403, 'Unauthorized access to order');
-            }
-        } else {
-            if ($orderGroup->guest_token !== session('guest_cart_token')) {
-                abort(403, 'Unauthorized access to order');
-            }
+{
+    // Security: Only show order to the person who created it
+    if (Auth::check()) {
+        if ($orderGroup->user_id !== Auth::id()) {
+            abort(403, 'Unauthorized access to order');
         }
-
-        // Load the order with related data
-        $orderGroup->load(['orders.vendor', 'orders.orderItems']);
-
-        return view('checkout.success', compact('orderGroup'));
+    } else {
+        if ($orderGroup->guest_token !== session('guest_cart_token')) {
+            abort(403, 'Unauthorized access to order');
+        }
     }
+
+    // Load the order with all related data for the receipt
+    $orderGroup->load([
+        'orders.orderItems.product',  // Load order items with product details
+        'orders.stall',          // Load stall information if needed
+        'user'                   // Load user if authenticated
+    ]);
+
+    // Use the new receipt-style success page
+    return view('payment.success', compact('orderGroup'));
+}
+
+    
 
     /**
      * Track order status

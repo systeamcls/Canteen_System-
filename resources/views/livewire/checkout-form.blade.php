@@ -1520,7 +1520,7 @@
             console.log('Redirecting to success page for order:', orderGroupId);
 
             // Redirect immediately (remove the setTimeout delay)
-            window.location.href = '/checkout/success/' + orderGroupId;
+            window.location.href = '/payment/success/' + orderGroupId;
         });
 
         // Keep your existing redirect-to-payment handler

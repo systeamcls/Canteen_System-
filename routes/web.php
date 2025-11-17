@@ -19,6 +19,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\EmailVerificationController;
 use App\Http\Controllers\FinancialReportController;
 use App\Http\Controllers\LegalController;
+use App\Models\OrderGroup;
 
 
 // Welcome page - first entry point
@@ -176,18 +177,27 @@ Route::middleware(['webhook.security'])->group(function () {
 });
 
 // Payment redirect routes (accessible to all users)
-Route::get('/payment/success', function () {
-    // Debug logging
-    logger()->info('Payment success route accessed');
-    
-    // Check if view exists
-    if (view()->exists('payment.success')) {
-        logger()->info('View exists, rendering...');
-        return view('payment.success');
+// ⭐ RECOMMENDED
+Route::get('/payment/success/{orderGroup}', function (OrderGroup $orderGroup) {
+    // Security check
+    if (Auth::check()) {
+        if ($orderGroup->user_id !== Auth::id()) {
+            abort(403, 'Unauthorized access to order');
+        }
     } else {
-        logger()->error('View does not exist at payment.success');
-        return response('Payment successful! View file missing.', 200);
+        if ($orderGroup->guest_token !== session('guest_cart_token')) {
+            abort(403, 'Unauthorized access to order');
+        }
     }
+    
+    // Load relationships
+    $orderGroup->load([
+        'orders.orderItems.product',
+        'orders.stall',
+        'user'
+    ]);
+    
+    return view('payment.success', compact('orderGroup'));
 })->name('payment.success');
 
 Route::get('/payment/failed', function () {
